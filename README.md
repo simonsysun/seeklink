@@ -107,44 +107,7 @@ aliases: [ML, Machine Learning]
 
 Both inline (`[a, b]`) and block list formats supported. Aliases are searchable and used for link resolution — if a note has `aliases: [ML]`, then `[[ML]]` resolves to it.
 
-## Architecture
-
-```
-                    ┌────────────────────────────────┐
-                    │         MCP Client             │
-                    │  (Claude Code, Cursor, ...)    │
-                    └──────────┬─────────────────────┘
-                               │ stdio / SSE
-                    ┌──────────▼─────────────────────┐
-                    │      FastMCP Server             │
-                    │  6 tools, async handlers        │
-                    └──────────┬─────────────────────┘
-                               │
-          ┌────────────────────┼────────────────────┐
-          ▼                    ▼                     ▼
-   ┌─────────────┐    ┌──────────────┐     ┌──────────────┐
-   │   Search     │    │   Ingest     │     │   Watcher    │
-   │  4-ch RRF    │    │  chunk+embed │     │  watchfiles  │
-   └──────┬──────┘    │  +frontmatter│     │  auto-index  │
-          │           └──────┬───────┘     └──────────────┘
-          ▼                  ▼
-   ┌──────────────────────────────────┐
-   │          SQLite + Extensions     │
-   │  FTS5 (jieba) │ vec0 (768d)     │
-   │  sources, chunks, wiki_links    │
-   │  source_tags, fts_sources       │
-   └──────────────────────────────────┘
-```
-
-## Configuration
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `SEEKLINK_VAULT` | `.` | Path to vault root |
-| `SEEKLINK_SSE_HOST` | `127.0.0.1` | SSE server bind address |
-| `SEEKLINK_SSE_PORT` | `8767` | SSE server port |
-
-## Development
+## Contributing
 
 ```bash
 git clone https://github.com/simonsysun/seeklink
@@ -152,17 +115,6 @@ cd seeklink
 uv sync --dev
 uv run python -m pytest tests/ -q --ignore=tests/test_integration.py
 ```
-
-217 tests. Python 3.11+.
-
-## Roadmap
-
-- [ ] Graph intelligence: orphan detection, cluster analysis, bridge notes, knowledge gap discovery
-- [ ] Cross-encoder reranking for top-k results
-- [ ] Lightweight embedding model option (~117MB vs 330MB default)
-- [ ] PyPI automated publishing
-
-See [TODOS.md](TODOS.md) for details.
 
 ## License
 
