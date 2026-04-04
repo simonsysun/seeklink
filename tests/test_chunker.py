@@ -155,3 +155,45 @@ class TestChunkMarkdown:
         text = s1 + s2 + s3
         for c in chunk_markdown(text, target_tokens=20):
             assert c.text == text[c.char_start : c.char_end]
+
+
+class TestOverlap:
+    """Tests for overlap_chars parameter."""
+
+    def test_no_overlap_default(self):
+        text = "# A\n\nFirst paragraph.\n\n# B\n\nSecond paragraph."
+        chunks_no = chunk_markdown(text, target_tokens=5, overlap_chars=0)
+        assert len(chunks_no) >= 2
+        # No overlap: chunks don't share char ranges
+        for i in range(1, len(chunks_no)):
+            assert chunks_no[i].char_start >= chunks_no[i - 1].char_end
+
+    def test_overlap_expands_start(self):
+        text = "# A\n\nFirst paragraph.\n\n# B\n\nSecond paragraph."
+        chunks = chunk_markdown(text, target_tokens=5, overlap_chars=10)
+        if len(chunks) >= 2:
+            # Second chunk's start should be earlier than without overlap
+            no_overlap = chunk_markdown(text, target_tokens=5, overlap_chars=0)
+            assert chunks[1].char_start < no_overlap[1].char_start
+
+    def test_overlap_invariant_preserved(self):
+        """chunk.text == text[char_start:char_end] still holds with overlap."""
+        text = "# A\n\nFirst paragraph.\n\n# B\n\nSecond paragraph.\n\n# C\n\nThird."
+        chunks = chunk_markdown(text, target_tokens=5, overlap_chars=15)
+        for c in chunks:
+            assert c.text == text[c.char_start:c.char_end]
+
+    def test_overlap_larger_than_gap(self):
+        """Overlap larger than gap between chunks is clamped."""
+        text = "# A\n\nShort.\n\n# B\n\nAlso short."
+        chunks = chunk_markdown(text, target_tokens=5, overlap_chars=9999)
+        for c in chunks:
+            assert c.text == text[c.char_start:c.char_end]
+        assert len(chunks) >= 1
+
+    def test_single_chunk_no_overlap(self):
+        """Single chunk: overlap has no effect."""
+        text = "Short text."
+        chunks = chunk_markdown(text, target_tokens=100, overlap_chars=50)
+        assert len(chunks) == 1
+        assert chunks[0].text == text

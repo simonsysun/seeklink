@@ -18,6 +18,7 @@ class Source:
     indexed_at: str | None
     created_at: str
     updated_at: str
+    aliases: str = "[]"  # JSON array of alias strings
 
 
 @dataclass(frozen=True, slots=True)

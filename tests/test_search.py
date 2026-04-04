@@ -261,7 +261,7 @@ class TestRRFFuseUnit:
         bm25 = {1: 1, 2: 2}
         vec: dict[int, int] = {}
         indeg = {1: 1, 2: 2}
-        scores = _rrf_fuse(bm25, vec, indeg, weights=(1.0, 1.0, 0.3))
+        scores = _rrf_fuse([bm25, vec, indeg], weights=[1.0, 1.0, 0.3])
         assert len(scores) == 2
         assert scores[1] > scores[2]  # rank 1 beats rank 2
 
@@ -270,7 +270,7 @@ class TestRRFFuseUnit:
         bm25: dict[int, int] = {}
         vec = {10: 1, 20: 2}
         indeg = {10: 1, 20: 2}
-        scores = _rrf_fuse(bm25, vec, indeg, weights=(1.0, 1.0, 0.3))
+        scores = _rrf_fuse([bm25, vec, indeg], weights=[1.0, 1.0, 0.3])
         assert len(scores) == 2
         assert scores[10] > scores[20]
 
@@ -279,7 +279,7 @@ class TestRRFFuseUnit:
         bm25 = {1: 1, 2: 2}
         vec = {1: 1, 3: 1}
         indeg = {1: 1, 2: 2, 3: 3}
-        scores = _rrf_fuse(bm25, vec, indeg, weights=(1.0, 1.0, 0.3))
+        scores = _rrf_fuse([bm25, vec, indeg], weights=[1.0, 1.0, 0.3])
         # Source 1 is rank 1 in all 3 channels
         assert scores[1] > scores[2]
         assert scores[1] > scores[3]
@@ -290,14 +290,26 @@ class TestRRFFuseUnit:
         vec = {2: 1}
         indeg = {1: 1, 2: 2}
         # Zero out BM25 — source 1 should only get indegree
-        scores = _rrf_fuse(bm25, vec, indeg, weights=(0.0, 1.0, 0.3))
+        scores = _rrf_fuse([bm25, vec, indeg], weights=[0.0, 1.0, 0.3])
         # Source 2 has vec contribution, source 1 has only indegree
         assert scores[2] > scores[1]
 
     def test_empty_channels(self):
         """All channels empty → no scores."""
-        scores = _rrf_fuse({}, {}, {}, weights=(1.0, 1.0, 0.3))
+        scores = _rrf_fuse([{}, {}, {}], weights=[1.0, 1.0, 0.3])
         assert scores == {}
+
+    def test_four_channels(self):
+        """4-channel RRF with title channel."""
+        bm25 = {1: 2, 2: 1}
+        vec = {1: 2, 2: 1}
+        indeg = {1: 1, 2: 2}
+        title = {1: 1}  # source 1 has title match
+        scores = _rrf_fuse(
+            [bm25, vec, indeg, title], weights=[1.0, 1.0, 0.3, 3.0]
+        )
+        # Source 1 has title match (weight 3.0), should beat source 2
+        assert scores[1] > scores[2]
 
 
 class TestBestChunkPerSourceUnit:
@@ -358,3 +370,60 @@ class TestCustomWeights:
         assert len(results) > 0
         for r in results:
             assert r.score > 0
+
+
+# ── v2: Tag/Folder filtering ─────────────────────────────────────
+
+
+class TestTagFiltering:
+    """Test tag-based filtering in search."""
+
+    def test_search_with_tags(self, db: Database, embedder: Embedder, vault: Path):
+        _ingest_corpus(db, embedder, vault)
+        # Tag some sources
+        ml = db.get_source_by_path("ml-basics.md")
+        cooking = db.get_source_by_path("cooking.md")
+        db.add_tags(ml.id, ["ai"])
+        db.add_tags(cooking.id, ["cooking"])
+
+        # Search with tag filter
+        results = search(db, embedder, "algorithms", tags=["ai"])
+        paths = {r.path for r in results}
+        assert "cooking.md" not in paths  # cooking shouldn't match ai tag
+        if results:
+            assert all(
+                "ai" in db.get_tags(r.source_id) for r in results
+            )
+
+    def test_search_without_tags(self, db: Database, embedder: Embedder, vault: Path):
+        """Search without tags returns all matching results."""
+        _ingest_corpus(db, embedder, vault)
+        results = search(db, embedder, "machine learning")
+        assert len(results) > 0
+
+
+class TestFolderFiltering:
+    """Test folder-based filtering in search."""
+
+    def test_search_with_folder(self, db: Database, embedder: Embedder, vault: Path):
+        # Create notes in different folders
+        _write_md(vault, "notes/a.md", "# Alpha\n\nAlpha content about science.")
+        _write_md(vault, "archive/b.md", "# Beta\n\nBeta content about science.")
+        ingest_file(db, vault / "notes" / "a.md", vault, embedder)
+        ingest_file(db, vault / "archive" / "b.md", vault, embedder)
+
+        results = search(db, embedder, "science", folder="notes")
+        paths = {r.path for r in results}
+        assert all(p.startswith("notes/") for p in paths)
+
+
+class TestTitleChannel:
+    """Test that the 4th RRF channel (title/alias) boosts title matches."""
+
+    def test_title_match_boosts_ranking(self, db: Database, embedder: Embedder, vault: Path):
+        _ingest_corpus(db, embedder, vault)
+        results = search(db, embedder, "Machine Learning")
+        if results:
+            # ml-basics.md has title "Machine Learning" — should rank high
+            top_paths = [r.path for r in results[:3]]
+            assert "ml-basics.md" in top_paths

@@ -1,10 +1,8 @@
-"""Integration tests — all 8 MCP tools tested through the real protocol.
+"""Integration tests — all 6 MCP tools tested through the real protocol.
 
 Uses mcp.shared.memory.create_connected_server_and_client_session to create
-an in-memory client↔server connection that runs the real lifespan (DB, embedder,
-watcher). This catches bugs that unit tests miss, like the Context annotation
-issue where every tool returned 'NoneType' errors through the protocol despite
-165 unit tests passing.
+an in-memory client<->server connection that runs the real lifespan (DB, embedder,
+watcher).
 """
 
 from __future__ import annotations
@@ -36,7 +34,7 @@ def _parse_list(result) -> list[dict]:
     """Parse a tool result that returns list[dict].
 
     FastMCP serializes each list element as a separate TextContent item,
-    so [dict1, dict2] → [TextContent(json(dict1)), TextContent(json(dict2))].
+    so [dict1, dict2] -> [TextContent(json(dict1)), TextContent(json(dict2))].
     An empty list returns 0 content items.
     """
     assert not result.isError, f"Tool returned error: {result}"
@@ -67,33 +65,28 @@ def anyio_backend():
 def vault(tmp_path_factory) -> Path:
     """Session-scoped vault with test corpus."""
     v = tmp_path_factory.mktemp("vault")
-    _write_md(v, "ml-basics.md", "# Machine Learning\n\nML uses algorithms to learn from data.\n")
+    _write_md(v, "ml-basics.md", "---\ntags: [ai, ml]\naliases: [ML]\n---\n# Machine Learning\n\nML uses algorithms to learn from data.\n")
     _write_md(
         v,
         "deep-learning.md",
-        "# Deep Learning\n\nNeural networks with many layers. See [[ml-basics]].\n",
+        "---\ntags: [ai, deep-learning]\n---\n# Deep Learning\n\nNeural networks with many layers. See [[ml-basics]].\n",
     )
-    _write_md(v, "cooking.md", "# Italian Cooking\n\nPasta recipes from Italy.\n")
+    _write_md(v, "cooking.md", "---\ntags: [cooking]\n---\n# Italian Cooking\n\nPasta recipes from Italy.\n")
     _write_md(
         v,
         "hub.md",
         "# Hub Note\n\nSee [[ml-basics]] and [[deep-learning]].\n",
     )
-    _write_md(v, "知识管理.md", "# 知识管理入门\n\n知识管理是一种系统性的方法。\n")
+    _write_md(v, "知识管理.md", "---\ntags: [meta]\naliases: [Knowledge Management]\n---\n# 知识管理入门\n\n知识管理是一种系统性的方法。\n")
     return v
 
 
 @pytest.fixture(scope="session")
 async def client(vault: Path) -> ClientSession:
-    """Session-scoped MCP client connected via in-memory transport.
-
-    The real lifespan runs: DB init, embedder load, watcher start.
-    Session-scoped so the ~2s embedder load happens once.
-    """
+    """Session-scoped MCP client connected via in-memory transport."""
     old_env = os.environ.get("SEEKLINK_VAULT")
     os.environ["SEEKLINK_VAULT"] = str(vault)
     try:
-        # Import here so SEEKLINK_VAULT is set before lifespan reads it
         from seeklink.server import mcp
 
         async with create_connected_server_and_client_session(
@@ -131,62 +124,53 @@ class TestStatus:
 
 
 # ---------------------------------------------------------------------------
-# Tool 2: get_unprocessed (returns list[dict])
+# Tool 2: index (returns dict or list[dict])
 # ---------------------------------------------------------------------------
 
-class TestGetUnprocessed:
+class TestIndex:
     pytestmark = pytest.mark.anyio
 
-    async def test_returns_list(self, client: ClientSession):
-        data = _parse_list(await client.call_tool("get_unprocessed", {}))
+    async def test_index_without_path_returns_unprocessed(self, client: ClientSession):
+        data = _parse_list(await client.call_tool("index", {}))
         assert isinstance(data, list)
 
-
-# ---------------------------------------------------------------------------
-# Tool 3: index_note (returns dict)
-# ---------------------------------------------------------------------------
-
-class TestIndexNote:
-    pytestmark = pytest.mark.anyio
-
     async def test_index_creates_chunks(self, client: ClientSession):
-        data = _parse_dict(await client.call_tool("index_note", {"path": "ml-basics.md"}))
+        data = _parse_dict(await client.call_tool("index", {"path": "ml-basics.md"}))
         assert data["status"] == "indexed"
         assert data["chunks_created"] >= 0
         assert "source_id" in data
 
     async def test_index_parses_wiki_links(self, client: ClientSession):
-        data = _parse_dict(await client.call_tool("index_note", {"path": "deep-learning.md"}))
+        data = _parse_dict(await client.call_tool("index", {"path": "deep-learning.md"}))
         assert data["status"] == "indexed"
         assert data["links_parsed"] >= 1  # [[ml-basics]]
 
     async def test_index_missing_file(self, client: ClientSession):
-        data = _parse_dict(await client.call_tool("index_note", {"path": "nonexistent.md"}))
+        data = _parse_dict(await client.call_tool("index", {"path": "nonexistent.md"}))
         assert "error" in data
         assert "not found" in data["error"].lower()
 
     async def test_force_reindex(self, client: ClientSession):
         data = _parse_dict(
-            await client.call_tool("index_note", {"path": "ml-basics.md", "force": True})
+            await client.call_tool("index", {"path": "ml-basics.md", "force": True})
         )
         assert data["status"] == "indexed"
 
     async def test_path_normalization(self, client: ClientSession):
-        data = _parse_dict(await client.call_tool("index_note", {"path": "./ml-basics.md"}))
+        data = _parse_dict(await client.call_tool("index", {"path": "./ml-basics.md"}))
         assert data["status"] == "indexed"
 
 
 # ---------------------------------------------------------------------------
-# Tool 4: search (returns list[dict])
+# Tool 3: search (returns list[dict])
 # ---------------------------------------------------------------------------
 
 class TestSearch:
     pytestmark = pytest.mark.anyio
 
     async def test_basic_search(self, client: ClientSession):
-        # Ensure corpus is indexed
-        await client.call_tool("index_note", {"path": "ml-basics.md"})
-        await client.call_tool("index_note", {"path": "cooking.md"})
+        await client.call_tool("index", {"path": "ml-basics.md"})
+        await client.call_tool("index", {"path": "cooking.md"})
 
         data = _parse_list(await client.call_tool("search", {"query": "machine learning", "top_k": 3}))
         assert len(data) > 0
@@ -204,14 +188,14 @@ class TestSearch:
         assert "indegree" in r
 
     async def test_search_with_expand(self, client: ClientSession):
-        await client.call_tool("index_note", {"path": "hub.md"})
+        await client.call_tool("index", {"path": "hub.md"})
         data = _parse_list(
             await client.call_tool("search", {"query": "machine learning", "top_k": 5, "expand": True})
         )
         assert isinstance(data, list)
 
     async def test_chinese_search(self, client: ClientSession):
-        await client.call_tool("index_note", {"path": "知识管理.md"})
+        await client.call_tool("index", {"path": "知识管理.md"})
         data = _parse_list(await client.call_tool("search", {"query": "知识管理", "top_k": 3}))
         assert len(data) > 0
         assert any("知识管理" in r["path"] for r in data)
@@ -223,16 +207,33 @@ class TestSearch:
         )
         assert isinstance(data, list)
 
+    async def test_search_with_tags(self, client: ClientSession):
+        """Search with tag filter restricts results."""
+        data = _parse_list(
+            await client.call_tool("search", {"query": "algorithms", "top_k": 5, "tags": ["ai"]})
+        )
+        assert isinstance(data, list)
+        # cooking.md has tag "cooking", not "ai" — should be excluded
+        for r in data:
+            assert "cooking" not in r["path"]
+
+    async def test_search_with_folder(self, client: ClientSession):
+        """Search with folder filter."""
+        data = _parse_list(
+            await client.call_tool("search", {"query": "learning", "top_k": 5, "folder": "nonexistent"})
+        )
+        assert data == []  # no notes in nonexistent folder
+
 
 # ---------------------------------------------------------------------------
-# Tool 5: suggest_links (returns list[dict])
+# Tool 4: suggest_links (returns list[dict])
 # ---------------------------------------------------------------------------
 
 class TestSuggestLinks:
     pytestmark = pytest.mark.anyio
 
     async def test_returns_suggestions(self, client: ClientSession):
-        await client.call_tool("index_note", {"path": "cooking.md"})
+        await client.call_tool("index", {"path": "cooking.md"})
         data = _parse_list(
             await client.call_tool("suggest_links", {"path": "cooking.md", "max_suggestions": 3})
         )
@@ -245,7 +246,6 @@ class TestSuggestLinks:
             assert "reason" in s
 
     async def test_suggest_for_missing_note(self, client: ClientSession):
-        # suggest_links returns [{"error": ...}] for missing notes
         data = _parse_list(
             await client.call_tool("suggest_links", {"path": "nonexistent.md"})
         )
@@ -254,14 +254,14 @@ class TestSuggestLinks:
 
 
 # ---------------------------------------------------------------------------
-# Tool 6 & 7: approve_suggestion / reject_suggestion (return dict)
+# Tool 5: resolve_suggestion (returns dict)
 # ---------------------------------------------------------------------------
 
-class TestSuggestionWorkflow:
+class TestResolveSuggestion:
     pytestmark = pytest.mark.anyio
 
     async def test_reject_suggestion(self, client: ClientSession):
-        await client.call_tool("index_note", {"path": "cooking.md", "force": True})
+        await client.call_tool("index", {"path": "cooking.md", "force": True})
         suggestions = _parse_list(
             await client.call_tool("suggest_links", {"path": "cooking.md", "max_suggestions": 2})
         )
@@ -269,7 +269,9 @@ class TestSuggestionWorkflow:
             pytest.skip("No suggestions generated")
 
         sid = suggestions[0]["suggestion_id"]
-        data = _parse_dict(await client.call_tool("reject_suggestion", {"suggestion_id": sid}))
+        data = _parse_dict(
+            await client.call_tool("resolve_suggestion", {"suggestion_id": sid, "action": "reject"})
+        )
         assert data["status"] == "rejected"
 
     async def test_reject_already_rejected(self, client: ClientSession):
@@ -280,18 +282,28 @@ class TestSuggestionWorkflow:
             pytest.skip("No suggestions generated")
 
         sid = suggestions[0]["suggestion_id"]
-        await client.call_tool("reject_suggestion", {"suggestion_id": sid})
-        data = _parse_dict(await client.call_tool("reject_suggestion", {"suggestion_id": sid}))
+        await client.call_tool("resolve_suggestion", {"suggestion_id": sid, "action": "reject"})
+        data = _parse_dict(
+            await client.call_tool("resolve_suggestion", {"suggestion_id": sid, "action": "reject"})
+        )
         assert "error" in data
         assert "already" in data["error"].lower()
 
     async def test_reject_nonexistent(self, client: ClientSession):
-        data = _parse_dict(await client.call_tool("reject_suggestion", {"suggestion_id": 99999}))
+        data = _parse_dict(
+            await client.call_tool("resolve_suggestion", {"suggestion_id": 99999, "action": "reject"})
+        )
+        assert "error" in data
+
+    async def test_invalid_action(self, client: ClientSession):
+        data = _parse_dict(
+            await client.call_tool("resolve_suggestion", {"suggestion_id": 1, "action": "invalid"})
+        )
         assert "error" in data
 
     async def test_approve_writes_link(self, client: ClientSession, vault: Path):
-        await client.call_tool("index_note", {"path": "hub.md", "force": True})
-        await client.call_tool("index_note", {"path": "ml-basics.md", "force": True})
+        await client.call_tool("index", {"path": "hub.md", "force": True})
+        await client.call_tool("index", {"path": "ml-basics.md", "force": True})
 
         suggestions = _parse_list(
             await client.call_tool("suggest_links", {"path": "hub.md", "max_suggestions": 3})
@@ -303,7 +315,9 @@ class TestSuggestionWorkflow:
         target_path = suggestions[0]["target_path"]
         target_stem = Path(target_path).stem
 
-        data = _parse_dict(await client.call_tool("approve_suggestion", {"suggestion_id": sid}))
+        data = _parse_dict(
+            await client.call_tool("resolve_suggestion", {"suggestion_id": sid, "action": "approve"})
+        )
         assert data["status"] == "approved"
         assert f"[[{target_stem}]]" in data["link_written"]
 
@@ -312,20 +326,22 @@ class TestSuggestionWorkflow:
         assert f"[[{target_stem}]]" in hub_content
 
     async def test_approve_nonexistent(self, client: ClientSession):
-        data = _parse_dict(await client.call_tool("approve_suggestion", {"suggestion_id": 99999}))
+        data = _parse_dict(
+            await client.call_tool("resolve_suggestion", {"suggestion_id": 99999, "action": "approve"})
+        )
         assert "error" in data
 
 
 # ---------------------------------------------------------------------------
-# Tool 8: graph_neighbors (returns dict)
+# Tool 6: graph (returns dict)
 # ---------------------------------------------------------------------------
 
-class TestGraphNeighbors:
+class TestGraph:
     pytestmark = pytest.mark.anyio
 
     async def test_returns_structure(self, client: ClientSession):
-        await client.call_tool("index_note", {"path": "hub.md"})
-        data = _parse_dict(await client.call_tool("graph_neighbors", {"path": "hub.md"}))
+        await client.call_tool("index", {"path": "hub.md"})
+        data = _parse_dict(await client.call_tool("graph", {"path": "hub.md"}))
         assert "center" in data
         assert "outgoing" in data
         assert "incoming" in data
@@ -333,29 +349,29 @@ class TestGraphNeighbors:
         assert "title" in data["center"]
 
     async def test_outgoing_links(self, client: ClientSession):
-        await client.call_tool("index_note", {"path": "hub.md"})
-        await client.call_tool("index_note", {"path": "ml-basics.md"})
-        await client.call_tool("index_note", {"path": "deep-learning.md"})
+        await client.call_tool("index", {"path": "hub.md"})
+        await client.call_tool("index", {"path": "ml-basics.md"})
+        await client.call_tool("index", {"path": "deep-learning.md"})
 
         data = _parse_dict(
-            await client.call_tool("graph_neighbors", {"path": "hub.md", "depth": 1})
+            await client.call_tool("graph", {"path": "hub.md", "depth": 1})
         )
         out_paths = {n["path"] for n in data["outgoing"]}
         assert "ml-basics.md" in out_paths or "deep-learning.md" in out_paths
 
     async def test_depth_2(self, client: ClientSession):
         data = _parse_dict(
-            await client.call_tool("graph_neighbors", {"path": "hub.md", "depth": 2})
+            await client.call_tool("graph", {"path": "hub.md", "depth": 2})
         )
         assert isinstance(data["outgoing"], list)
 
     async def test_missing_note(self, client: ClientSession):
-        data = _parse_dict(await client.call_tool("graph_neighbors", {"path": "nonexistent.md"}))
+        data = _parse_dict(await client.call_tool("graph", {"path": "nonexistent.md"}))
         assert "error" in data
 
     async def test_isolated_note(self, client: ClientSession):
-        await client.call_tool("index_note", {"path": "cooking.md"})
-        data = _parse_dict(await client.call_tool("graph_neighbors", {"path": "cooking.md"}))
+        await client.call_tool("index", {"path": "cooking.md"})
+        data = _parse_dict(await client.call_tool("graph", {"path": "cooking.md"}))
         assert data["outgoing"] == []
 
 
@@ -366,17 +382,15 @@ class TestGraphNeighbors:
 class TestToolRegistration:
     pytestmark = pytest.mark.anyio
 
-    async def test_all_8_tools_registered(self, client: ClientSession):
+    async def test_all_6_tools_registered(self, client: ClientSession):
         result = await client.list_tools()
         names = {t.name for t in result.tools}
         expected = {
-            "get_unprocessed",
-            "index_note",
+            "index",
             "search",
             "suggest_links",
-            "approve_suggestion",
-            "reject_suggestion",
-            "graph_neighbors",
+            "resolve_suggestion",
+            "graph",
             "status",
         }
         assert expected == names

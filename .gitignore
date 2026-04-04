@@ -20,3 +20,6 @@ wheels/
 
 # Environment
 .env
+
+# Security reports (local only)
+.gstack/

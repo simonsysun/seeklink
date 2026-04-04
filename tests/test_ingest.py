@@ -10,7 +10,7 @@ import pytest
 
 from seeklink.db import Database
 from seeklink.embedder import Embedder
-from seeklink.ingest import ingest_file, ingest_vault
+from seeklink.ingest import _parse_frontmatter, ingest_file, ingest_vault
 
 
 @pytest.fixture(scope="session")
@@ -312,3 +312,155 @@ class TestLinkResolution:
 
         links_after = db.get_links_from(early.id)
         assert links_after[0].target_note_id is not None  # resolved
+
+
+# ── v2: Frontmatter parsing ─────────────────────────────────────
+
+
+class TestParseFrontmatter:
+    """Tests for _parse_frontmatter helper."""
+
+    def test_no_frontmatter(self):
+        tags, aliases, body = _parse_frontmatter("# Title\n\nContent here.")
+        assert tags == []
+        assert aliases == []
+        assert body == "# Title\n\nContent here."
+
+    def test_inline_tags(self):
+        content = "---\ntags: [ai, ml, deep-learning]\n---\n# Title\n\nBody."
+        tags, aliases, body = _parse_frontmatter(content)
+        assert tags == ["ai", "ml", "deep-learning"]
+        assert "# Title" in body
+        assert "tags:" not in body
+
+    def test_block_list_tags(self):
+        content = "---\ntags:\n  - ai\n  - ml\n  - deep-learning\n---\n# Title\n"
+        tags, aliases, body = _parse_frontmatter(content)
+        assert tags == ["ai", "ml", "deep-learning"]
+
+    def test_inline_aliases(self):
+        content = '---\naliases: [ML, "Machine Learning"]\n---\n# Title\n'
+        tags, aliases, body = _parse_frontmatter(content)
+        assert aliases == ["ML", "Machine Learning"]
+
+    def test_block_list_aliases(self):
+        content = "---\naliases:\n  - ML\n  - Machine Learning\n---\n# Title\n"
+        tags, aliases, body = _parse_frontmatter(content)
+        assert aliases == ["ML", "Machine Learning"]
+
+    def test_mixed_formats(self):
+        content = "---\ntags: [ai, ml]\naliases:\n  - Alias One\n  - Alias Two\n---\nBody."
+        tags, aliases, body = _parse_frontmatter(content)
+        assert tags == ["ai", "ml"]
+        assert aliases == ["Alias One", "Alias Two"]
+        assert body == "Body."
+
+    def test_chinese_tags(self):
+        content = "---\ntags: [知识管理, 学习方法]\n---\n# 标题\n"
+        tags, aliases, body = _parse_frontmatter(content)
+        assert tags == ["知识管理", "学习方法"]
+
+    def test_hierarchical_tags(self):
+        content = "---\ntags: [ai-engineering/mcp, ai-engineering/agents]\n---\n# Title\n"
+        tags, aliases, body = _parse_frontmatter(content)
+        assert "ai-engineering/mcp" in tags
+
+    def test_malformed_frontmatter(self):
+        content = "---\nthis is not valid yaml\n---\n# Title\n"
+        tags, aliases, body = _parse_frontmatter(content)
+        assert tags == []
+        assert aliases == []
+        assert "# Title" in body
+
+    def test_empty_frontmatter(self):
+        content = "---\n---\n# Title\n"
+        tags, aliases, body = _parse_frontmatter(content)
+        assert tags == []
+        assert aliases == []
+        assert body == "# Title\n"
+
+    def test_other_fields_ignored(self):
+        content = "---\ncreated: 2026-01-01\ntags: [ai]\ntype: literature\n---\nBody."
+        tags, aliases, body = _parse_frontmatter(content)
+        assert tags == ["ai"]
+        assert aliases == []
+
+    def test_quoted_values(self):
+        content = "---\ntags: ['tag one', \"tag two\"]\n---\nBody."
+        tags, aliases, body = _parse_frontmatter(content)
+        assert "tag one" in tags
+        assert "tag two" in tags
+
+
+# ── v2: Frontmatter stripping in ingest ──────────────────────────
+
+
+class TestFrontmatterIngest:
+    """Test that frontmatter is stripped before chunking/embedding."""
+
+    @pytest.fixture
+    def vault(self, tmp_path):
+        return tmp_path
+
+    def test_frontmatter_not_in_chunks(self, db: Database, embedder: Embedder, vault: Path):
+        content = "---\ntags: [ai, ml]\naliases: [ML Intro]\n---\n# Machine Learning\n\nML uses algorithms."
+        path = vault / "fm-test.md"
+        path.write_text(content, encoding="utf-8")
+        source = ingest_file(db, path, vault, embedder)
+        assert source is not None
+
+        chunks = db.get_chunks_by_source(source.id)
+        for chunk in chunks:
+            assert "tags:" not in chunk.content
+            assert "aliases:" not in chunk.content
+
+    def test_tags_stored_in_db(self, db: Database, embedder: Embedder, vault: Path):
+        content = "---\ntags: [ai, ml]\n---\n# Test\n\nContent."
+        path = vault / "tags-test.md"
+        path.write_text(content, encoding="utf-8")
+        source = ingest_file(db, path, vault, embedder)
+        assert source is not None
+
+        tags = db.get_tags(source.id)
+        assert "ai" in tags
+        assert "ml" in tags
+
+    def test_aliases_stored_in_source(self, db: Database, embedder: Embedder, vault: Path):
+        content = '---\naliases: [ML, "Machine Learning"]\n---\n# ML Basics\n\nContent.'
+        path = vault / "alias-test.md"
+        path.write_text(content, encoding="utf-8")
+        source = ingest_file(db, path, vault, embedder)
+        assert source is not None
+        assert "ML" in source.aliases
+        assert "Machine Learning" in source.aliases
+
+    def test_reindex_clears_old_tags(self, db: Database, embedder: Embedder, vault: Path):
+        path = vault / "reindex-tags.md"
+        path.write_text("---\ntags: [old-tag]\n---\n# Test\n\nV1.", encoding="utf-8")
+        ingest_file(db, path, vault, embedder)
+
+        # Modify: change tags
+        path.write_text("---\ntags: [new-tag]\n---\n# Test\n\nV2.", encoding="utf-8")
+        source = ingest_file(db, path, vault, embedder)
+        assert source is not None
+
+        tags = db.get_tags(source.id)
+        assert "new-tag" in tags
+        assert "old-tag" not in tags
+
+    def test_alias_link_resolution(self, db: Database, embedder: Embedder, vault: Path):
+        """[[ML]] resolves to a note with alias 'ML'."""
+        target = vault / "ml-basics.md"
+        target.write_text('---\naliases: [ML]\n---\n# ML Basics\n\nContent.', encoding="utf-8")
+        ingest_file(db, target, vault, embedder)
+
+        linker = vault / "linker.md"
+        linker.write_text("# Linker\n\nSee [[ML]] for details.", encoding="utf-8")
+        ingest_file(db, linker, vault, embedder)
+
+        linker_source = db.get_source_by_path("linker.md")
+        links = db.get_links_from(linker_source.id)
+        assert len(links) >= 1
+        # The [[ML]] link should resolve to ml-basics.md
+        ml_source = db.get_source_by_path("ml-basics.md")
+        assert any(lk.target_note_id == ml_source.id for lk in links)

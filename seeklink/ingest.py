@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import logging
+import re
 from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
@@ -18,6 +20,9 @@ logger = logging.getLogger(__name__)
 
 # Non-hidden top-level dirs excluded from indexing (mirrors watcher._SKIP_DIRS)
 _SKIP_DIRS = {"todo", "archive"}
+
+# Regex for YAML frontmatter block (handles empty frontmatter too)
+_FRONTMATTER_RE = re.compile(r"\A---\s*\n(.*?)---\s*\n", re.DOTALL)
 
 
 def _utcnow() -> str:
@@ -56,9 +61,13 @@ def ingest_file(
     if existing is not None and existing.content_hash == content_hash:
         return existing  # unchanged
 
+    # Parse frontmatter → extract tags, aliases, and body (content without YAML)
+    tags, aliases, body = _parse_frontmatter(content)
+
     # Prepare data outside transaction: title, chunks, embeddings, links
-    title = _extract_title(content, path)
-    chunks = chunk_markdown(content)
+    # Use body (stripped of frontmatter) for chunking/embedding/link parsing
+    title = _extract_title(body, path)
+    chunks = chunk_markdown(body)
 
     if chunks:
         embeddings = embedder.embed_documents([c.text for c in chunks])
@@ -69,7 +78,8 @@ def ingest_file(
     else:
         embeddings = []
 
-    targets = extract_wiki_links(content)
+    targets = extract_wiki_links(body)
+    aliases_json = json.dumps(aliases, ensure_ascii=False)
 
     # Mutate DB atomically
     with db.transaction():
@@ -77,6 +87,7 @@ def ingest_file(
             # Re-index: delete old data
             db.delete_chunks_by_source(existing.id)
             db.delete_links_by_source(existing.id)
+            db.delete_tags_by_source(existing.id)
             source = existing
         else:
             source = db.add_source(
@@ -97,7 +108,7 @@ def ingest_file(
             )
             db.upsert_vec(db_chunk.id, emb)
 
-        # Store wiki-links
+        # Store wiki-links (with alias-aware resolution)
         for target in targets:
             target_source = _find_source_by_target(db, target)
             db.add_wiki_link(
@@ -106,12 +117,18 @@ def ingest_file(
                 target_note_id=target_source.id if target_source else None,
             )
 
-        # Resolve forward refs pointing TO this file (by stem and by relative path)
+        # Store tags
+        if tags:
+            db.add_tags(source.id, tags)
+
+        # Resolve forward refs pointing TO this file (by stem, relative path, and aliases)
         stem = path.stem
         rel_no_ext = rel_path.removesuffix(".md")
         db.resolve_forward_refs(stem, source.id)
         if rel_no_ext != stem:
             db.resolve_forward_refs(rel_no_ext, source.id)
+        for alias in aliases:
+            db.resolve_forward_refs(alias, source.id)
 
         # Update source status with real timestamp
         db.update_source(
@@ -120,6 +137,7 @@ def ingest_file(
             content_hash=content_hash,
             status="indexed",
             indexed_at=_utcnow(),
+            aliases=aliases_json,
         )
 
     return db.get_source(source.id)
@@ -168,6 +186,63 @@ def ingest_vault(
     return stats
 
 
+def _parse_frontmatter(content: str) -> tuple[list[str], list[str], str]:
+    """Parse YAML frontmatter, returning (tags, aliases, body).
+
+    Handles both formats for tags and aliases:
+    - Inline: `tags: [ai, ml, deep-learning]`
+    - Block list: `tags:\\n  - ai\\n  - ml`
+
+    Returns ([], [], content) if no frontmatter found or on parse error.
+    Body is the content after the frontmatter block.
+    """
+    match = _FRONTMATTER_RE.match(content)
+    if not match:
+        return [], [], content
+
+    yaml_block = match.group(1)
+    body = content[match.end():]
+
+    tags = _parse_yaml_list_field(yaml_block, "tags")
+    aliases = _parse_yaml_list_field(yaml_block, "aliases")
+
+    return tags, aliases, body
+
+
+def _parse_yaml_list_field(yaml_block: str, field: str) -> list[str]:
+    """Extract a list field from a YAML block. Handles inline and block list formats."""
+    # Try inline format: field: [a, b, c]
+    inline_re = re.compile(rf"^{re.escape(field)}\s*:\s*\[([^\]]*)\]", re.MULTILINE)
+    m = inline_re.search(yaml_block)
+    if m:
+        raw = m.group(1)
+        items = [s.strip().strip("'\"") for s in raw.split(",")]
+        return [s for s in items if s]
+
+    # Try block list format:
+    # field:
+    #   - item1
+    #   - item2
+    block_re = re.compile(
+        rf"^{re.escape(field)}\s*:\s*\n((?:\s+-\s+.+\n?)+)", re.MULTILINE
+    )
+    m = block_re.search(yaml_block)
+    if m:
+        block = m.group(1)
+        items = re.findall(r"^\s+-\s+(.+)$", block, re.MULTILINE)
+        return [s.strip().strip("'\"") for s in items if s.strip()]
+
+    # Try single value: field: value
+    single_re = re.compile(rf"^{re.escape(field)}\s*:\s+(.+)$", re.MULTILINE)
+    m = single_re.search(yaml_block)
+    if m:
+        val = m.group(1).strip().strip("'\"")
+        if val and not val.startswith("["):
+            return [val]
+
+    return []
+
+
 def _extract_title(content: str, path: Path) -> str:
     """Extract title from first # heading, falling back to filename stem."""
     for line in content.splitlines():
@@ -183,7 +258,8 @@ def _find_source_by_target(db: Database, target: str) -> Source | None:
     Resolution order:
     1. Exact path match with .md suffix
     2. Exact path match as-is
-    3. Stem match (only for simple names without path separators)
+    3. Stem match via SQL (for simple names without path separators)
+    4. Alias match (check aliases JSON field)
     """
     # Try exact path match
     source = db.get_source_by_path(target + ".md")
@@ -195,8 +271,13 @@ def _find_source_by_target(db: Database, target: str) -> Source | None:
 
     # Fall back to stem match (only for simple names)
     if "/" not in target and "\\" not in target:
-        for source in db.list_sources():
-            if Path(source.path).stem == target:
-                return source
+        source = db.get_source_by_stem(target)
+        if source:
+            return source
+
+        # Try alias match
+        source = db.get_source_by_alias(target)
+        if source:
+            return source
 
     return None

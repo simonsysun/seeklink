@@ -46,7 +46,7 @@ class TestSchemaCreation:
                 "AND name NOT LIKE 'sqlite_%'"
             ).fetchall()
         }
-        expected = {"sources", "chunks", "wiki_links", "suggestions"}
+        expected = {"sources", "chunks", "wiki_links", "suggestions", "source_tags"}
         assert expected.issubset(tables)
 
     def test_virtual_tables_exist(self, db: Database):
@@ -58,6 +58,7 @@ class TestSchemaCreation:
         }
         assert "vec_chunks" in tables
         assert "fts_chunks" in tables
+        assert "fts_sources" in tables
 
     def test_triggers_exist(self, db: Database):
         triggers = {
@@ -74,6 +75,9 @@ class TestSchemaCreation:
             "wikilinks_delete_indegree",
             "wikilinks_update_indegree_new",
             "wikilinks_update_indegree_old",
+            "sources_fts_insert",
+            "sources_fts_delete",
+            "sources_fts_update",
         }
         assert expected == triggers
 
@@ -94,6 +98,8 @@ class TestSchemaCreation:
             "idx_wikilinks_target",
             "idx_wikilinks_target_path",
             "idx_suggestions_status",
+            "idx_source_tags_source",
+            "idx_source_tags_tag",
         }
         assert expected == indexes
 
@@ -485,3 +491,223 @@ class TestPragmas:
         """In-memory DB can't use WAL, falls back to 'memory'."""
         mode = db.conn.execute("PRAGMA journal_mode").fetchone()[0]
         assert mode == "memory"
+
+
+# ── v2: Tags CRUD ─────────────────────────────────────────────────
+
+
+class TestTagCRUD:
+    """Tests for source_tags table and tag methods."""
+
+    def test_add_and_get_tags(self, db: Database):
+        source = _make_source(db, path="notes/tagged.md")
+        count = db.add_tags(source.id, ["ai", "ml", "deep-learning"])
+        assert count == 3
+        tags = db.get_tags(source.id)
+        assert tags == ["ai", "deep-learning", "ml"]  # sorted
+
+    def test_add_tags_ignores_duplicates(self, db: Database):
+        source = _make_source(db, path="notes/dup-tags.md")
+        db.add_tags(source.id, ["ai", "ml"])
+        count = db.add_tags(source.id, ["ml", "new-tag"])
+        assert count == 1  # only "new-tag" is new
+        tags = db.get_tags(source.id)
+        assert "new-tag" in tags
+
+    def test_delete_tags_by_source(self, db: Database):
+        source = _make_source(db, path="notes/del-tags.md")
+        db.add_tags(source.id, ["a", "b", "c"])
+        deleted = db.delete_tags_by_source(source.id)
+        assert deleted == 3
+        assert db.get_tags(source.id) == []
+
+    def test_get_sources_by_tag(self, db: Database):
+        s1 = _make_source(db, path="notes/s1.md")
+        s2 = _make_source(db, path="notes/s2.md")
+        s3 = _make_source(db, path="notes/s3.md")
+        db.add_tags(s1.id, ["ai", "ml"])
+        db.add_tags(s2.id, ["ai"])
+        db.add_tags(s3.id, ["cooking"])
+        ai_sources = db.get_sources_by_tag("ai")
+        ai_ids = {s.id for s in ai_sources}
+        assert s1.id in ai_ids
+        assert s2.id in ai_ids
+        assert s3.id not in ai_ids
+
+    def test_tags_cascade_on_source_delete(self, db: Database):
+        source = _make_source(db, path="notes/cascade-tags.md")
+        db.add_tags(source.id, ["tag1", "tag2"])
+        db.delete_source(source.id)
+        tags = db.get_tags(source.id)
+        assert tags == []
+
+    def test_hierarchical_tags(self, db: Database):
+        source = _make_source(db, path="notes/hier-tags.md")
+        db.add_tags(source.id, ["ai-engineering/mcp", "ai-engineering/agents"])
+        tags = db.get_tags(source.id)
+        assert "ai-engineering/mcp" in tags
+
+
+# ── v2: FTS Sources ───────────────────────────────────────────────
+
+
+class TestFTSSources:
+    """Tests for fts_sources search (title + aliases)."""
+
+    def test_search_by_title(self, db: Database):
+        source = db.add_source(uid=_uid(), path="notes/ml.md", title="Machine Learning Basics")
+        db.update_source(source.id, title="Machine Learning Basics")
+        results = db.search_fts_sources("machine learning", limit=10)
+        source_ids = [sid for sid, _ in results]
+        assert source.id in source_ids
+
+    def test_search_by_alias(self, db: Database):
+        source = db.add_source(uid=_uid(), path="notes/ml-alias.md", title="ML Intro")
+        db.update_source(source.id, aliases='["Machine Learning", "ML Basics"]')
+        results = db.search_fts_sources("machine learning", limit=10)
+        source_ids = [sid for sid, _ in results]
+        assert source.id in source_ids
+
+    def test_search_returns_empty_on_no_match(self, db: Database):
+        results = db.search_fts_sources("nonexistent_term_xyz", limit=10)
+        assert results == []
+
+    def test_search_handles_bad_query(self, db: Database):
+        results = db.search_fts_sources("AND OR NOT", limit=10)
+        assert isinstance(results, list)  # should not raise
+
+
+# ── v2: get_source_by_stem ────────────────────────────────────────
+
+
+class TestGetSourceByStem:
+    """Tests for stem-based source lookup."""
+
+    def test_finds_by_stem(self, db: Database):
+        source = _make_source(db, path="notes/my-note.md")
+        found = db.get_source_by_stem("my-note")
+        assert found is not None
+        assert found.id == source.id
+
+    def test_finds_root_level(self, db: Database):
+        source = _make_source(db, path="root-note.md")
+        found = db.get_source_by_stem("root-note")
+        assert found is not None
+        assert found.id == source.id
+
+    def test_returns_none_for_missing(self, db: Database):
+        assert db.get_source_by_stem("no-such-note") is None
+
+
+# ── v2: get_source_by_alias ──────────────────────────────────────
+
+
+class TestGetSourceByAlias:
+    """Tests for alias-based source lookup."""
+
+    def test_finds_by_alias(self, db: Database):
+        source = db.add_source(uid=_uid(), path="notes/aliased.md")
+        db.update_source(source.id, aliases='["ML", "Machine Learning"]')
+        found = db.get_source_by_alias("ML")
+        assert found is not None
+        assert found.id == source.id
+
+    def test_returns_none_for_missing(self, db: Database):
+        assert db.get_source_by_alias("nonexistent-alias") is None
+
+
+# ── v2: Migration ────────────────────────────────────────────────
+
+
+class TestMigrationV1ToV2:
+    """Test that v1 databases migrate to v2 correctly."""
+
+    def test_migrate_preserves_data(self):
+        """Create a v1 database, add data, then migrate to v2."""
+        db = Database(":memory:")
+
+        # Manually create v1 schema (without aliases column, without source_tags/fts_sources)
+        db._conn.executescript("""
+            CREATE TABLE sources (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                uid TEXT NOT NULL UNIQUE,
+                path TEXT NOT NULL UNIQUE,
+                title TEXT,
+                content_hash TEXT,
+                status TEXT DEFAULT 'unprocessed',
+                indegree INTEGER DEFAULT 0,
+                fs_modified_at TEXT,
+                indexed_at TEXT,
+                created_at TEXT DEFAULT (datetime('now')),
+                updated_at TEXT DEFAULT (datetime('now'))
+            );
+            CREATE TABLE chunks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                source_id INTEGER NOT NULL REFERENCES sources(id) ON DELETE CASCADE,
+                content TEXT NOT NULL,
+                chunk_index INTEGER NOT NULL,
+                char_start INTEGER,
+                char_end INTEGER,
+                token_count INTEGER,
+                created_at TEXT DEFAULT (datetime('now'))
+            );
+            CREATE TABLE wiki_links (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                source_note_id INTEGER NOT NULL REFERENCES sources(id) ON DELETE CASCADE,
+                target_note_id INTEGER REFERENCES sources(id) ON DELETE SET NULL,
+                target_path TEXT NOT NULL,
+                created_at TEXT DEFAULT (datetime('now')),
+                UNIQUE(source_note_id, target_path)
+            );
+            CREATE TABLE suggestions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                source_note_id INTEGER NOT NULL REFERENCES sources(id) ON DELETE CASCADE,
+                target_note_id INTEGER NOT NULL REFERENCES sources(id) ON DELETE CASCADE,
+                score REAL NOT NULL,
+                reason TEXT,
+                status TEXT DEFAULT 'pending',
+                created_at TEXT DEFAULT (datetime('now')),
+                resolved_at TEXT
+            );
+            CREATE VIRTUAL TABLE vec_chunks USING vec0(
+                chunk_id INTEGER PRIMARY KEY,
+                embedding float[768] distance_metric=cosine
+            );
+            CREATE VIRTUAL TABLE fts_chunks USING fts5(
+                content, content=chunks, content_rowid=id, tokenize='jieba'
+            );
+            PRAGMA user_version = 1;
+        """)
+
+        # Add v1 data
+        db._conn.execute(
+            "INSERT INTO sources (uid, path, title, status) VALUES (?, ?, ?, ?)",
+            (_uid(), "notes/test.md", "Test Note", "indexed"),
+        )
+        db._conn.commit()
+
+        # Now migrate to v2
+        db._migrate_v1_to_v2()
+
+        # Verify migration
+        version = db._conn.execute("PRAGMA user_version").fetchone()[0]
+        assert version == 2
+
+        # Original data preserved, aliases column added with default
+        row = db._conn.execute("SELECT * FROM sources WHERE path = 'notes/test.md'").fetchone()
+        assert row is not None
+        assert row["aliases"] == "[]"
+
+        # New tables exist
+        tables = {r[0] for r in db._conn.execute(
+            "SELECT name FROM sqlite_master WHERE type='table'"
+        ).fetchall()}
+        assert "source_tags" in tables
+
+        # fts_sources was backfilled
+        fts_rows = db._conn.execute(
+            "SELECT rowid FROM fts_sources WHERE fts_sources MATCH 'test'"
+        ).fetchall()
+        assert len(fts_rows) >= 1
+
+        db.close()

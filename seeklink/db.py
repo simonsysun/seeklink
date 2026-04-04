@@ -25,7 +25,7 @@ class Database:
     types: sources, chunks, wiki_links, suggestions.
     """
 
-    SCHEMA_VERSION = 1
+    SCHEMA_VERSION = 2
 
     def __init__(self, path: str | Path = ":memory:"):
         self._path = str(path)
@@ -130,6 +130,11 @@ class Database:
                 "Delete the DB file to recreate."
             )
 
+        # Migrate from v1 → v2 if needed
+        if version == 1:
+            self._migrate_v1_to_v2()
+            return
+
         # -- Tables (order matters for FK references) --
 
         self._conn.execute("""
@@ -141,6 +146,7 @@ class Database:
                 content_hash TEXT,
                 status TEXT DEFAULT 'unprocessed',
                 indegree INTEGER DEFAULT 0,
+                aliases TEXT DEFAULT '[]',
                 fs_modified_at TEXT,
                 indexed_at TEXT,
                 created_at TEXT DEFAULT (datetime('now')),
@@ -283,6 +289,57 @@ class Database:
             END""",
         )
 
+        # -- Source tags table (v2) --
+
+        self._conn.execute("""
+            CREATE TABLE IF NOT EXISTS source_tags (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                source_id INTEGER NOT NULL REFERENCES sources(id) ON DELETE CASCADE,
+                tag TEXT NOT NULL,
+                UNIQUE(source_id, tag)
+            )
+        """)
+
+        # -- FTS5 for source-level search: title + aliases (v2) --
+
+        self._conn.execute("""
+            CREATE VIRTUAL TABLE IF NOT EXISTS fts_sources USING fts5(
+                title,
+                aliases,
+                content=sources,
+                content_rowid=id,
+                tokenize='jieba'
+            )
+        """)
+
+        # -- Triggers: fts_sources sync (3) --
+
+        self._create_trigger(
+            "sources_fts_insert",
+            """CREATE TRIGGER sources_fts_insert AFTER INSERT ON sources BEGIN
+                INSERT INTO fts_sources(rowid, title, aliases)
+                    VALUES (new.id, COALESCE(new.title, ''), COALESCE(new.aliases, '[]'));
+            END""",
+        )
+
+        self._create_trigger(
+            "sources_fts_delete",
+            """CREATE TRIGGER sources_fts_delete AFTER DELETE ON sources BEGIN
+                INSERT INTO fts_sources(fts_sources, rowid, title, aliases)
+                    VALUES ('delete', old.id, COALESCE(old.title, ''), COALESCE(old.aliases, '[]'));
+            END""",
+        )
+
+        self._create_trigger(
+            "sources_fts_update",
+            """CREATE TRIGGER sources_fts_update AFTER UPDATE OF title, aliases ON sources BEGIN
+                INSERT INTO fts_sources(fts_sources, rowid, title, aliases)
+                    VALUES ('delete', old.id, COALESCE(old.title, ''), COALESCE(old.aliases, '[]'));
+                INSERT INTO fts_sources(rowid, title, aliases)
+                    VALUES (new.id, COALESCE(new.title, ''), COALESCE(new.aliases, '[]'));
+            END""",
+        )
+
         # -- Indexes --
 
         self._conn.execute(
@@ -309,6 +366,12 @@ class Database:
         self._conn.execute(
             "CREATE INDEX IF NOT EXISTS idx_suggestions_status ON suggestions(status)"
         )
+        self._conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_source_tags_source ON source_tags(source_id)"
+        )
+        self._conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_source_tags_tag ON source_tags(tag)"
+        )
         # -- Set schema version --
 
         self._conn.execute(f"PRAGMA user_version = {self.SCHEMA_VERSION}")
@@ -321,6 +384,86 @@ class Database:
         ).fetchone()
         if not exists:
             self._conn.execute(ddl)
+
+    def _migrate_v1_to_v2(self) -> None:
+        """Migrate schema from v1 to v2: add aliases, source_tags, fts_sources.
+
+        v1 → v2 changes:
+        - ADD COLUMN aliases to sources
+        - CREATE TABLE source_tags
+        - CREATE VIRTUAL TABLE fts_sources (title + aliases FTS5)
+        - 3 triggers for fts_sources sync
+        - Backfill fts_sources from existing sources
+        - DROP TABLE budget_log (cleanup from Step 1)
+        """
+        # Add aliases column
+        self._conn.execute(
+            "ALTER TABLE sources ADD COLUMN aliases TEXT DEFAULT '[]'"
+        )
+
+        # Create source_tags table
+        self._conn.execute("""
+            CREATE TABLE IF NOT EXISTS source_tags (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                source_id INTEGER NOT NULL REFERENCES sources(id) ON DELETE CASCADE,
+                tag TEXT NOT NULL,
+                UNIQUE(source_id, tag)
+            )
+        """)
+        self._conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_source_tags_source ON source_tags(source_id)"
+        )
+        self._conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_source_tags_tag ON source_tags(tag)"
+        )
+
+        # Create fts_sources virtual table
+        self._conn.execute("""
+            CREATE VIRTUAL TABLE IF NOT EXISTS fts_sources USING fts5(
+                title,
+                aliases,
+                content=sources,
+                content_rowid=id,
+                tokenize='jieba'
+            )
+        """)
+
+        # Create fts_sources sync triggers
+        self._create_trigger(
+            "sources_fts_insert",
+            """CREATE TRIGGER sources_fts_insert AFTER INSERT ON sources BEGIN
+                INSERT INTO fts_sources(rowid, title, aliases)
+                    VALUES (new.id, COALESCE(new.title, ''), COALESCE(new.aliases, '[]'));
+            END""",
+        )
+        self._create_trigger(
+            "sources_fts_delete",
+            """CREATE TRIGGER sources_fts_delete AFTER DELETE ON sources BEGIN
+                INSERT INTO fts_sources(fts_sources, rowid, title, aliases)
+                    VALUES ('delete', old.id, COALESCE(old.title, ''), COALESCE(old.aliases, '[]'));
+            END""",
+        )
+        self._create_trigger(
+            "sources_fts_update",
+            """CREATE TRIGGER sources_fts_update AFTER UPDATE OF title, aliases ON sources BEGIN
+                INSERT INTO fts_sources(fts_sources, rowid, title, aliases)
+                    VALUES ('delete', old.id, COALESCE(old.title, ''), COALESCE(old.aliases, '[]'));
+                INSERT INTO fts_sources(rowid, title, aliases)
+                    VALUES (new.id, COALESCE(new.title, ''), COALESCE(new.aliases, '[]'));
+            END""",
+        )
+
+        # Backfill fts_sources from existing data
+        self._conn.execute("""
+            INSERT INTO fts_sources(rowid, title, aliases)
+            SELECT id, COALESCE(title, ''), '[]' FROM sources
+        """)
+
+        # Cleanup: drop budget_log if it exists (leftover from pre-v1)
+        self._conn.execute("DROP TABLE IF EXISTS budget_log")
+
+        self._conn.execute(f"PRAGMA user_version = {self.SCHEMA_VERSION}")
+        self._conn.commit()
 
     # ── Source CRUD ───────────────────────────────────────────────
 
@@ -381,7 +524,7 @@ class Database:
 
     _SOURCE_UPDATABLE = frozenset({
         "path", "title", "content_hash", "status",
-        "indegree", "fs_modified_at", "indexed_at",
+        "indegree", "fs_modified_at", "indexed_at", "aliases",
     })
 
     def update_source(self, id: int, **kwargs: str | int | None) -> Source | None:
@@ -424,6 +567,90 @@ class Database:
         self._commit()
         return cursor.rowcount > 0
 
+    def get_source_by_stem(self, stem: str) -> Source | None:
+        """Find a source whose filename stem matches (case-sensitive).
+
+        Matches 'note' against paths like 'note.md', 'folder/note.md'.
+        Uses SQL instead of fetching all sources (O(1) vs O(n)).
+        """
+        # Escape LIKE wildcards in stem to prevent unintended matches
+        escaped = stem.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+        row = self._conn.execute(
+            "SELECT * FROM sources WHERE path = ? || '.md' "
+            "OR path LIKE '%/' || ? || '.md' ESCAPE '\\'",
+            (stem, escaped),
+        ).fetchone()
+        return self._row_to_source(row) if row else None
+
+    def get_source_by_alias(self, alias: str) -> Source | None:
+        """Find a source that has the given alias in its aliases JSON array."""
+        # Use JSON_EACH to search inside the aliases JSON array
+        row = self._conn.execute(
+            """SELECT s.* FROM sources s, json_each(s.aliases) j
+               WHERE j.value = ? LIMIT 1""",
+            (alias,),
+        ).fetchone()
+        return self._row_to_source(row) if row else None
+
+    # ── Tag CRUD ─────────────────────────────────────────────────
+
+    def add_tags(self, source_id: int, tags: list[str]) -> int:
+        """Add tags to a source. Returns number of tags added (ignores duplicates)."""
+        count = 0
+        for tag in tags:
+            cursor = self._conn.execute(
+                "INSERT OR IGNORE INTO source_tags (source_id, tag) VALUES (?, ?)",
+                (source_id, tag),
+            )
+            count += cursor.rowcount
+        self._commit()
+        return count
+
+    def get_tags(self, source_id: int) -> list[str]:
+        """Get all tags for a source."""
+        rows = self._conn.execute(
+            "SELECT tag FROM source_tags WHERE source_id = ? ORDER BY tag",
+            (source_id,),
+        ).fetchall()
+        return [r["tag"] for r in rows]
+
+    def delete_tags_by_source(self, source_id: int) -> int:
+        """Delete all tags for a source. Returns number deleted."""
+        cursor = self._conn.execute(
+            "DELETE FROM source_tags WHERE source_id = ?", (source_id,)
+        )
+        self._commit()
+        return cursor.rowcount
+
+    def get_sources_by_tag(self, tag: str) -> list[Source]:
+        """Get all sources with a given tag."""
+        rows = self._conn.execute(
+            """SELECT s.* FROM sources s
+               JOIN source_tags st ON st.source_id = s.id
+               WHERE st.tag = ?""",
+            (tag,),
+        ).fetchall()
+        return [self._row_to_source(r) for r in rows]
+
+    def search_fts_sources(
+        self, query: str, limit: int = 20
+    ) -> list[tuple[int, float]]:
+        """Search source titles and aliases via FTS5.
+
+        Returns (source_id, bm25_rank) pairs. Safe: returns [] on query errors.
+        """
+        try:
+            rows = self._conn.execute(
+                """SELECT rowid, rank FROM fts_sources
+                   WHERE fts_sources MATCH ?
+                   ORDER BY rank
+                   LIMIT ?""",
+                (query, limit),
+            ).fetchall()
+            return [(r["rowid"], r["rank"]) for r in rows]
+        except sqlite3.OperationalError:
+            return []
+
     @staticmethod
     def _row_to_source(row: sqlite3.Row) -> Source:
         return Source(
@@ -438,6 +665,7 @@ class Database:
             indexed_at=row["indexed_at"],
             created_at=row["created_at"],
             updated_at=row["updated_at"],
+            aliases=row["aliases"] if "aliases" in row.keys() else "[]",
         )
 
     # ── Chunk CRUD ───────────────────────────────────────────────

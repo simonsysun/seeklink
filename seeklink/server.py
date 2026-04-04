@@ -1,4 +1,4 @@
-"""FastMCP server — 8 tools for SeekLink PKM engine."""
+"""FastMCP server — 6 tools for SeekLink PKM engine."""
 
 from __future__ import annotations
 
@@ -23,6 +23,29 @@ from seeklink.watcher import run_watcher_with_retry
 logger = logging.getLogger(__name__)
 
 
+# ── Shared bootstrap ─────────────────────────────────────────────
+
+
+def init_app(vault_path: Path | None = None) -> tuple[Database, Embedder, Path]:
+    """Initialize DB + embedder for a vault. Used by both MCP server and CLI.
+
+    Returns (db, embedder, vault_root).
+    """
+    vault_root = (vault_path or Path(os.environ.get("SEEKLINK_VAULT", "."))).resolve()
+    db_dir = vault_root / ".seeklink"
+    db_dir.mkdir(parents=True, exist_ok=True)
+    db_path = db_dir / "seeklink.db"
+
+    logger.info("SeekLink starting — vault: %s, db: %s", vault_root, db_path)
+
+    db = Database(db_path)
+    db.check_capabilities()
+    db.init_schema()
+    embedder = Embedder()
+
+    return db, embedder, vault_root
+
+
 @dataclass
 class AppContext:
     db: Database
@@ -35,19 +58,9 @@ class AppContext:
 @asynccontextmanager
 async def app_lifespan(server: FastMCP) -> AsyncIterator[AppContext]:
     """Initialize DB, embedder, watcher on startup; clean up on shutdown."""
-    vault_root = Path(os.environ.get("SEEKLINK_VAULT", ".")).resolve()
-    db_dir = vault_root / ".seeklink"
-    db_dir.mkdir(parents=True, exist_ok=True)
-    db_path = db_dir / "seeklink.db"
+    db, embedder, vault_root = init_app()
 
-    logger.info("SeekLink starting — vault: %s, db: %s", vault_root, db_path)
-
-    db = Database(db_path)
     try:
-        db.check_capabilities()
-        db.init_schema()
-        embedder = Embedder()
-
         stop_event = asyncio.Event()
         watcher_task = asyncio.create_task(
             run_watcher_with_retry(vault_root, db, embedder, stop_event)
@@ -81,102 +94,38 @@ def _get_ctx(ctx: Context) -> AppContext:
     return ctx.request_context.lifespan_context
 
 
-# ── Tool 1: get_unprocessed ──────────────────────────────────────────
-
-
-@mcp.tool()
-async def get_unprocessed(ctx: Context) -> list[dict]:
-    """List notes that are new or modified since last indexing."""
-    try:
-        app = _get_ctx(ctx)
-        sources = await asyncio.to_thread(app.db.list_sources, "unprocessed")
-        return [
-            {
-                "path": s.path,
-                "title": s.title,
-                "status": s.status,
-                "fs_modified_at": s.fs_modified_at,
-                "indexed_at": s.indexed_at,
-            }
-            for s in sources
-        ]
-    except Exception as e:
-        return [{"error": str(e)}]
-
-
-# ── Tool 2: index_note ───────────────────────────────────────────────
-
-
-@mcp.tool()
-async def index_note(path: str, force: bool = False, ctx: Context = None) -> dict:
-    """Index a note: chunk, embed, update FTS/vector indexes, parse [[wiki-links]].
-
-    Args:
-        path: Relative path to the .md file from vault root.
-        force: Re-index even if content hash is unchanged.
-    """
-    try:
-        app = _get_ctx(ctx)
-        # Normalize path: resolve ./note.md, sub/../note.md etc.
-        norm_path = os.path.normpath(path)
-        abs_path = (app.vault_root / norm_path).resolve()
-
-        # Security: block path traversal (../../etc/passwd, /etc/passwd, etc.)
-        if not abs_path.is_relative_to(app.vault_root):
-            return {"error": f"Path escapes vault: {path}"}
-
-        norm_path = str(abs_path.relative_to(app.vault_root))
-
-        if not abs_path.exists():
-            return {"error": f"File not found: {norm_path}"}
-
-        if force:
-            source = await asyncio.to_thread(
-                app.db.get_source_by_path, norm_path
-            )
-            if source is not None:
-                await asyncio.to_thread(
-                    app.db.update_source, source.id, content_hash=None
-                )
-
-        result = await asyncio.to_thread(
-            ingest_file, app.db, abs_path, app.vault_root, app.embedder
-        )
-
-        if result is None:
-            return {"error": f"Failed to index: {norm_path}"}
-
-        chunks = await asyncio.to_thread(app.db.get_chunks_by_source, result.id)
-        links = await asyncio.to_thread(app.db.get_links_from, result.id)
-
-        return {
-            "source_id": result.id,
-            "chunks_created": len(chunks),
-            "links_parsed": len(links),
-            "status": result.status,
-        }
-    except Exception as e:
-        return {"error": str(e)}
-
-
-# ── Tool 3: search ───────────────────────────────────────────────────
+# ── Tool 1: search ──────────────────────────────────────────────
 
 
 @mcp.tool()
 async def search(
-    query: str, top_k: int = 10, expand: bool = False, ctx: Context = None
+    query: str,
+    top_k: int = 10,
+    tags: list[str] | None = None,
+    folder: str | None = None,
+    expand: bool = False,
+    ctx: Context = None,
 ) -> list[dict]:
-    """Search the knowledge base.
+    """Search the knowledge base using hybrid semantic + keyword search.
 
     Args:
         query: Search query (Chinese, English, or mixed).
         top_k: Number of results to return.
+        tags: Filter results to notes with ALL specified tags.
+        folder: Filter results to notes in this folder (e.g. "notes/").
         expand: If true, also follow links from top results for deeper search.
     """
     try:
         app = _get_ctx(ctx)
         results = await asyncio.to_thread(
-            seeklink_search, app.db, app.embedder, query, top_k=top_k, expand=expand
+            seeklink_search,
+            app.db,
+            app.embedder,
+            query,
+            top_k=top_k,
+            expand=expand,
+            tags=tags,
+            folder=folder,
         )
         return [
             {
@@ -193,14 +142,49 @@ async def search(
         return [{"error": str(e)}]
 
 
-# ── Tool 4: suggest_links ────────────────────────────────────────────
+# ── Tool 2: graph ───────────────────────────────────────────────
+
+
+@mcp.tool()
+async def graph(path: str, depth: int = 1, ctx: Context = None) -> dict:
+    """Show the link neighborhood of a note.
+
+    Args:
+        path: Relative path to the note.
+        depth: 1 = direct links, 2 = links of links (max 3).
+    """
+    try:
+        app = _get_ctx(ctx)
+        source = await asyncio.to_thread(app.db.get_source_by_path, path)
+        if source is None:
+            return {"error": f"Note not found: {path}"}
+
+        depth = max(1, min(depth, 3))
+        outgoing, incoming = await asyncio.to_thread(
+            _bfs_neighbors, app.db, source.id, depth
+        )
+
+        return {
+            "center": {
+                "path": source.path,
+                "title": source.title,
+                "indegree": source.indegree,
+            },
+            "outgoing": outgoing,
+            "incoming": incoming,
+        }
+    except Exception as e:
+        return {"error": str(e)}
+
+
+# ── Tool 3: suggest_links ───────────────────────────────────────
 
 
 @mcp.tool()
 async def suggest_links(path: str, max_suggestions: int = 5, ctx: Context = None) -> list[dict]:
     """Find notes that might be worth linking to from this note.
     Returns suggestions with relevance scores.
-    Does NOT write any links — user must approve via approve_suggestion.
+    Does NOT write any links — user must approve via resolve_suggestion.
 
     Args:
         path: Relative path to the source note.
@@ -264,24 +248,36 @@ async def suggest_links(path: str, max_suggestions: int = 5, ctx: Context = None
         return [{"error": str(e)}]
 
 
-# ── Tool 5: approve_suggestion ───────────────────────────────────────
+# ── Tool 4: resolve_suggestion ──────────────────────────────────
 
 
 @mcp.tool()
-async def approve_suggestion(suggestion_id: int, ctx: Context = None) -> dict:
-    """Approve a link suggestion. Appends [[target]] to the source note.
+async def resolve_suggestion(
+    suggestion_id: int, action: str = "approve", ctx: Context = None
+) -> dict:
+    """Approve or reject a link suggestion.
 
     Args:
         suggestion_id: ID from suggest_links results.
+        action: "approve" to write the link, "reject" to dismiss.
     """
     try:
         app = _get_ctx(ctx)
+
+        if action not in ("approve", "reject"):
+            return {"error": f"Invalid action: {action}. Must be 'approve' or 'reject'."}
+
         sug = await asyncio.to_thread(app.db.get_suggestion, suggestion_id)
         if sug is None:
             return {"error": f"Suggestion not found: {suggestion_id}"}
         if sug.status != "pending":
             return {"error": f"Suggestion already {sug.status}"}
 
+        if action == "reject":
+            await asyncio.to_thread(app.db.reject_suggestion, suggestion_id)
+            return {"status": "rejected"}
+
+        # Approve: write link to file
         source = await asyncio.to_thread(app.db.get_source, sug.source_note_id)
         target = await asyncio.to_thread(app.db.get_source, sug.target_note_id)
         if source is None or target is None:
@@ -314,66 +310,79 @@ async def approve_suggestion(suggestion_id: int, ctx: Context = None) -> dict:
         return {"error": str(e)}
 
 
-# ── Tool 6: reject_suggestion ────────────────────────────────────────
+# ── Tool 5: index ───────────────────────────────────────────────
 
 
 @mcp.tool()
-async def reject_suggestion(suggestion_id: int, ctx: Context = None) -> dict:
-    """Reject a link suggestion.
+async def index(
+    path: str | None = None, force: bool = False, ctx: Context = None
+) -> dict | list[dict]:
+    """Index a note, or list unprocessed notes if no path given.
 
     Args:
-        suggestion_id: ID from suggest_links results.
+        path: Relative path to the .md file. If omitted, returns unprocessed list.
+        force: Re-index even if content hash is unchanged.
     """
     try:
         app = _get_ctx(ctx)
-        sug = await asyncio.to_thread(app.db.get_suggestion, suggestion_id)
-        if sug is None:
-            return {"error": f"Suggestion not found: {suggestion_id}"}
-        if sug.status != "pending":
-            return {"error": f"Suggestion already {sug.status}"}
 
-        await asyncio.to_thread(app.db.reject_suggestion, suggestion_id)
-        return {"status": "rejected"}
-    except Exception as e:
-        return {"error": str(e)}
+        # No path → return unprocessed list
+        if path is None:
+            sources = await asyncio.to_thread(app.db.list_sources, "unprocessed")
+            return [
+                {
+                    "path": s.path,
+                    "title": s.title,
+                    "status": s.status,
+                    "fs_modified_at": s.fs_modified_at,
+                    "indexed_at": s.indexed_at,
+                }
+                for s in sources
+            ]
 
+        # Normalize path: resolve ./note.md, sub/../note.md etc.
+        norm_path = os.path.normpath(path)
+        abs_path = (app.vault_root / norm_path).resolve()
 
-# ── Tool 7: graph_neighbors ──────────────────────────────────────────
+        # Security: block path traversal (../../etc/passwd, /etc/passwd, etc.)
+        if not abs_path.is_relative_to(app.vault_root):
+            return {"error": f"Path escapes vault: {path}"}
 
+        norm_path = str(abs_path.relative_to(app.vault_root))
 
-@mcp.tool()
-async def graph_neighbors(path: str, depth: int = 1, ctx: Context = None) -> dict:
-    """Show the link neighborhood of a note.
+        if not abs_path.exists():
+            return {"error": f"File not found: {norm_path}"}
 
-    Args:
-        path: Relative path to the note.
-        depth: 1 = direct links, 2 = links of links (max 3).
-    """
-    try:
-        app = _get_ctx(ctx)
-        source = await asyncio.to_thread(app.db.get_source_by_path, path)
-        if source is None:
-            return {"error": f"Note not found: {path}"}
+        if force:
+            source = await asyncio.to_thread(
+                app.db.get_source_by_path, norm_path
+            )
+            if source is not None:
+                await asyncio.to_thread(
+                    app.db.update_source, source.id, content_hash=None
+                )
 
-        depth = max(1, min(depth, 3))
-        outgoing, incoming = await asyncio.to_thread(
-            _bfs_neighbors, app.db, source.id, depth
+        result = await asyncio.to_thread(
+            ingest_file, app.db, abs_path, app.vault_root, app.embedder
         )
 
+        if result is None:
+            return {"error": f"Failed to index: {norm_path}"}
+
+        chunks = await asyncio.to_thread(app.db.get_chunks_by_source, result.id)
+        links = await asyncio.to_thread(app.db.get_links_from, result.id)
+
         return {
-            "center": {
-                "path": source.path,
-                "title": source.title,
-                "indegree": source.indegree,
-            },
-            "outgoing": outgoing,
-            "incoming": incoming,
+            "source_id": result.id,
+            "chunks_created": len(chunks),
+            "links_parsed": len(links),
+            "status": result.status,
         }
     except Exception as e:
         return {"error": str(e)}
 
 
-# ── Tool 8: status ───────────────────────────────────────────────────
+# ── Tool 6: status ──────────────────────────────────────────────
 
 
 @mcp.tool()
@@ -539,15 +548,21 @@ def main_sse() -> None:
         stream=sys.stderr,
     )
 
-    host = os.environ.get("SEEKLINK_SSE_HOST", "0.0.0.0")
+    host = os.environ.get("SEEKLINK_SSE_HOST", "127.0.0.1")
     port = int(os.environ.get("SEEKLINK_SSE_PORT", "8767"))
 
-    # Override FastMCP settings for SSE mode:
-    # - Bind to all interfaces so Docker containers can connect
-    # - Disable DNS rebinding protection (allows Host: host.docker.internal)
+    if host != "127.0.0.1" and host != "localhost":
+        logger.warning(
+            "SSE binding to %s — vault content will be accessible to other "
+            "devices on the network. Set SEEKLINK_SSE_HOST=127.0.0.1 for local-only.",
+            host,
+        )
+
     mcp.settings.host = host
     mcp.settings.port = port
-    mcp.settings.transport_security = None
+    # Disable DNS rebinding protection only when binding non-loopback (e.g. Docker)
+    if host not in ("127.0.0.1", "localhost"):
+        mcp.settings.transport_security = None
 
     logger.info("SeekLink SSE server starting on %s:%d", host, port)
     mcp.run(transport="sse")

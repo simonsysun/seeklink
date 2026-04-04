@@ -35,35 +35,48 @@ def search(
     bm25_weight: float = 1.0,
     vec_weight: float = 1.0,
     indegree_weight: float = 0.3,
+    title_weight: float = 3.0,
     path_prefix: str | None = None,
+    tags: list[str] | None = None,
+    folder: str | None = None,
 ) -> list[SearchResult]:
-    """Search the knowledge base using three-channel RRF fusion.
+    """Search the knowledge base using four-channel RRF fusion.
 
-    Channels: BM25 (keyword), vector (semantic), indegree (quality prior).
+    Channels: BM25 (keyword chunks), vector (semantic), indegree (quality
+    prior), title/alias (source-level FTS5).
     Optional graph expansion follows wiki-links from top results.
 
-    If path_prefix is given, only return results whose source path starts
-    with the prefix (e.g. "agent_memory/decisions/" for namespace filtering).
+    Filtering (applied as post-filter on candidate pool):
+    - tags: only include sources with ALL specified tags
+    - folder: only include sources whose path starts with this prefix
+    - path_prefix: alias for folder (legacy)
     """
     if not query.strip() or top_k <= 0:
         return []
 
-    # Channel 1: BM25
+    # Merge folder into path_prefix
+    effective_prefix = folder or path_prefix
+    # Ensure folder prefix ends with / for directory boundary
+    if effective_prefix and not effective_prefix.endswith("/"):
+        effective_prefix += "/"
+
+    # When filtering, increase vec limit to reduce post-filter recall loss
+    has_filter = bool(tags or effective_prefix)
+
+    # Channel 1: BM25 (chunk-level)
     bm25_results = _safe_fts(db, query, limit=50)
     bm25_best = _best_chunk_per_source(bm25_results)
-    # Rank by BM25 score (FTS5 rank is negative; more negative = better)
     bm25_ranked = sorted(bm25_best.keys(), key=lambda sid: bm25_best[sid][1])
     bm25_ranks = {sid: i + 1 for i, sid in enumerate(bm25_ranked)}
 
-    # Channel 2: Vector (use larger k when expansion is requested)
-    vec_limit = 200 if expand else 50
+    # Channel 2: Vector (use larger k when expansion or filtering requested)
+    vec_limit = 200 if (expand or has_filter) else 50
     query_emb = _safe_embed(embedder, query)
     if query_emb is not None:
         vec_results = db.search_vec(query_emb, k=vec_limit)
     else:
         vec_results = []
 
-    # Batch-fetch chunks to get source_id, filtering invalid distances
     chunk_ids = [cid for cid, dist in vec_results if isinstance(dist, (int, float)) and math.isfinite(dist)]
     valid_distances = {cid: dist for cid, dist in vec_results if isinstance(dist, (int, float)) and math.isfinite(dist)}
     chunks_by_id = db.get_chunks_by_ids(chunk_ids)
@@ -74,28 +87,55 @@ def search(
         if cid in chunks_by_id
     ]
     vec_best = _best_chunk_per_source(vec_chunks_with_dist)
-    # Rank by distance (ascending = better)
     vec_ranked = sorted(vec_best.keys(), key=lambda sid: vec_best[sid][1])
     vec_ranks = {sid: i + 1 for i, sid in enumerate(vec_ranked)}
 
-    # Candidate pool: union of BM25 and vector source IDs
-    candidate_ids = set(bm25_ranks.keys()) | set(vec_ranks.keys())
+    # Channel 4: Title/alias (source-level FTS5)
+    title_results = db.search_fts_sources(query, limit=50)
+    title_ranked = sorted(
+        [sid for sid, _ in title_results],
+        key=lambda sid: dict(title_results).get(sid, 0),
+    )
+    title_ranks = {sid: i + 1 for i, sid in enumerate(title_ranked)}
+
+    # Candidate pool: union of all channel source IDs
+    candidate_ids = set(bm25_ranks.keys()) | set(vec_ranks.keys()) | set(title_ranks.keys())
     if not candidate_ids:
         return []
 
-    # Batch-fetch sources for indegree (and path_prefix filtering)
+    # Batch-fetch sources
     sources = db.get_sources_by_ids(list(candidate_ids))
 
-    # Namespace filtering: restrict to sources matching path_prefix
-    if path_prefix:
-        filtered = {sid for sid in candidate_ids if sid in sources and sources[sid].path.startswith(path_prefix)}
-        if not filtered:
+    # Post-filter: folder/path_prefix
+    if effective_prefix:
+        candidate_ids = {
+            sid for sid in candidate_ids
+            if sid in sources and sources[sid].path.startswith(effective_prefix)
+        }
+        if not candidate_ids:
             return []
-        candidate_ids = filtered
-        bm25_ranks = {k: v for k, v in bm25_ranks.items() if k in filtered}
-        vec_ranks = {k: v for k, v in vec_ranks.items() if k in filtered}
 
-    # Channel 3: Indegree (rank candidates by indegree descending)
+    # Post-filter: tags (source must have ALL specified tags)
+    if tags:
+        tagged_ids: set[int] | None = None
+        for tag in tags:
+            tag_sources = {s.id for s in db.get_sources_by_tag(tag)}
+            if tagged_ids is None:
+                tagged_ids = tag_sources
+            else:
+                tagged_ids &= tag_sources
+        if tagged_ids is None:
+            tagged_ids = set()
+        candidate_ids &= tagged_ids
+        if not candidate_ids:
+            return []
+
+    # Apply filter to per-channel ranks
+    bm25_ranks = {k: v for k, v in bm25_ranks.items() if k in candidate_ids}
+    vec_ranks = {k: v for k, v in vec_ranks.items() if k in candidate_ids}
+    title_ranks = {k: v for k, v in title_ranks.items() if k in candidate_ids}
+
+    # Channel 3: Indegree (rank filtered candidates by indegree descending)
     indeg_ranked = sorted(
         candidate_ids,
         key=lambda sid: sources[sid].indegree if sid in sources else 0,
@@ -103,10 +143,10 @@ def search(
     )
     indeg_ranks = {sid: i + 1 for i, sid in enumerate(indeg_ranked)}
 
-    # RRF fusion
+    # RRF fusion (4 channels)
     scores = _rrf_fuse(
-        bm25_ranks, vec_ranks, indeg_ranks,
-        weights=(bm25_weight, vec_weight, indegree_weight),
+        [bm25_ranks, vec_ranks, indeg_ranks, title_ranks],
+        weights=[bm25_weight, vec_weight, indegree_weight, title_weight],
     )
 
     # Sort by score descending, take top_k
@@ -135,6 +175,23 @@ def search(
         for sid in ranked
         if sid in best_chunks and sid in sources
     ]
+
+    # For title-only matches (no chunk), create a result with title as content
+    for sid in ranked:
+        if sid not in best_chunks and sid in sources:
+            src = sources[sid]
+            results.append(SearchResult(
+                source_id=sid,
+                chunk_id=0,
+                path=src.path,
+                title=src.title,
+                content=src.title or src.path,
+                score=scores[sid],
+                indegree=src.indegree,
+            ))
+
+    results.sort(key=lambda r: r.score, reverse=True)
+    results = results[:top_k]
 
     # Graph expansion (reuses vec_results from the larger k=200 search)
     if expand and results and query_emb is not None:
@@ -186,24 +243,24 @@ def _best_chunk_per_source(
 
 
 def _rrf_fuse(
-    bm25_ranks: dict[int, int],
-    vec_ranks: dict[int, int],
-    indeg_ranks: dict[int, int],
-    weights: tuple[float, float, float],
+    channel_ranks: list[dict[int, int]],
+    weights: list[float],
     k: int = 60,
 ) -> dict[int, float]:
-    """Compute RRF scores for candidates across three channels."""
-    bm25_w, vec_w, indeg_w = weights
-    all_ids = set(bm25_ranks.keys()) | set(vec_ranks.keys())
+    """Compute RRF scores for candidates across N channels.
+
+    Each channel contributes weight / (k + rank) for candidates it contains.
+    """
+    all_ids: set[int] = set()
+    for ranks in channel_ranks:
+        all_ids |= ranks.keys()
+
     scores: dict[int, float] = {}
     for sid in all_ids:
         score = 0.0
-        if sid in bm25_ranks:
-            score += bm25_w / (k + bm25_ranks[sid])
-        if sid in vec_ranks:
-            score += vec_w / (k + vec_ranks[sid])
-        if sid in indeg_ranks:
-            score += indeg_w / (k + indeg_ranks[sid])
+        for ranks, weight in zip(channel_ranks, weights):
+            if sid in ranks:
+                score += weight / (k + ranks[sid])
         scores[sid] = score
     return scores
 

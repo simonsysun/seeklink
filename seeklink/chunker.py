@@ -33,7 +33,9 @@ def estimate_tokens(text: str) -> int:
     return max(1, int(non_cjk / 4 + cjk / 1.5))
 
 
-def chunk_markdown(text: str, target_tokens: int = 400) -> list[ChunkSpan]:
+def chunk_markdown(
+    text: str, target_tokens: int = 400, overlap_chars: int = 0
+) -> list[ChunkSpan]:
     """Split markdown into chunks respecting semantic boundaries.
 
     Splitting hierarchy:
@@ -43,10 +45,15 @@ def chunk_markdown(text: str, target_tokens: int = 400) -> list[ChunkSpan]:
     4. Sentence boundaries
     5. Single sentences kept whole even if over target
 
+    If overlap_chars > 0, each chunk (after the first) expands its start
+    backward to include overlap from the previous chunk's text.
+
     Invariant: chunk.text == text[chunk.char_start:chunk.char_end]
     """
     if not text or not text.strip():
         return []
+
+    overlap_chars = max(0, overlap_chars)
 
     # Step 1: Extract fenced code blocks as atomic segments
     segments: list[tuple[int, int, bool]] = []  # (start, end, is_code)
@@ -83,7 +90,24 @@ def chunk_markdown(text: str, target_tokens: int = 400) -> list[ChunkSpan]:
             # Step 4: Accumulate paragraphs until near target
             _accumulate(para_spans, target_tokens, chunks, text)
 
-    return [c for c in chunks if c.text.strip()]
+    chunks = [c for c in chunks if c.text.strip()]
+
+    # Step 5: Apply overlap — expand each chunk's start backward
+    if overlap_chars > 0 and len(chunks) > 1:
+        overlapped: list[ChunkSpan] = [chunks[0]]
+        for i in range(1, len(chunks)):
+            prev_start = chunks[i - 1].char_start
+            new_start = max(prev_start, chunks[i].char_start - overlap_chars)
+            new_text = text[new_start:chunks[i].char_end]
+            overlapped.append(ChunkSpan(
+                text=new_text,
+                char_start=new_start,
+                char_end=chunks[i].char_end,
+                token_count=estimate_tokens(new_text),
+            ))
+        chunks = overlapped
+
+    return chunks
 
 
 def _split_at_headers(

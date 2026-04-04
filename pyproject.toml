@@ -1,9 +1,23 @@
 [project]
 name = "seeklink"
 version = "0.1.0"
-description = "Hybrid semantic search MCP server for Obsidian vaults. BM25 + vector + knowledge graph, native CJK support, fully local."
+description = "Hybrid semantic search MCP server for markdown vaults. Four-channel RRF fusion (BM25 + vector + knowledge graph + title), native CJK support, fully local."
 readme = "README.md"
-requires-python = ">=3.14"
+license = "MIT"
+requires-python = ">=3.11"
+authors = [
+    { name = "Siyuan Sun" },
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Text Processing :: Indexing",
+]
 dependencies = [
     "fastembed>=0.7.4",
     "jieba>=0.42.1",
@@ -12,6 +26,13 @@ dependencies = [
     "sqlitefts>=1.0.1",
     "watchfiles>=1.1.1",
 ]
+
+[project.urls]
+Homepage = "https://github.com/simonsysun/seeklink"
+Repository = "https://github.com/simonsysun/seeklink"
+
+[project.scripts]
+seeklink = "seeklink.__main__:main"
 
 [dependency-groups]
 dev = [

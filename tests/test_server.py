@@ -458,3 +458,69 @@ class TestApproveAtomicity:
         assert check.status == "pending"
 
 
+# ── CLI tests ────────────────────────────────────────────────────
+
+
+class TestCLI:
+    """Tests for CLI subcommands."""
+
+    def test_status_command(self, db: Database, embedder: Embedder, vault: Path):
+        """seeklink status --vault works."""
+        import subprocess
+        import sys
+        result = subprocess.run(
+            [sys.executable, "-m", "seeklink", "status", "--vault", str(vault)],
+            capture_output=True, text=True, timeout=30,
+        )
+        assert result.returncode == 0
+        assert "Vault:" in result.stdout
+        assert "Notes:" in result.stdout
+
+    def test_index_vault_command(self, db: Database, embedder: Embedder, vault: Path):
+        """seeklink index --vault works for full vault."""
+        import subprocess
+        import sys
+        result = subprocess.run(
+            [sys.executable, "-m", "seeklink", "index", "--vault", str(vault)],
+            capture_output=True, text=True, timeout=60,
+        )
+        assert result.returncode == 0
+        assert "Done:" in result.stdout
+
+    def test_search_command(self, db: Database, embedder: Embedder, vault: Path):
+        """seeklink search works after indexing."""
+        import subprocess
+        import sys
+        # Index first
+        subprocess.run(
+            [sys.executable, "-m", "seeklink", "index", "--vault", str(vault)],
+            capture_output=True, text=True, timeout=60,
+        )
+        # Then search
+        result = subprocess.run(
+            [sys.executable, "-m", "seeklink", "search", "machine learning",
+             "--vault", str(vault), "--top-k", "3"],
+            capture_output=True, text=True, timeout=30,
+        )
+        assert result.returncode == 0
+
+    def test_missing_vault_error(self):
+        """seeklink status with non-existent vault gives clear error."""
+        import subprocess
+        import sys
+        result = subprocess.run(
+            [sys.executable, "-m", "seeklink", "status", "--vault", "/nonexistent/path"],
+            capture_output=True, text=True, timeout=30,
+        )
+        assert result.returncode != 0
+
+    def test_init_app_function(self, vault: Path):
+        """init_app returns db, embedder, vault_root."""
+        from seeklink.server import init_app
+        db, embedder, vault_root = init_app(vault)
+        assert vault_root == vault.resolve()
+        assert db is not None
+        assert embedder is not None
+        db.close()
+
+
