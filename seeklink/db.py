@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 import sqlite3
 import sys
 import threading
@@ -11,7 +10,7 @@ from pathlib import Path
 
 import sqlite_vec
 
-from seeklink.models import BudgetEntry, Chunk, Source, Suggestion, WikiLink
+from seeklink.models import Chunk, Source, Suggestion, WikiLink
 from seeklink.tokenizer import register_jieba_tokenizer
 
 
@@ -23,7 +22,7 @@ class Database:
     """Single connection wrapper over SeekLink's SQLite database.
 
     Manages schema lifecycle, capability checking, and CRUD for all 5 entity
-    types: sources, chunks, wiki_links, suggestions, budget_log.
+    types: sources, chunks, wiki_links, suggestions.
     """
 
     SCHEMA_VERSION = 1
@@ -186,16 +185,6 @@ class Database:
             )
         """)
 
-        self._conn.execute("""
-            CREATE TABLE IF NOT EXISTS budget_log (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                week_start TEXT NOT NULL UNIQUE,
-                tokens_used INTEGER DEFAULT 0,
-                breakdown TEXT DEFAULT '{}',
-                updated_at TEXT DEFAULT (datetime('now'))
-            )
-        """)
-
         # -- Virtual tables --
 
         self._conn.execute("""
@@ -320,10 +309,6 @@ class Database:
         self._conn.execute(
             "CREATE INDEX IF NOT EXISTS idx_suggestions_status ON suggestions(status)"
         )
-        self._conn.execute(
-            "CREATE INDEX IF NOT EXISTS idx_budget_week ON budget_log(week_start)"
-        )
-
         # -- Set schema version --
 
         self._conn.execute(f"PRAGMA user_version = {self.SCHEMA_VERSION}")
@@ -749,45 +734,6 @@ class Database:
             resolved_at=row["resolved_at"],
         )
 
-    # ── Budget CRUD ──────────────────────────────────────────────
-
-    def get_or_create_budget(self, week_start: str) -> BudgetEntry:
-        row = self._conn.execute(
-            "SELECT * FROM budget_log WHERE week_start = ?", (week_start,)
-        ).fetchone()
-        if row:
-            return self._row_to_budget(row)
-
-        self._conn.execute(
-            "INSERT INTO budget_log (week_start) VALUES (?)", (week_start,)
-        )
-        self._commit()
-        row = self._conn.execute(
-            "SELECT * FROM budget_log WHERE week_start = ?", (week_start,)
-        ).fetchone()
-        return self._row_to_budget(row)
-
-    def add_tokens(
-        self, week_start: str, tokens: int, category: str = "search"
-    ) -> BudgetEntry:
-        entry = self.get_or_create_budget(week_start)
-        breakdown = json.loads(entry.breakdown)
-        breakdown[category] = breakdown.get(category, 0) + tokens
-        new_total = entry.tokens_used + tokens
-
-        self._conn.execute(
-            """UPDATE budget_log
-            SET tokens_used = ?, breakdown = ?, updated_at = datetime('now')
-            WHERE week_start = ?""",
-            (new_total, json.dumps(breakdown), week_start),
-        )
-        self._commit()
-
-        row = self._conn.execute(
-            "SELECT * FROM budget_log WHERE week_start = ?", (week_start,)
-        ).fetchone()
-        return self._row_to_budget(row)
-
     def get_stats(self) -> dict:
         """Get aggregate statistics for the knowledge base."""
         return {
@@ -808,12 +754,3 @@ class Database:
             ).fetchone()[0],
         }
 
-    @staticmethod
-    def _row_to_budget(row: sqlite3.Row) -> BudgetEntry:
-        return BudgetEntry(
-            id=row["id"],
-            week_start=row["week_start"],
-            tokens_used=row["tokens_used"],
-            breakdown=row["breakdown"],
-            updated_at=row["updated_at"],
-        )

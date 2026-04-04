@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import asyncio
-import json
 import logging
 import os
 import re
@@ -11,7 +10,6 @@ import sys
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from mcp.server.fastmcp import Context, FastMCP
@@ -380,15 +378,10 @@ async def graph_neighbors(path: str, depth: int = 1, ctx: Context = None) -> dic
 
 @mcp.tool()
 async def status(ctx: Context = None) -> dict:
-    """Get system status: index stats, graph size, budget usage."""
+    """Get system status: index stats, graph size, watcher status."""
     try:
         app = _get_ctx(ctx)
         stats = await asyncio.to_thread(app.db.get_stats)
-
-        # Budget for current week
-        week_start = _current_week_start()
-        budget = await asyncio.to_thread(app.db.get_or_create_budget, week_start)
-        breakdown = json.loads(budget.breakdown)
 
         watcher_running = (
             app.watcher_task is not None and not app.watcher_task.done()
@@ -396,11 +389,6 @@ async def status(ctx: Context = None) -> dict:
 
         return {
             **stats,
-            "budget": {
-                "week_start": budget.week_start,
-                "tokens_used": budget.tokens_used,
-                "breakdown": breakdown,
-            },
             "watcher_running": watcher_running,
         }
     except Exception as e:
@@ -527,13 +515,6 @@ def _bfs_neighbors(
     incoming = [_to_dict(sid, d) for sid, d in incoming_results]
 
     return outgoing, incoming
-
-
-def _current_week_start() -> str:
-    """Return ISO date of Monday of the current UTC week."""
-    now = datetime.now(UTC)
-    monday = now.date() - timedelta(days=now.weekday())
-    return monday.isoformat()
 
 
 # ── Entry point ───────────────────────────────────────────────────────

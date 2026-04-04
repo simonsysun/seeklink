@@ -123,7 +123,6 @@ class TestStatus:
         assert "chunks_total" in data
         assert "links_total" in data
         assert "suggestions_pending" in data
-        assert "budget" in data
         assert "watcher_running" in data
 
     async def test_watcher_is_running(self, client: ClientSession):

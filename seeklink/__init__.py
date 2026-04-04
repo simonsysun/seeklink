@@ -5,7 +5,7 @@ from seeklink.db import CapabilityError, Database
 from seeklink.embedder import Embedder
 from seeklink.ingest import ingest_file, ingest_vault
 from seeklink.link_parser import extract_wiki_links
-from seeklink.models import BudgetEntry, Chunk, Source, Suggestion, WikiLink
+from seeklink.models import Chunk, Source, Suggestion, WikiLink
 from seeklink.search import SearchResult, search
 
 __all__ = [
@@ -15,7 +15,6 @@ __all__ = [
     "Chunk",
     "WikiLink",
     "Suggestion",
-    "BudgetEntry",
     "Embedder",
     "ChunkSpan",
     "chunk_markdown",

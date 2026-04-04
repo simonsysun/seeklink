@@ -53,10 +53,3 @@ class Suggestion:
     resolved_at: str | None
 
 
-@dataclass(frozen=True, slots=True)
-class BudgetEntry:
-    id: int
-    week_start: str
-    tokens_used: int
-    breakdown: str
-    updated_at: str

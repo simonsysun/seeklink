@@ -9,7 +9,7 @@ import numpy as np
 import pytest
 
 from seeklink.db import CapabilityError, Database
-from seeklink.models import BudgetEntry, Chunk, Source, Suggestion, WikiLink
+from seeklink.models import Chunk, Source, Suggestion, WikiLink
 
 
 # ── Helpers ──────────────────────────────────────────────────────
@@ -46,7 +46,7 @@ class TestSchemaCreation:
                 "AND name NOT LIKE 'sqlite_%'"
             ).fetchall()
         }
-        expected = {"sources", "chunks", "wiki_links", "suggestions", "budget_log"}
+        expected = {"sources", "chunks", "wiki_links", "suggestions"}
         assert expected.issubset(tables)
 
     def test_virtual_tables_exist(self, db: Database):
@@ -94,7 +94,6 @@ class TestSchemaCreation:
             "idx_wikilinks_target",
             "idx_wikilinks_target_path",
             "idx_suggestions_status",
-            "idx_budget_week",
         }
         assert expected == indexes
 

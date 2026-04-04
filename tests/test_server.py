@@ -11,7 +11,7 @@ import pytest
 from seeklink.db import Database
 from seeklink.embedder import Embedder
 from seeklink.ingest import ingest_file
-from seeklink.server import _bfs_neighbors, _current_week_start, _write_related_link
+from seeklink.server import _bfs_neighbors, _write_related_link
 from seeklink.watcher import MarkdownFilter
 
 
@@ -451,11 +451,3 @@ class TestApproveAtomicity:
         assert check.status == "pending"
 
 
-class TestStatusLogic:
-    def test_current_week_start(self):
-        """_current_week_start returns a Monday ISO date."""
-        import datetime
-
-        ws = _current_week_start()
-        d = datetime.date.fromisoformat(ws)
-        assert d.weekday() == 0  # Monday
