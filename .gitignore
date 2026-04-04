@@ -1,0 +1,22 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+.venv/
+.pytest_cache/
+
+# Runtime DB (generated per vault)
+.sophia/
+
+# IDE
+.vscode/
+.idea/
+
+# Environment
+.env
