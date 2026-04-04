@@ -1,8 +1,8 @@
-"""Tests for sophia.link_parser — pure function tests, no DB."""
+"""Tests for seeklink.link_parser — pure function tests, no DB."""
 
 from __future__ import annotations
 
-from synapsis.link_parser import extract_wiki_links
+from seeklink.link_parser import extract_wiki_links
 
 
 class TestExtractWikiLinks:

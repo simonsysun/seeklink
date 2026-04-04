@@ -1,4 +1,4 @@
-"""Tests for sophia.search — three-channel RRF fusion with graph expansion."""
+"""Tests for seeklink.search — three-channel RRF fusion with graph expansion."""
 
 from __future__ import annotations
 
@@ -7,11 +7,11 @@ from unittest.mock import patch
 
 import pytest
 
-from synapsis.db import Database
-from synapsis.embedder import Embedder
-from synapsis.ingest import ingest_file
-from synapsis.search import SearchResult, _best_chunk_per_source, _rrf_fuse, search
-from synapsis.models import Chunk
+from seeklink.db import Database
+from seeklink.embedder import Embedder
+from seeklink.ingest import ingest_file
+from seeklink.search import SearchResult, _best_chunk_per_source, _rrf_fuse, search
+from seeklink.models import Chunk
 
 
 @pytest.fixture(scope="session")

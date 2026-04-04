@@ -1,4 +1,4 @@
-"""Tests for sophia.ingest — integration tests with DB + embedder."""
+"""Tests for seeklink.ingest — integration tests with DB + embedder."""
 
 from __future__ import annotations
 
@@ -8,9 +8,9 @@ from unittest.mock import patch
 
 import pytest
 
-from synapsis.db import Database
-from synapsis.embedder import Embedder
-from synapsis.ingest import ingest_file, ingest_vault
+from seeklink.db import Database
+from seeklink.embedder import Embedder
+from seeklink.ingest import ingest_file, ingest_vault
 
 
 @pytest.fixture(scope="session")

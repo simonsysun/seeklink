@@ -1,8 +1,8 @@
-"""Tests for sophia.chunker — pure function tests, no DB or embedding."""
+"""Tests for seeklink.chunker — pure function tests, no DB or embedding."""
 
 from __future__ import annotations
 
-from synapsis.chunker import ChunkSpan, chunk_markdown, estimate_tokens
+from seeklink.chunker import ChunkSpan, chunk_markdown, estimate_tokens
 
 
 class TestEstimateTokens:

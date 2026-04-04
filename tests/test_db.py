@@ -1,4 +1,4 @@
-"""Tests for sophia.db — covers all 8 Phase 1 acceptance criteria."""
+"""Tests for seeklink.db — covers all 8 Phase 1 acceptance criteria."""
 
 from __future__ import annotations
 
@@ -8,8 +8,8 @@ import uuid
 import numpy as np
 import pytest
 
-from synapsis.db import CapabilityError, Database
-from synapsis.models import BudgetEntry, Chunk, Source, Suggestion, WikiLink
+from seeklink.db import CapabilityError, Database
+from seeklink.models import BudgetEntry, Chunk, Source, Suggestion, WikiLink
 
 
 # ── Helpers ──────────────────────────────────────────────────────

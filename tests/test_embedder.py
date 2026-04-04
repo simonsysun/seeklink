@@ -1,11 +1,11 @@
-"""Tests for sophia.embedder — requires model download, session-scoped fixture."""
+"""Tests for seeklink.embedder — requires model download, session-scoped fixture."""
 
 from __future__ import annotations
 
 import numpy as np
 import pytest
 
-from synapsis.embedder import Embedder
+from seeklink.embedder import Embedder
 
 FLOAT32_DIM = 768
 FLOAT32_BYTES = FLOAT32_DIM * 4  # 3072

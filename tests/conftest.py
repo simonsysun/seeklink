@@ -1,10 +1,10 @@
-"""Pytest fixtures for Synapsis database tests."""
+"""Pytest fixtures for SeekLink database tests."""
 
 from pathlib import Path
 
 import pytest
 
-from synapsis.db import Database
+from seeklink.db import Database
 
 
 @pytest.fixture

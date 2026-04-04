@@ -12,7 +12,7 @@ wheels/
 .pytest_cache/
 
 # Runtime DB (generated per vault)
-.synapsis/
+.seeklink/
 
 # IDE
 .vscode/

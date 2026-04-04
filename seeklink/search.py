@@ -7,9 +7,9 @@ import math
 import sqlite3
 from dataclasses import dataclass
 
-from synapsis.db import Database
-from synapsis.embedder import Embedder
-from synapsis.models import Chunk, Source
+from seeklink.db import Database
+from seeklink.embedder import Embedder
+from seeklink.models import Chunk, Source
 
 logger = logging.getLogger(__name__)
 
