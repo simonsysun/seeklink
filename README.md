@@ -132,8 +132,6 @@ Everything lives in `.seeklink/seeklink.db` inside your vault — a single SQLit
 
 Notes are chunked (~400 tokens), embedded with jina-embeddings-v2-base-zh, and indexed incrementally. Delete `.seeklink/` to rebuild from scratch.
 
-While built for personal knowledge bases, SeekLink's search and graph tools work with any corpus of markdown files — including agent-generated notes and shared knowledge bases.
-
 ## Configuration
 
 | Variable | Default | Description |

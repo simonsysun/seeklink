@@ -16,6 +16,9 @@ Add `SEEKLINK_MODEL` environment variable to choose between:
 
 **Context:** Deferred because adding model choice increases decision burden for new users. 330MB is acceptable in 2026. Add when community requests it.
 
+### Agent knowledge layer
+Extend SeekLink as a knowledge/memory layer for AI agents and multi-agent systems. Current API is note-centric (paths, frontmatter, wikilinks). Agent memory would need: programmatic note creation tool, entity/fact-level retrieval, session memory, and possibly a different metadata model. The search + graph infrastructure is already there.
+
 ## Infrastructure
 
 ### PyPI automated publishing
