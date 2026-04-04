@@ -39,14 +39,21 @@ async def watch_vault(
     """Watch vault for markdown changes and ingest them.
 
     Runs until stop_event is set. Catches per-file errors to keep the loop alive.
-    Skips deleted files (source stays for link integrity).
+    Handles deleted files by removing them from the index.
     """
     md_filter = MarkdownFilter()
 
     async for changes in awatch(vault_root, watch_filter=md_filter, stop_event=stop_event):
         for change_type, path_str in changes:
             if change_type == Change.deleted:
-                logger.info("File deleted (skipping): %s", path_str)
+                rel_path = str(Path(path_str).relative_to(vault_root))
+                try:
+                    source = await asyncio.to_thread(db.get_source_by_path, rel_path)
+                    if source is not None:
+                        await asyncio.to_thread(db.delete_source, source.id)
+                        logger.info("Deleted from index: %s", path_str)
+                except Exception:
+                    logger.exception("Error handling deletion of %s", path_str)
                 continue
 
             path = Path(path_str)

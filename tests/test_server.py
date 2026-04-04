@@ -308,8 +308,15 @@ class TestWatcher:
         assert f(Change.modified, "/vault/.hidden/note.md") is False
         assert f(Change.modified, "/vault/.obsidian/config.md") is False
 
+    def test_deleted_file_gc(self, db: Database):
+        """Deleting a file removes its source and chunks from the DB."""
+        source = db.add_source(uid="gc1", path="notes/to-delete.md", status="indexed")
+        db.add_chunk(source.id, "content", 0, char_start=0, char_end=7, token_count=1)
+        assert db.get_source_by_path("notes/to-delete.md") is not None
+        assert len(db.get_chunks_by_source(source.id)) == 1
 
-# ── TestStatusLogic ───────────────────────────────────────────────────
+        db.delete_source(source.id)
+        assert db.get_source_by_path("notes/to-delete.md") is None
 
 
 class TestHasPendingSuggestion:
