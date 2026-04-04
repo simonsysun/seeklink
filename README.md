@@ -1,5 +1,10 @@
 # SeekLink
 
+[![PyPI](https://img.shields.io/pypi/v/seeklink)](https://pypi.org/project/seeklink/)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://python.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Tests](https://github.com/simonsysun/seeklink/actions/workflows/test.yml/badge.svg)](https://github.com/simonsysun/seeklink/actions)
+
 **Let your AI agent manage your Zettelkasten.**
 
 SeekLink is an MCP server that gives AI assistants (Claude Code, Cursor, etc.) deep access to your markdown vault. It searches, discovers missing connections, and writes `[[wikilinks]]` for you — so your knowledge graph grows as you work.
@@ -23,20 +28,30 @@ Agent: writes [[wikilinks]] directly into your note file
 
 | Tool | What it does |
 |------|-------------|
-| `search` | Four-channel hybrid search: keyword (BM25) + semantic (vector) + knowledge graph (indegree) + title/alias. Fused with Reciprocal Rank Fusion. Filter by tags or folder. |
+| `search` | Four-channel hybrid search with tag/folder filtering and graph expansion |
 | `graph` | Explore a note's neighborhood — outgoing links, backlinks, configurable depth |
 | `suggest_links` | Find notes that should be linked but aren't. Returns scored suggestions |
-| `resolve_suggestion` | Approve (writes `[[link]]` to file) or reject a link suggestion |
+| `resolve_suggestion` | Approve (writes `[[link]]` to file) or reject a suggestion |
 | `index` | Index a note, or list unprocessed notes |
 | `status` | Vault stats: indexed notes, graph size, watcher status |
 
-## Why SeekLink
+## Why not Obsidian's built-in search?
 
-**Most MCP servers for Obsidian are file managers.** They read, write, and search text. SeekLink understands your knowledge *structure*: it parses `[[wikilinks]]`, builds a knowledge graph, tracks which notes are central (indegree), and finds connections you missed.
+Obsidian's search is keyword-only. It finds exact matches, not related ideas.
 
-**Chinese is a first-class citizen.** jieba tokenization for keyword search + jina-embeddings-v2-base-zh for semantic search. Not "also supports Chinese" — designed for it. Bilingual vaults (Chinese + English) work out of the box.
+SeekLink finds notes that are *semantically similar*, even if they use different words. It knows your knowledge graph: notes that many other notes link to rank higher. And it discovers missing connections — notes that *should* be linked but aren't.
 
-**Fully local, headless.** Runs on your machine. No Obsidian plugins required, no API keys for search. Works from the terminal with Claude Code, or as MCP server for any client.
+Unlike **Smart Connections** (Obsidian plugin), SeekLink:
+- Runs headless — works from Claude Code, Cursor, or any MCP client, without Obsidian open
+- Builds a real knowledge graph from your `[[wikilinks]]`, not just vector similarity
+- Handles Chinese/English bilingual vaults natively (jieba + jina-embeddings-v2-base-zh)
+- Uses four-channel fusion (BM25 + vector + graph + title) instead of vector-only search
+
+## Requirements
+
+- Python 3.11+
+- ~330 MB disk for the embedding model (downloaded on first run)
+- No API keys needed — everything runs locally
 
 ## Install
 
@@ -92,7 +107,7 @@ Query: "agent memory systems"
 
 - **Tags filter:** `search("query", tags=["ai", "mcp"])` — only return notes with these tags
 - **Folder filter:** `search("query", folder="notes/")` — only search within a folder
-- **Expand mode:** `search("query", expand=True)` — include graph neighbors of results
+- **Expand mode:** `search("query", expand=True)` — follow links from top results for deeper recall
 
 ## Frontmatter
 
@@ -106,6 +121,28 @@ aliases: [ML, Machine Learning]
 ```
 
 Both inline (`[a, b]`) and block list formats supported. Aliases are searchable and used for link resolution — if a note has `aliases: [ML]`, then `[[ML]]` resolves to it.
+
+## How it stores data
+
+Everything lives in `.seeklink/seeklink.db` inside your vault — a single SQLite database with:
+- FTS5 full-text index (jieba-tokenized for CJK)
+- sqlite-vec for 768-dim vector similarity search
+- A wikilink graph (parsed from `[[links]]` in your notes)
+- Link suggestion tracking with approve/reject state
+
+Notes are chunked (~400 tokens), embedded with jina-embeddings-v2-base-zh, and indexed incrementally. Delete `.seeklink/` to rebuild from scratch.
+
+While built for personal knowledge bases, SeekLink's search and graph tools work with any corpus of markdown files — including agent-generated notes and shared knowledge bases.
+
+## Configuration
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `SEEKLINK_VAULT` | `.` | Path to vault root |
+| `SEEKLINK_SSE_HOST` | `127.0.0.1` | SSE server bind address |
+| `SEEKLINK_SSE_PORT` | `8767` | SSE server port |
+
+For SSE transport (e.g. Docker or remote access): `seeklink serve --sse`
 
 ## Contributing
 
