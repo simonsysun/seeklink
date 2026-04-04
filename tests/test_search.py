@@ -7,11 +7,11 @@ from unittest.mock import patch
 
 import pytest
 
-from sophia.db import Database
-from sophia.embedder import Embedder
-from sophia.ingest import ingest_file
-from sophia.search import SearchResult, _best_chunk_per_source, _rrf_fuse, search
-from sophia.models import Chunk
+from synapsis.db import Database
+from synapsis.embedder import Embedder
+from synapsis.ingest import ingest_file
+from synapsis.search import SearchResult, _best_chunk_per_source, _rrf_fuse, search
+from synapsis.models import Chunk
 
 
 @pytest.fixture(scope="session")

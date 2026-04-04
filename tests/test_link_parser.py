@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from sophia.link_parser import extract_wiki_links
+from synapsis.link_parser import extract_wiki_links
 
 
 class TestExtractWikiLinks:

@@ -8,11 +8,11 @@ from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
 
-from sophia.chunker import chunk_markdown
-from sophia.db import Database
-from sophia.embedder import Embedder
-from sophia.link_parser import extract_wiki_links
-from sophia.models import Source
+from synapsis.chunker import chunk_markdown
+from synapsis.db import Database
+from synapsis.embedder import Embedder
+from synapsis.link_parser import extract_wiki_links
+from synapsis.models import Source
 
 logger = logging.getLogger(__name__)
 

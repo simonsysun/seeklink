@@ -90,11 +90,11 @@ async def client(vault: Path) -> ClientSession:
     The real lifespan runs: DB init, embedder load, watcher start.
     Session-scoped so the ~2s embedder load happens once.
     """
-    old_env = os.environ.get("SOPHIA_VAULT")
-    os.environ["SOPHIA_VAULT"] = str(vault)
+    old_env = os.environ.get("SYNAPSIS_VAULT")
+    os.environ["SYNAPSIS_VAULT"] = str(vault)
     try:
-        # Import here so SOPHIA_VAULT is set before lifespan reads it
-        from sophia.server import mcp
+        # Import here so SYNAPSIS_VAULT is set before lifespan reads it
+        from synapsis.server import mcp
 
         async with create_connected_server_and_client_session(
             mcp,
@@ -104,9 +104,9 @@ async def client(vault: Path) -> ClientSession:
             yield session
     finally:
         if old_env is None:
-            os.environ.pop("SOPHIA_VAULT", None)
+            os.environ.pop("SYNAPSIS_VAULT", None)
         else:
-            os.environ["SOPHIA_VAULT"] = old_env
+            os.environ["SYNAPSIS_VAULT"] = old_env
 
 
 # ---------------------------------------------------------------------------

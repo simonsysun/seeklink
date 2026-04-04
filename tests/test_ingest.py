@@ -8,9 +8,9 @@ from unittest.mock import patch
 
 import pytest
 
-from sophia.db import Database
-from sophia.embedder import Embedder
-from sophia.ingest import ingest_file, ingest_vault
+from synapsis.db import Database
+from synapsis.embedder import Embedder
+from synapsis.ingest import ingest_file, ingest_vault
 
 
 @pytest.fixture(scope="session")

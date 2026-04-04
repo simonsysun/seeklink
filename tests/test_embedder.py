@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from sophia.embedder import Embedder
+from synapsis.embedder import Embedder
 
 FLOAT32_DIM = 768
 FLOAT32_BYTES = FLOAT32_DIM * 4  # 3072

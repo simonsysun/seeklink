@@ -8,9 +8,9 @@ from pathlib import Path
 
 from watchfiles import Change, awatch
 
-from sophia.db import Database
-from sophia.embedder import Embedder
-from sophia.ingest import ingest_file
+from synapsis.db import Database
+from synapsis.embedder import Embedder
+from synapsis.ingest import ingest_file
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +19,7 @@ _SKIP_DIRS = {"todo", "archive"}  # non-hidden top-level dirs excluded from inde
 
 
 class MarkdownFilter:
-    """Callable filter for watchfiles: only .md files, skip hidden dirs and .sophia/."""
+    """Callable filter for watchfiles: only .md files, skip hidden dirs and .synapsis/."""
 
     def __call__(self, change: Change, path: str) -> bool:
         p = Path(path)

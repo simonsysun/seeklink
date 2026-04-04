@@ -1,7 +1,7 @@
 [project]
-name = "sophia"
+name = "synapsis"
 version = "0.1.0"
-description = "Add your description here"
+description = "Hybrid semantic search MCP server for Obsidian vaults. BM25 + vector + knowledge graph, native CJK support, fully local."
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [

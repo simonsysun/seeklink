@@ -7,9 +7,9 @@ import math
 import sqlite3
 from dataclasses import dataclass
 
-from sophia.db import Database
-from sophia.embedder import Embedder
-from sophia.models import Chunk, Source
+from synapsis.db import Database
+from synapsis.embedder import Embedder
+from synapsis.models import Chunk, Source
 
 logger = logging.getLogger(__name__)
 

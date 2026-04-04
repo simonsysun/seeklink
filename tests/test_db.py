@@ -8,8 +8,8 @@ import uuid
 import numpy as np
 import pytest
 
-from sophia.db import CapabilityError, Database
-from sophia.models import BudgetEntry, Chunk, Source, Suggestion, WikiLink
+from synapsis.db import CapabilityError, Database
+from synapsis.models import BudgetEntry, Chunk, Source, Suggestion, WikiLink
 
 
 # ── Helpers ──────────────────────────────────────────────────────

@@ -1,4 +1,4 @@
-"""SQLite database wrapper for Sophia — schema, capability check, CRUD."""
+"""SQLite database wrapper for Synapsis — schema, capability check, CRUD."""
 
 from __future__ import annotations
 
@@ -11,8 +11,8 @@ from pathlib import Path
 
 import sqlite_vec
 
-from sophia.models import BudgetEntry, Chunk, Source, Suggestion, WikiLink
-from sophia.tokenizer import register_jieba_tokenizer
+from synapsis.models import BudgetEntry, Chunk, Source, Suggestion, WikiLink
+from synapsis.tokenizer import register_jieba_tokenizer
 
 
 class CapabilityError(Exception):
@@ -20,7 +20,7 @@ class CapabilityError(Exception):
 
 
 class Database:
-    """Single connection wrapper over Sophia's SQLite database.
+    """Single connection wrapper over Synapsis's SQLite database.
 
     Manages schema lifecycle, capability checking, and CRUD for all 5 entity
     types: sources, chunks, wiki_links, suggestions, budget_log.
@@ -86,7 +86,7 @@ class Database:
     # ── Capability check ─────────────────────────────────────────
 
     def check_capabilities(self) -> None:
-        """Verify runtime meets Sophia's requirements. Raises CapabilityError."""
+        """Verify runtime meets Synapsis's requirements. Raises CapabilityError."""
         # Python version
         if sys.version_info < (3, 11):
             raise CapabilityError(

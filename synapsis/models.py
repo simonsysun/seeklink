@@ -1,4 +1,4 @@
-"""Frozen dataclasses for all Sophia entity types."""
+"""Frozen dataclasses for all Synapsis entity types."""
 
 from __future__ import annotations
 

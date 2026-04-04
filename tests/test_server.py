@@ -8,11 +8,11 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from sophia.db import Database
-from sophia.embedder import Embedder
-from sophia.ingest import ingest_file
-from sophia.server import _bfs_neighbors, _current_week_start, _write_related_link
-from sophia.watcher import MarkdownFilter
+from synapsis.db import Database
+from synapsis.embedder import Embedder
+from synapsis.ingest import ingest_file
+from synapsis.server import _bfs_neighbors, _current_week_start, _write_related_link
+from synapsis.watcher import MarkdownFilter
 
 
 @pytest.fixture(scope="session")
@@ -172,9 +172,9 @@ class TestSuggestLinksLogic:
         source = db.get_source_by_path("ml-basics.md")
         assert source is not None
 
-        from sophia.search import search as sophia_search
+        from synapsis.search import search as synapsis_search
 
-        results = sophia_search(db, embedder, source.title or "ML", top_k=15)
+        results = synapsis_search(db, embedder, source.title or "ML", top_k=15)
         # Filter self
         filtered = [r for r in results if r.source_id != source.id]
         # Self should not appear in filtered list
@@ -190,9 +190,9 @@ class TestSuggestLinksLogic:
         linked_ids = {lk.target_note_id for lk in existing_links if lk.target_note_id}
         assert len(linked_ids) > 0  # deep-learning links to ml-basics
 
-        from sophia.search import search as sophia_search
+        from synapsis.search import search as synapsis_search
 
-        results = sophia_search(db, embedder, source.title or "DL", top_k=15)
+        results = synapsis_search(db, embedder, source.title or "DL", top_k=15)
         filtered = [
             r for r in results
             if r.source_id != source.id and r.source_id not in linked_ids
@@ -207,9 +207,9 @@ class TestSuggestLinksLogic:
         assert source is not None
 
         # Simulate suggest_links logic
-        from sophia.search import search as sophia_search
+        from synapsis.search import search as synapsis_search
 
-        results = sophia_search(db, embedder, source.title or "cooking", top_k=10)
+        results = synapsis_search(db, embedder, source.title or "cooking", top_k=10)
         existing_links = db.get_links_from(source.id)
         linked_ids = {lk.target_note_id for lk in existing_links if lk.target_note_id}
 
@@ -300,11 +300,11 @@ class TestWatcher:
         assert f(Change.added, "/vault/sub/deep.md") is True
 
     def test_markdown_filter_skips_hidden(self):
-        """MarkdownFilter skips hidden dirs and .sophia/."""
+        """MarkdownFilter skips hidden dirs and .synapsis/."""
         from watchfiles import Change
 
         f = MarkdownFilter()
-        assert f(Change.modified, "/vault/.sophia/sophia.db") is False
+        assert f(Change.modified, "/vault/.synapsis/sophia.db") is False
         assert f(Change.modified, "/vault/.hidden/note.md") is False
         assert f(Change.modified, "/vault/.obsidian/config.md") is False
 
@@ -340,9 +340,9 @@ class TestDuplicateSuggestionPrevention:
         source = db.get_source_by_path("cooking.md")
         assert source is not None
 
-        from sophia.search import search as sophia_search
+        from synapsis.search import search as synapsis_search
 
-        results = sophia_search(db, embedder, source.title or "cooking", top_k=10)
+        results = synapsis_search(db, embedder, source.title or "cooking", top_k=10)
         existing_links = db.get_links_from(source.id)
         linked_ids = {lk.target_note_id for lk in existing_links if lk.target_note_id}
 

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from sophia.chunker import ChunkSpan, chunk_markdown, estimate_tokens
+from synapsis.chunker import ChunkSpan, chunk_markdown, estimate_tokens
 
 
 class TestEstimateTokens:

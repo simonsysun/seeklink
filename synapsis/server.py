@@ -1,4 +1,4 @@
-"""FastMCP server — 8 tools for Sophia PKM engine."""
+"""FastMCP server — 8 tools for Synapsis PKM engine."""
 
 from __future__ import annotations
 
@@ -16,11 +16,11 @@ from pathlib import Path
 
 from mcp.server.fastmcp import Context, FastMCP
 
-from sophia.db import Database
-from sophia.embedder import Embedder
-from sophia.ingest import ingest_file
-from sophia.search import search as sophia_search
-from sophia.watcher import run_watcher_with_retry
+from synapsis.db import Database
+from synapsis.embedder import Embedder
+from synapsis.ingest import ingest_file
+from synapsis.search import search as synapsis_search
+from synapsis.watcher import run_watcher_with_retry
 
 logger = logging.getLogger(__name__)
 
@@ -37,12 +37,12 @@ class AppContext:
 @asynccontextmanager
 async def app_lifespan(server: FastMCP) -> AsyncIterator[AppContext]:
     """Initialize DB, embedder, watcher on startup; clean up on shutdown."""
-    vault_root = Path(os.environ.get("SOPHIA_VAULT", ".")).resolve()
-    db_dir = vault_root / ".sophia"
+    vault_root = Path(os.environ.get("SYNAPSIS_VAULT", ".")).resolve()
+    db_dir = vault_root / ".synapsis"
     db_dir.mkdir(parents=True, exist_ok=True)
-    db_path = db_dir / "sophia.db"
+    db_path = db_dir / "synapsis.db"
 
-    logger.info("Sophia starting — vault: %s, db: %s", vault_root, db_path)
+    logger.info("Synapsis starting — vault: %s, db: %s", vault_root, db_path)
 
     db = Database(db_path)
     try:
@@ -72,10 +72,10 @@ async def app_lifespan(server: FastMCP) -> AsyncIterator[AppContext]:
                 pass
     finally:
         db.close()
-        logger.info("Sophia shut down")
+        logger.info("Synapsis shut down")
 
 
-mcp = FastMCP("sophia", lifespan=app_lifespan)
+mcp = FastMCP("synapsis", lifespan=app_lifespan)
 
 
 def _get_ctx(ctx: Context) -> AppContext:
@@ -178,7 +178,7 @@ async def search(
     try:
         app = _get_ctx(ctx)
         results = await asyncio.to_thread(
-            sophia_search, app.db, app.embedder, query, top_k=top_k, expand=expand
+            synapsis_search, app.db, app.embedder, query, top_k=top_k, expand=expand
         )
         return [
             {
@@ -217,7 +217,7 @@ async def suggest_links(path: str, max_suggestions: int = 5, ctx: Context = None
         # Use title as query — concise and topical
         query = source.title or Path(path).stem
         results = await asyncio.to_thread(
-            sophia_search,
+            synapsis_search,
             app.db,
             app.embedder,
             query,
@@ -540,7 +540,7 @@ def _current_week_start() -> str:
 
 
 def main() -> None:
-    """Run the Sophia MCP server over stdio."""
+    """Run the Synapsis MCP server over stdio."""
     # Configure logging to stderr (stdio MCP needs clean stdout)
     logging.basicConfig(
         level=logging.INFO,
@@ -551,15 +551,15 @@ def main() -> None:
 
 
 def main_sse() -> None:
-    """Run the Sophia MCP server over SSE (for remote/Docker access)."""
+    """Run the Synapsis MCP server over SSE (for remote/Docker access)."""
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s %(name)s %(levelname)s %(message)s",
         stream=sys.stderr,
     )
 
-    host = os.environ.get("SOPHIA_SSE_HOST", "0.0.0.0")
-    port = int(os.environ.get("SOPHIA_SSE_PORT", "8767"))
+    host = os.environ.get("SYNAPSIS_SSE_HOST", "0.0.0.0")
+    port = int(os.environ.get("SYNAPSIS_SSE_PORT", "8767"))
 
     # Override FastMCP settings for SSE mode:
     # - Bind to all interfaces so Docker containers can connect
@@ -568,5 +568,5 @@ def main_sse() -> None:
     mcp.settings.port = port
     mcp.settings.transport_security = None
 
-    logger.info("Sophia SSE server starting on %s:%d", host, port)
+    logger.info("Synapsis SSE server starting on %s:%d", host, port)
     mcp.run(transport="sse")
