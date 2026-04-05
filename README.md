@@ -111,7 +111,9 @@ Query: "agent memory systems"
 
 ## Frontmatter
 
-SeekLink reads `tags` and `aliases` from YAML frontmatter:
+SeekLink works with any markdown file — no special formatting required. Just point it at your vault and search.
+
+If your notes have YAML frontmatter, SeekLink will use it for extra features:
 
 ```yaml
 ---
@@ -120,7 +122,10 @@ aliases: [ML, Machine Learning]
 ---
 ```
 
-Both inline (`[a, b]`) and block list formats supported. Aliases are searchable and used for link resolution — if a note has `aliases: [ML]`, then `[[ML]]` resolves to it.
+- **Tags** enable filtered search: `search("query", tags=["ai"])` returns only matching notes
+- **Aliases** are searchable and used for link resolution — `[[ML]]` resolves to the note with `aliases: [ML]`
+
+Both inline (`[a, b]`) and block list formats supported. No frontmatter? No problem — search, graph, and link suggestions all work without it.
 
 ## How it stores data
 
