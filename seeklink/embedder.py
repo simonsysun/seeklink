@@ -2,9 +2,21 @@
 
 from __future__ import annotations
 
+import os
 import threading
+from pathlib import Path
 
 import numpy as np
+
+
+def _default_cache_dir() -> Path:
+    # On macOS the system default $TMPDIR is under /var/folders/.../T/, which
+    # launchd periodically purges — breaking the ONNX blob symlinks. Pin the
+    # fastembed cache to a persistent user directory instead.
+    override = os.environ.get("SEEKLINK_FASTEMBED_CACHE")
+    if override:
+        return Path(override).expanduser()
+    return Path.home() / ".cache" / "fastembed"
 
 
 class Embedder:
@@ -27,7 +39,12 @@ class Embedder:
                 return
             from fastembed import TextEmbedding
 
-            self._model = TextEmbedding(model_name=self.MODEL_NAME)
+            cache_dir = _default_cache_dir()
+            cache_dir.mkdir(parents=True, exist_ok=True)
+            self._model = TextEmbedding(
+                model_name=self.MODEL_NAME,
+                cache_dir=str(cache_dir),
+            )
 
     def embed_documents(self, texts: list[str]) -> list[bytes]:
         """Embed document texts with 'passage: ' prefix. Returns float32 bytes."""
