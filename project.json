@@ -1,6 +1,6 @@
 {
   "status": "in-progress",
   "category": "project",
-  "description": "SeekLink semantic search for Obsidian",
+  "description": "SeekLink — hybrid semantic search CLI + daemon for markdown vaults",
   "created": "2026-03"
 }
