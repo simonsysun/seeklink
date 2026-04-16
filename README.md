@@ -127,6 +127,10 @@ SeekLink runs four search channels in parallel and merges results with Reciproca
 - **Indegree**: notes that many other notes link to rank higher — a lightweight quality signal from your knowledge graph.
 - **Title/Alias** (FTS5): matches against note titles and `aliases` frontmatter. Weight 1.5 gives a modest boost without overwhelming content matches.
 
+### Why title weight is 1.5 (not higher)
+
+Many personal knowledge bases contain a mix of **titled articles** (permanent notes, literature reviews) and **untitled process notes** (daily logs, journal entries, quick captures). A high title weight systematically buries untitled content — even when it's the most relevant result for the query. The default of 1.5 keeps title matching useful for precise `[[alias]]` lookups while letting content-based matches compete on their own merits. Override with `--title-weight` per query if needed.
+
 ### Optional: cross-encoder reranking
 
 When enabled (default on Apple Silicon), the top-20 RRF candidates are re-scored by Qwen3-Reranker-0.6B running on MLX (Metal GPU). This reads each (query, passage) pair with full cross-attention — more accurate than vector similarity alone, at the cost of ~1-2s per query.
