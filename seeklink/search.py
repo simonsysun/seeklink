@@ -1,4 +1,4 @@
-"""Search engine — three-channel RRF fusion with optional graph expansion."""
+"""Search engine — four-channel RRF fusion with optional cross-encoder reranking and graph expansion."""
 
 from __future__ import annotations
 
@@ -6,10 +6,14 @@ import logging
 import math
 import sqlite3
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from seeklink.db import Database
 from seeklink.embedder import Embedder
 from seeklink.models import Chunk, Source
+
+if TYPE_CHECKING:
+    from seeklink.reranker import Reranker
 
 logger = logging.getLogger(__name__)
 
@@ -35,16 +39,27 @@ def search(
     bm25_weight: float = 1.0,
     vec_weight: float = 1.0,
     indegree_weight: float = 0.3,
-    title_weight: float = 3.0,
+    title_weight: float = 1.5,
     path_prefix: str | None = None,
     tags: list[str] | None = None,
     folder: str | None = None,
+    reranker: "Reranker | None" = None,
+    rerank_k: int = 20,
 ) -> list[SearchResult]:
     """Search the knowledge base using four-channel RRF fusion.
 
     Channels: BM25 (keyword chunks), vector (semantic), indegree (quality
     prior), title/alias (source-level FTS5).
     Optional graph expansion follows wiki-links from top results.
+
+    Note on title_weight (default 1.5): rank-1 title match contributes
+    1.5/61 ≈ 0.025, which is roughly on par with BM25+vector combined at
+    rank 1 each (~0.032). This keeps title as a meaningful boost for
+    alias lookups (e.g., [[fsrs-basics]]) without systematically
+    dominating content matches from artifacts that lack title metadata
+    (logs, journal entries, cards). Agents can override via CLI
+    --title-weight flag per query: raise for "find the definitive article"
+    queries, lower (toward 0) for "surface raw moments" queries.
 
     Filtering (applied as post-filter on candidate pool):
     - tags: only include sources with ALL specified tags
@@ -149,9 +164,13 @@ def search(
         weights=[bm25_weight, vec_weight, indegree_weight, title_weight],
     )
 
-    # Sort by score descending, take top_k
+    # Sort by score descending. When a reranker is provided, fetch a larger
+    # candidate pool (rerank_k) so the cross-encoder has meaningful room to
+    # reorder. Without a reranker, cut directly to top_k.
+    reranking_enabled = reranker is not None and not reranker.disabled
+    candidate_k = max(rerank_k, top_k) if reranking_enabled else top_k
     ranked = sorted(scores.keys(), key=lambda sid: scores[sid], reverse=True)
-    ranked = ranked[:top_k]
+    ranked = ranked[:candidate_k]
 
     # Pick best chunk for each source (prefer BM25 chunk, fall back to vec)
     best_chunks: dict[int, Chunk] = {}
@@ -191,6 +210,30 @@ def search(
             ))
 
     results.sort(key=lambda r: r.score, reverse=True)
+    results = results[:candidate_k]
+
+    # Cross-encoder reranking — replaces first-stage RRF scores with
+    # cross-encoder relevance scores on the candidate pool. Reranker
+    # failures downgrade gracefully (rerank() returns None → keep
+    # first-stage ordering).
+    if reranking_enabled and len(results) > 1:
+        passages = [r.content for r in results]
+        rerank_scores = reranker.rerank(query, passages)
+        if rerank_scores is not None and len(rerank_scores) == len(results):
+            results = [
+                SearchResult(
+                    source_id=r.source_id,
+                    chunk_id=r.chunk_id,
+                    path=r.path,
+                    title=r.title,
+                    content=r.content,
+                    score=float(rerank_scores[i]),
+                    indegree=r.indegree,
+                )
+                for i, r in enumerate(results)
+            ]
+            results.sort(key=lambda r: r.score, reverse=True)
+
     results = results[:top_k]
 
     # Graph expansion (reuses vec_results from the larger k=200 search)

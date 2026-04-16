@@ -59,7 +59,12 @@ def ingest_file(
     # Check existing source
     existing = db.get_source_by_path(rel_path)
     if existing is not None and existing.content_hash == content_hash:
-        return existing  # unchanged
+        # Content unchanged — but refresh indexed_at so that freshness
+        # checks don't keep warning about this file after a content-
+        # preserving touch / git checkout / editor save-without-change.
+        if existing.status == "indexed":
+            db.update_source(existing.id, indexed_at=_utcnow())
+        return existing
 
     # Parse frontmatter → extract tags, aliases, and body (content without YAML)
     tags, aliases, body = _parse_frontmatter(content)
@@ -148,25 +153,30 @@ def ingest_vault(
     vault_root: Path,
     embedder: Embedder | None = None,
 ) -> dict[str, int]:
-    """Ingest all markdown files in a vault directory.
+    """Ingest all markdown files in a vault directory and prune stale entries.
 
-    Returns stats: {"ingested": N, "unchanged": N, "skipped": N, "errors": N}
+    Returns stats: {"ingested": N, "unchanged": N, "skipped": N, "errors": N, "pruned": N}
+
+    After processing all existing files, walks DB entries and removes any
+    whose path no longer exists on disk. This handles files that were
+    deleted or moved outside the rhizome CLI (where no explicit
+    ``seeklink index`` call would have fired).
     """
     if embedder is None:
         embedder = Embedder()
 
-    stats = {"ingested": 0, "unchanged": 0, "skipped": 0, "errors": 0}
+    stats = {"ingested": 0, "unchanged": 0, "skipped": 0, "errors": 0, "pruned": 0}
+    seen_paths: set[str] = set()
 
     for md_path in sorted(vault_root.rglob("*.md")):
-        # Skip hidden dirs and excluded dirs (mirrors watcher.MarkdownFilter)
         try:
             rel = md_path.relative_to(vault_root)
         except ValueError:
             continue
         if any(part.startswith(".") or part in _SKIP_DIRS for part in rel.parts):
             continue
-        # Snapshot existing source to detect unchanged
-        rel_path = str(md_path.relative_to(vault_root))
+        rel_path = str(rel)
+        seen_paths.add(rel_path)
         existing = db.get_source_by_path(rel_path)
 
         try:
@@ -182,6 +192,13 @@ def ingest_vault(
             stats["unchanged"] += 1
         else:
             stats["ingested"] += 1
+
+    # Prune DB entries for files that no longer exist on disk
+    for src in db.list_sources():
+        if src.path not in seen_paths:
+            db.delete_source(src.id)
+            stats["pruned"] += 1
+            logger.info("Pruned stale entry: %s", src.path)
 
     return stats
 

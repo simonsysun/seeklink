@@ -3,55 +3,50 @@
 [![PyPI](https://img.shields.io/pypi/v/seeklink)](https://pypi.org/project/seeklink/)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://python.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Tests](https://github.com/simonsysun/seeklink/actions/workflows/test.yml/badge.svg)](https://github.com/simonsysun/seeklink/actions)
 
-**Let your AI agent manage your Zettelkasten.**
+**Hybrid semantic search for your markdown vault.**
 
-SeekLink is an MCP server that gives AI assistants (Claude Code, Cursor, etc.) deep access to your markdown vault. It searches, discovers missing connections, and writes `[[wikilinks]]` for you — so your knowledge graph grows as you work.
+SeekLink searches your personal knowledge base using four channels in parallel — keyword matching, semantic similarity, knowledge graph, and title/alias lookup — then fuses the results for high-recall, high-precision retrieval. Optional cross-encoder reranking via MLX gives an extra precision boost on Apple Silicon.
 
 Built for people who take notes seriously and want an AI that understands their knowledge structure, not just their text.
 
 ## What it does
 
 ```
-You:   "What do I know about MCP protocol?"
-Agent: searches vault → finds 8 related notes across topics
+You:   seeklink search "agent memory systems" --vault ~/notes
+       → 8 related notes across topics, ranked by relevance
 
-You:   "What should this note link to?"
-Agent: analyzes content → suggests 4 missing connections with relevance scores
+You:   seeklink search "记忆保持力" --vault ~/notes --title-weight 0.5
+       → surfaces raw log entries alongside polished articles
 
-You:   "Approve the first two"
-Agent: writes [[wikilinks]] directly into your note file
+You:   seeklink daemon --vault ~/notes
+       → resident mode: first search ~2s, every search after ~10ms
 ```
 
-**Six MCP tools:**
+## Architecture
 
-| Tool | What it does |
-|------|-------------|
-| `search` | Four-channel hybrid search with tag/folder filtering and graph expansion |
-| `graph` | Explore a note's neighborhood — outgoing links, backlinks, configurable depth |
-| `suggest_links` | Find notes that should be linked but aren't. Returns scored suggestions |
-| `resolve_suggestion` | Approve (writes `[[link]]` to file) or reject a suggestion |
-| `index` | Index a note, or list unprocessed notes |
-| `status` | Vault stats: indexed notes, graph size, watcher status |
+```
+Query: "agent memory systems"
+        │
+        ├── BM25 (FTS5 + jieba) ──── keyword match ──────── weight 1.0
+        ├── Vector (jina-v2-zh) ──── semantic similarity ── weight 1.0
+        ├── Indegree ─────────────── well-linked = quality ─ weight 0.3
+        └── Title/Alias (FTS5) ──── exact name match ────── weight 1.5
+        │
+        └── RRF Fusion → top candidates
+                │
+                └── [optional] Qwen3-Reranker-0.6B (MLX) → precision boost
+                        │
+                        └── ranked results
+```
 
-## Why not Obsidian's built-in search?
-
-Obsidian's search is keyword-only. It finds exact matches, not related ideas.
-
-SeekLink finds notes that are *semantically similar*, even if they use different words. It knows your knowledge graph: notes that many other notes link to rank higher. And it discovers missing connections — notes that *should* be linked but aren't.
-
-Unlike **Smart Connections** (Obsidian plugin), SeekLink:
-- Runs headless — works from Claude Code, Cursor, or any MCP client, without Obsidian open
-- Builds a real knowledge graph from your `[[wikilinks]]`, not just vector similarity
-- Handles Chinese/English bilingual vaults natively (jieba + jina-embeddings-v2-base-zh)
-- Uses four-channel fusion (BM25 + vector + graph + title) instead of vector-only search
+Four-channel Reciprocal Rank Fusion, with optional cross-encoder reranking for Apple Silicon. Everything runs locally — no API keys, no cloud.
 
 ## Requirements
 
 - Python 3.11+
 - ~330 MB disk for the embedding model (downloaded on first run)
-- No API keys needed — everything runs locally
+- ~700 MB disk for the reranker model (if enabled; Apple Silicon recommended)
 
 ## Install
 
@@ -61,59 +56,88 @@ uv tool install seeklink
 pip install seeklink
 ```
 
-## Setup
-
-### MCP server (for Claude Code, Cursor, etc.)
-
-Add to your MCP config:
-
-```json
-{
-  "mcpServers": {
-    "seeklink": {
-      "command": "seeklink",
-      "args": ["serve"],
-      "env": { "SEEKLINK_VAULT": "/path/to/your/vault" }
-    }
-  }
-}
-```
-
-First run indexes your vault automatically. A file watcher keeps the index up to date.
-
-### CLI
+## Quick start
 
 ```bash
+# Search your vault
 seeklink search "machine learning" --vault /path/to/vault
-seeklink search "知识管理" --vault /path/to/vault --tags ai --top-k 5
-seeklink index --vault /path/to/vault
+
+# Check index health
 seeklink status --vault /path/to/vault
+
+# Index a new or changed file
+seeklink index path/to/note.md --vault /path/to/vault
+
+# Full vault rebuild
+seeklink index --vault /path/to/vault
+
+# Start the resident daemon (keeps models in memory for fast queries)
+seeklink daemon --vault /path/to/vault
 ```
+
+## CLI reference
+
+### `seeklink search`
+
+```
+seeklink search "query" --vault PATH [options]
+
+Options:
+  --top-k N          Number of results (default: 10)
+  --tags TAG [TAG]   Filter by tags (AND semantics)
+  --folder PREFIX    Filter by folder (e.g. "notes/")
+  --title-weight F   Override title channel weight (default: 1.5)
+                     Raise toward 3.0 for "find the article" queries;
+                     lower toward 0.5 for "surface raw moments" queries.
+```
+
+### `seeklink daemon`
+
+Starts a Unix-socket daemon that keeps the embedding model (and reranker, if enabled) resident in memory. First query after startup takes ~2s (model warmup); subsequent queries return in ~10ms without reranker or ~2s with reranker.
+
+The daemon auto-spawns when needed — you don't have to start it manually. It never auto-exits; kill it with `kill` or restart your machine.
+
+```
+seeklink daemon --vault PATH
+```
+
+### `seeklink index`
+
+```
+seeklink index [PATH] --vault VAULT
+
+Without PATH: full vault re-index (detects unchanged files via content hash).
+With PATH:    index a single file.
+```
+
+### `seeklink status`
+
+```
+seeklink status --vault PATH
+```
+
+Shows index stats and freshness warnings. If files have changed since last index, prints a warning to stderr.
 
 ## How search works
 
 SeekLink runs four search channels in parallel and merges results with Reciprocal Rank Fusion:
 
-```
-Query: "agent memory systems"
-        │
-        ├── BM25 (FTS5 + jieba) ──── keyword match ──────── weight 1.0
-        ├── Vector (jina-v2-zh) ──── semantic similarity ── weight 1.0
-        ├── Indegree ─────────────── well-linked = quality ─ weight 0.3
-        └── Title/Alias (FTS5) ──── exact name match ────── weight 3.0
-        │
-        └── RRF Fusion → ranked results
-```
+- **BM25** (FTS5 + jieba): keyword match on chunk content. Handles CJK natively via jieba tokenization.
+- **Vector** (jina-embeddings-v2-base-zh): semantic similarity. Finds conceptually related notes even when they use different words or languages.
+- **Indegree**: notes that many other notes link to rank higher — a lightweight quality signal from your knowledge graph.
+- **Title/Alias** (FTS5): matches against note titles and `aliases` frontmatter. Weight 1.5 gives a modest boost without overwhelming content matches.
 
-- **Tags filter:** `search("query", tags=["ai", "mcp"])` — only return notes with these tags
-- **Folder filter:** `search("query", folder="notes/")` — only search within a folder
-- **Expand mode:** `search("query", expand=True)` — follow links from top results for deeper recall
+### Optional: cross-encoder reranking
+
+When enabled (default on Apple Silicon), the top-20 RRF candidates are re-scored by Qwen3-Reranker-0.6B running on MLX (Metal GPU). This reads each (query, passage) pair with full cross-attention — more accurate than vector similarity alone, at the cost of ~1-2s per query.
+
+Disable with: `export SEEKLINK_RERANKER_MODEL=""`
 
 ## Frontmatter
 
-SeekLink works with any markdown file — no special formatting required. Just point it at your vault and search.
+SeekLink works with any markdown file — no special formatting required.
 
-If your notes have YAML frontmatter, SeekLink will use it for extra features:
+If your notes have YAML frontmatter, SeekLink uses it for extra features:
 
 ```yaml
 ---
@@ -122,10 +146,8 @@ aliases: [ML, Machine Learning]
 ---
 ```
 
-- **Tags** enable filtered search: `search("query", tags=["ai"])` returns only matching notes
-- **Aliases** are searchable and used for link resolution — `[[ML]]` resolves to the note with `aliases: [ML]`
-
-Both inline (`[a, b]`) and block list formats supported. No frontmatter? No problem — search, graph, and link suggestions all work without it.
+- **Tags** enable filtered search: `seeklink search "query" --tags ai`
+- **Aliases** are searchable and used for wikilink resolution — `[[ML]]` resolves to the note with that alias
 
 ## How it stores data
 
@@ -133,7 +155,6 @@ Everything lives in `.seeklink/seeklink.db` inside your vault — a single SQLit
 - FTS5 full-text index (jieba-tokenized for CJK)
 - sqlite-vec for 768-dim vector similarity search
 - A wikilink graph (parsed from `[[links]]` in your notes)
-- Link suggestion tracking with approve/reject state
 
 Notes are chunked (~400 tokens), embedded with jina-embeddings-v2-base-zh, and indexed incrementally. Delete `.seeklink/` to rebuild from scratch.
 
@@ -142,10 +163,17 @@ Notes are chunked (~400 tokens), embedded with jina-embeddings-v2-base-zh, and i
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `SEEKLINK_VAULT` | `.` | Path to vault root |
-| `SEEKLINK_SSE_HOST` | `127.0.0.1` | SSE server bind address |
-| `SEEKLINK_SSE_PORT` | `8767` | SSE server port |
+| `SEEKLINK_EMBEDDER_MODEL` | `jinaai/jina-embeddings-v2-base-zh` | Embedding model (fastembed-supported) |
+| `SEEKLINK_RERANKER_MODEL` | `mlx-community/Qwen3-Reranker-0.6B-mxfp8` | Reranker model (set to `""` to disable) |
 
-For SSE transport (e.g. Docker or remote access): `seeklink serve --sse`
+## What changed in v0.2
+
+- **CLI-first**: MCP server removed. All interaction via `seeklink search/index/status/daemon`.
+- **Daemon mode**: Unix-socket resident server with auto-spawn. Models stay loaded for fast queries.
+- **Reranker**: Qwen3-Reranker-0.6B via MLX on Apple Silicon. Optional, default enabled.
+- **Freshness check**: bidirectional mtime scan replaces the file watcher. Warns on stale/new/deleted files.
+- **Title weight 1.5**: down from 3.0, so log entries and journal notes compete fairly with titled permanent notes.
+- **Leaner deps**: `mcp` and `watchfiles` removed. 4 runtime dependencies instead of 6.
 
 ## Contributing
 
@@ -153,7 +181,7 @@ For SSE transport (e.g. Docker or remote access): `seeklink serve --sse`
 git clone https://github.com/simonsysun/seeklink
 cd seeklink
 uv sync --dev
-uv run python -m pytest tests/ -q --ignore=tests/test_integration.py
+uv run python -m pytest tests/ -q
 ```
 
 ## License

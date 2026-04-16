@@ -1,28 +1,43 @@
 # TODOs
 
-Deferred work for future releases. Contributions welcome.
+Deferred work for future releases.
 
-## v0.2 candidates
+## v0.3 candidates
 
-### Cross-encoder reranking
-Re-rank top results with a cross-encoder for better precision. Needs latency benchmarking to ensure the quality gain justifies the added latency (~100-300ms per query).
+### Cross-encoder performance optimization
+The MLX reranker (Qwen3-Reranker-0.6B) runs at ~60ms per pair on M3 Air Metal GPU, totaling ~1.2-2.7s for 20 candidates with realistic vault chunks. Potential paths to reduce this:
+- Batch inference (process all 20 pairs in one forward pass instead of sequentially)
+- Passage truncation (cap at 200 tokens for reranking, use full text only for final display)
+- Configurable `rerank_k` via CLI flag (reduce candidate pool when speed matters)
 
-**Context:** The current RRF fusion (BM25 + vector + indegree + title) is already strong. Cross-encoder would be an optional second pass on the top-k results. Competitor "Hybrid Search" uses multilingual-e5 reranking.
+### `suggest_links` and `graph` CLI subcommands
+The helper functions exist in `seeklink/app.py` (moved from the deleted MCP server) but have no CLI exposure. Wire them as:
+- `seeklink suggest-links <path>` — find notes that should be linked
+- `seeklink resolve-suggestion <id> approve|reject` — approve writes `[[link]]`
+- `seeklink graph <path> --depth N` — show link neighborhood
 
-### Lightweight embedding model option
-Add `SEEKLINK_MODEL` environment variable to choose between:
-- `jinaai/jina-embeddings-v2-base-zh` (default, 330MB, best CJK)
-- A smaller multilingual model (~117MB, 100+ languages)
+### Embedder upgrade path
+Current: jina-embeddings-v2-base-zh (330MB, 768-dim). All 2026 multilingual alternatives (Qwen3-Embedding-0.6B, BGE-M3, jina-v3) are >2GB in ONNX form and not fastembed-supported. Revisit when a <500MB multilingual embedder with better CJK scores becomes available in fastembed. The `SEEKLINK_EMBEDDER_MODEL` env var is ready for a drop-in swap; a full re-index (`seeklink index --force`) is required after switching.
 
-**Context:** Deferred because adding model choice increases decision burden for new users. 330MB is acceptable in 2026. Add when community requests it.
+### Sources folder as RAG data source
+The vault's `sources/` folder could store raw external content (textbooks, papers, PDFs converted to markdown) for semantic search. Requires:
+- An ingest pipeline (MarkItDown / marker / docling for PDF→markdown)
+- LLM metadata extraction pass (title, aliases, tags, chapter structure)
+- Possibly chunk-by-chapter instead of chunk-by-400-tokens
 
-### Agent knowledge layer
-Extend SeekLink as a knowledge/memory layer for AI agents and multi-agent systems. Current API is note-centric (paths, frontmatter, wikilinks). Agent memory would need: programmatic note creation tool, entity/fact-level retrieval, session memory, and possibly a different metadata model. The search + graph infrastructure is already there.
+### Daemon freshness integration
+Currently freshness warnings only appear in the cold-start CLI path (`seeklink search/status`). The daemon doesn't propagate warnings back to clients. Add a `warnings` field to daemon JSON responses so `cli_client` can print them.
 
 ## Infrastructure
 
-### PyPI automated publishing
-GitHub Actions workflow to publish to PyPI on tag push. Currently v0.1.0 is published manually.
+### PyPI v0.2 publishing
+Publish v0.2.0 to PyPI. v0.1.0 is already there (manually published).
 
-### Integration test fixture cleanup
-Session-scoped async MCP client fixture hangs during teardown when all integration tests run together. Individual test classes pass fine. Likely a `create_connected_server_and_client_session` cleanup issue with the watcher task.
+### Multi-vault daemon support
+Current daemon binds to a single socket (`~/.rhizome/seeklink.sock`) regardless of vault. If multiple vaults need concurrent daemons, hash the vault path into the socket name. Deferred until multi-vault is a real use case.
+
+### Linux deployment
+The MLX reranker is Apple Silicon only. On Linux, either:
+- Disable reranker (`SEEKLINK_RERANKER_MODEL=""`) and rely on RRF only
+- Port to onnxruntime with CUDA (if GPU available)
+- Port to llama.cpp via GGUF format (`Mungert/Qwen3-Reranker-0.6B-GGUF`)

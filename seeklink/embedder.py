@@ -20,12 +20,20 @@ def _default_cache_dir() -> Path:
 
 
 class Embedder:
-    """Lazy-loaded FastEmbed wrapper for jina-embeddings-v2-base-zh.
+    """Lazy-loaded FastEmbed wrapper for a multilingual text embedder.
+
+    Defaults to jina-embeddings-v2-base-zh (330MB, strong CJK+English).
+    Override via SEEKLINK_EMBEDDER_MODEL env var if you want to try a
+    different fastembed-supported model. After switching models, you
+    must re-index the vault (`seeklink index --force`) because the
+    vector space is not compatible across models.
 
     Thread-safe: model loads once on first use via double-checked locking.
     """
 
-    MODEL_NAME = "jinaai/jina-embeddings-v2-base-zh"
+    MODEL_NAME = os.environ.get(
+        "SEEKLINK_EMBEDDER_MODEL", "jinaai/jina-embeddings-v2-base-zh"
+    )
 
     def __init__(self) -> None:
         self._model = None

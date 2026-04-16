@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import sqlite3
 import sys
 import threading
@@ -58,6 +59,14 @@ class Database:
 
     def close(self) -> None:
         self._conn.close()
+
+    def checkpoint(self) -> None:
+        """Run a PASSIVE WAL checkpoint to flush WAL frames into the main DB.
+
+        PASSIVE mode doesn't block readers or writers — it checkpoints as many
+        frames as possible without waiting. Safe to call periodically.
+        """
+        self._conn.execute("PRAGMA wal_checkpoint(PASSIVE)")
 
     def _commit(self) -> None:
         """Commit unless inside an explicit transaction."""
@@ -964,6 +973,9 @@ class Database:
 
     def get_stats(self) -> dict:
         """Get aggregate statistics for the knowledge base."""
+        wal_path = self._path + "-wal"
+        wal_bytes = os.path.getsize(wal_path) if os.path.exists(wal_path) else 0
+
         return {
             "notes_total": self._conn.execute(
                 "SELECT COUNT(*) FROM sources"
@@ -980,5 +992,6 @@ class Database:
             "suggestions_pending": self._conn.execute(
                 "SELECT COUNT(*) FROM suggestions WHERE status = 'pending'"
             ).fetchone()[0],
+            "wal_bytes": wal_bytes,
         }
 

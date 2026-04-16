@@ -23,3 +23,6 @@ wheels/
 
 # Security reports (local only)
 .gstack/
+
+# Dev log (private)
+.claude/devlog.md
