@@ -1,0 +1,87 @@
+name: Publish to PyPI
+
+# Triggers:
+#   - Pushing any tag matching `v*` auto-publishes that ref to PyPI.
+#   - `workflow_dispatch` lets you (re)publish an existing tag manually,
+#     useful for backfilling a tag that shipped before this workflow
+#     existed (e.g. v0.2.1) or for retrying a failed publish.
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to publish (e.g. v0.2.1). Leave blank to use the branch HEAD."
+        required: false
+        type: string
+        default: ""
+
+jobs:
+  build:
+    name: Build sdist + wheel
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          # workflow_dispatch may override with a specific tag; otherwise
+          # use the ref that triggered the workflow (tag push = that tag).
+          ref: ${{ github.event.inputs.tag != '' && github.event.inputs.tag || github.ref }}
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@e4db8464a088ece1b920f60402e813ea4de65b8f # v4
+
+      - name: Build distributions
+        run: uv build
+
+      - name: Sanity-check version matches tag
+        # When triggered by a tag push, ensure pyproject.toml version matches
+        # the tag name. Skipped for workflow_dispatch (where we assume the
+        # invoker knows what they're doing).
+        if: github.event_name == 'push'
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          PKG_VERSION=$(grep -E '^version = ' pyproject.toml | head -1 | sed -E 's/version = "([^"]+)"/\1/')
+          echo "Tag: v${TAG_VERSION}   pyproject: ${PKG_VERSION}"
+          if [ "$TAG_VERSION" != "$PKG_VERSION" ]; then
+            echo "::error::Tag v${TAG_VERSION} does not match pyproject version ${PKG_VERSION}"
+            exit 1
+          fi
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: dist
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    name: Publish to PyPI (OIDC)
+    needs: build
+    runs-on: ubuntu-latest
+    # `environment` is required by PyPI's Trusted Publisher if one was
+    # configured with an environment name. We use `pypi` as the
+    # convention. If you set a different name on PyPI, update it here.
+    environment:
+      name: pypi
+      url: https://pypi.org/project/seeklink/
+    permissions:
+      # Required for PyPI Trusted Publishing (OIDC) — the action exchanges
+      # this for a short-lived PyPI upload token, so no long-lived API
+      # secret is ever stored in GitHub.
+      id-token: write
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # v1.14.0
+        # No `password:` input — Trusted Publishing via OIDC.
+        with:
+          packages-dir: dist/

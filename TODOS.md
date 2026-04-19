@@ -33,9 +33,16 @@ Currently freshness warnings only appear in the cold-start CLI path (`seeklink s
 
 ## Infrastructure
 
-### PyPI v0.2 publishing
-Publish v0.2.0 to PyPI. v0.1.0 is already there (manually published).
-When setting this up, prefer a [Trusted Publisher (OIDC)](https://docs.pypi.org/trusted-publishers/) flow via a SHA-pinned `pypa/gh-action-pypi-publish` action instead of a long-lived API token. One-time config; removes the "what if the token leaks" supply-chain class entirely.
+### PyPI publishing (in progress)
+`.github/workflows/publish.yml` (v0.2.1+) ships an OIDC-based Trusted Publisher flow via a SHA-pinned `pypa/gh-action-pypi-publish@v1.14.0`. Future tags matching `v*` will auto-publish once the Trusted Publisher has been registered on PyPI. One-time PyPI-side setup:
+
+1. Log in to https://pypi.org/manage/project/seeklink/settings/publishing/
+2. Add a new **trusted publisher** with:
+   - Owner: `simonsysun`
+   - Repository name: `seeklink`
+   - Workflow filename: `publish.yml`
+   - Environment name: `pypi`
+3. Trigger the workflow once for v0.2.1 via `gh workflow run publish.yml -f tag=v0.2.1` (or via the GitHub Actions UI with the `tag` input set to `v0.2.1`).
 
 ### Multi-vault daemon support
 Current daemon binds to a single socket (`~/.rhizome/seeklink.sock`) regardless of vault. If multiple vaults need concurrent daemons, hash the vault path into the socket name. Deferred until multi-vault is a real use case.
