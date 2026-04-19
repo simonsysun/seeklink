@@ -7,7 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.2.1] - 2026-04-18
+## [0.2.2] - 2026-04-19
+
+### Fixed
+- PyPI build failed because `pyproject.toml` carried both the SPDX expression `license = "MIT"` and the legacy `License :: OSI Approved :: MIT License` classifier, which modern setuptools rejects under PEP 639. v0.2.1 was tagged on GitHub but never published to PyPI. v0.2.2 is the first release in this line that downstream users can actually `pip install`. No functional changes from v0.2.1 — same daemon-first dispatch, same vault/model guards, same metadata.
+
+## [0.2.1] - 2026-04-18 — **tagged only, not on PyPI**
+
+> This tag was published on GitHub but never made it to PyPI: a duplicate license declaration broke the build. Everything described below shipped in **[0.2.2]**. Do not pin to `seeklink==0.2.1`.
 
 ### Added
 - Daemon-first CLI dispatch: `seeklink search` and `seeklink index` auto-spawn the daemon on first invocation when `--vault` is not passed, then serve subsequent calls in ~10ms. Pass `--vault` to force cold-start.
@@ -55,7 +62,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Native CJK tokenization via jieba registered as a custom FTS5 tokenizer.
 - MCP server transport (`seeklink serve`) — removed in v0.2.0.
 
-[Unreleased]: https://github.com/simonsysun/seeklink/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/simonsysun/seeklink/compare/v0.2.2...HEAD
+[0.2.2]: https://github.com/simonsysun/seeklink/releases/tag/v0.2.2
 [0.2.1]: https://github.com/simonsysun/seeklink/releases/tag/v0.2.1
 [0.2.0]: https://github.com/simonsysun/seeklink/releases/tag/v0.2.0
 [0.1.0]: https://github.com/simonsysun/seeklink/releases/tag/v0.1.0

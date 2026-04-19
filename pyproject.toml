@@ -1,6 +1,6 @@
 [project]
 name = "seeklink"
-version = "0.2.1"
+version = "0.2.2"
 description = "Hybrid semantic search CLI for Obsidian-compatible markdown vaults. BM25 + vector + knowledge graph + title, fused via RRF. Native CJK. Fully local."
 readme = "README.md"
 license = "MIT"
@@ -41,11 +41,14 @@ classifiers = [
     "Topic :: Text Processing :: Indexing",
     "Topic :: Database :: Database Engines/Servers",
     "Environment :: Console",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: POSIX",
     "Operating System :: MacOS",
     "Operating System :: POSIX :: Linux",
 ]
+# The license is declared above as the SPDX expression `license = "MIT"`.
+# Do NOT add a `License :: OSI Approved :: MIT License` classifier here —
+# modern setuptools rejects the pair (PEP 639). Previously fixed in
+# `c0d261a` and regressed in the v0.2.1 chore commit; this note pins it.
 dependencies = [
     "fastembed>=0.7.4",
     "jieba>=0.42.1",
