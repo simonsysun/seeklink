@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.11", "3.13"]
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - uses: astral-sh/setup-uv@e4db8464a088ece1b920f60402e813ea4de65b8f # v4
@@ -23,4 +23,10 @@ jobs:
       - name: Run tests
         run: uv run python -m pytest tests/ -q --ignore=tests/test_integration.py
       - name: Verify install
-        run: uv tool install . && seeklink status --vault /tmp || true
+        run: |
+          uv tool install .
+          seeklink --help
+          # status needs a vault, use a minimal temp vault
+          mkdir -p /tmp/seeklink_ci_vault
+          echo "# ci test" > /tmp/seeklink_ci_vault/test.md
+          seeklink status --vault /tmp/seeklink_ci_vault

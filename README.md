@@ -2,13 +2,16 @@
 
 [![PyPI](https://img.shields.io/pypi/v/seeklink)](https://pypi.org/project/seeklink/)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://python.org)
+[![Tests](https://github.com/simonsysun/seeklink/actions/workflows/test.yml/badge.svg)](https://github.com/simonsysun/seeklink/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-**Hybrid semantic search for your markdown vault.**
+**Hybrid semantic search for your Obsidian-compatible markdown vault.**
 
 SeekLink searches your personal knowledge base using four channels in parallel — keyword matching, semantic similarity, knowledge graph, and title/alias lookup — then fuses the results for high-recall, high-precision retrieval. Optional cross-encoder reranking via MLX gives an extra precision boost on Apple Silicon.
 
 Built for people who take notes seriously and want an AI that understands their knowledge structure, not just their text.
+
+**Ideal for:** Obsidian power users, Zettelkasten / second-brain practitioners, bilingual English + Chinese note-takers, and anyone building local-first RAG on top of a markdown vault. Works with any folder of `.md` files — no Obsidian plugin required.
 
 ## What it does
 
@@ -22,6 +25,34 @@ You:   seeklink search "记忆保持力" --vault ~/notes --title-weight 0.5
 You:   seeklink daemon --vault ~/notes
        → resident mode: first search ~2s, every search after ~10ms
 ```
+
+## When to use SeekLink
+
+- Your knowledge base is a folder of markdown files, with or without Obsidian.
+- You want search that understands *meaning*, not just exact words — and that surfaces short log entries on equal footing with titled permanent notes.
+- You want it to work offline, with no API keys, no cloud, and no data leaving your machine.
+- You write in English, Chinese, or both. CJK is a first-class tokenization path (`jieba` as a custom FTS5 tokenizer), not an afterthought.
+- You want a CLI an agent can shell out to. Any tool that can `exec()` a binary can use SeekLink — no MCP client or vendor lock-in.
+
+## When **not** to use SeekLink
+
+- Your notes are not markdown (Notion export, Bear, Apple Notes native format, Roam). Convert them first, or pick a tool built for that format.
+- You want a hosted, synced, multi-user search service. SeekLink is single-machine, single-user.
+- You want a GUI inside Obsidian. SeekLink is a CLI + daemon — there's no Obsidian plugin (yet).
+- You need sub-millisecond search over millions of notes. SeekLink targets personal vaults (thousands to low tens-of-thousands of notes). At that scale it's fast; beyond, you want a real search service (Typesense, Meilisearch, Elastic).
+- You're on Windows. macOS and Linux are tested; Windows should mostly work (Python is portable, the Unix-socket daemon isn't) but is not a supported path.
+
+## How it compares
+
+| Tool | Format | Semantic search | CJK | Local-only | Knowledge-graph signal |
+|---|---|---|---|---|---|
+| **SeekLink** | any `.md` vault | ✅ BM25 + vector + title, RRF-fused, optional MLX reranker | ✅ jieba tokenizer | ✅ | ✅ wikilink indegree |
+| Obsidian core search | Obsidian vault | ❌ (keyword only) | partial | ✅ | ❌ |
+| Obsidian semantic-search plugins (Smart Connections, Copilot, etc.) | Obsidian vault | ✅ (vector only, mostly OpenAI API) | varies | usually ❌ (API) | ❌ |
+| `ripgrep` | any text | ❌ (keyword only, literal regex) | ✅ | ✅ | ❌ |
+| Build-your-own RAG (LlamaIndex, LangChain) | any | ✅ (you wire it) | depends on embedder | depends | depends |
+
+SeekLink's niche: **markdown-native, hybrid keyword + semantic, CJK-first, fully local, with the knowledge-graph signal your wikilinks already encode** — available as a single `pip install`.
 
 ## Architecture
 
@@ -42,11 +73,19 @@ Query: "agent memory systems"
 
 Four-channel Reciprocal Rank Fusion, with optional cross-encoder reranking for Apple Silicon. Everything runs locally — no API keys, no cloud.
 
-## Requirements
+## Support & limitations
 
-- Python 3.11+
-- ~330 MB disk for the embedding model (downloaded on first run)
-- ~700 MB disk for the reranker model (if enabled; Apple Silicon recommended)
+| | Supported | Notes |
+|---|---|---|
+| Python | 3.11, 3.12, 3.13, 3.14 | Tested in CI |
+| OS (core + daemon) | macOS, Linux | Unix socket at `~/.rhizome/seeklink.sock` |
+| OS (Windows) | unsupported | Python code is portable; Unix-socket daemon is not |
+| File format | `.md` (markdown) | Frontmatter optional |
+| Wikilink syntax | `[[note]]`, `[[alias]]`, Obsidian-compatible | |
+| Embedder | `jina-embeddings-v2-base-zh` (default, 330 MB) | Swap via `SEEKLINK_EMBEDDER_MODEL` (fastembed-supported) |
+| Reranker | Qwen3-Reranker-0.6B via MLX (700 MB) | Apple Silicon only. Disable with `SEEKLINK_RERANKER_MODEL=""` |
+| Multi-vault daemon | single-vault only | Pass `--vault` to run a one-shot against a different vault (forces cold-start) |
+| Concurrent access | one daemon per machine | Multiple CLI clients may share one daemon |
 
 ## Install
 
@@ -59,21 +98,23 @@ pip install seeklink
 ## Quick start
 
 ```bash
-# Search your vault
+# One-shot: search a specific vault (always cold-start, no daemon)
 seeklink search "machine learning" --vault /path/to/vault
 
-# Check index health
-seeklink status --vault /path/to/vault
-
-# Index a new or changed file
-seeklink index path/to/note.md --vault /path/to/vault
-
-# Full vault rebuild
+# Full vault rebuild (cold-start)
 seeklink index --vault /path/to/vault
-
-# Start the resident daemon (keeps models in memory for fast queries)
-seeklink daemon --vault /path/to/vault
 ```
+
+**Recommended for daily use** — set your default vault once, then every search auto-uses the fast daemon:
+
+```bash
+export SEEKLINK_VAULT=/path/to/vault
+seeklink search "machine learning"
+# First call after a cold boot: ~2s (spawns the daemon, loads the embedder).
+# Every call after that: ~10ms without reranker, ~0.5s with reranker.
+```
+
+The daemon stays resident across terminal sessions until you `kill` it or restart. No manual startup needed — `seeklink search / index / status` auto-spawn it when missing.
 
 ## CLI reference
 
@@ -95,10 +136,12 @@ Options:
 
 Starts a Unix-socket daemon that keeps the embedding model (and reranker, if enabled) resident in memory. First query after startup takes ~2s (model warmup); subsequent queries return in ~10ms without reranker or ~2s with reranker.
 
-The daemon auto-spawns when needed — you don't have to start it manually. It never auto-exits; kill it with `kill` or restart your machine.
+**You almost never run this directly.** When you run `seeklink search / index / status` without `--vault`, the CLI tries the daemon socket first and auto-spawns a daemon on cold machines. The daemon uses `SEEKLINK_VAULT` (or cwd) as its vault. It never auto-exits — kill it with `kill` or restart your machine.
+
+Passing `--vault` always uses cold-start instead of the daemon, because the daemon binds to a single vault at startup. Multi-vault daemon support is tracked in TODOS.md.
 
 ```
-seeklink daemon --vault PATH
+seeklink daemon --vault PATH    # foreground, for debugging
 ```
 
 ### `seeklink index`

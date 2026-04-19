@@ -28,10 +28,14 @@ The vault's `sources/` folder could store raw external content (textbooks, paper
 ### Daemon freshness integration
 Currently freshness warnings only appear in the cold-start CLI path (`seeklink search/status`). The daemon doesn't propagate warnings back to clients. Add a `warnings` field to daemon JSON responses so `cli_client` can print them.
 
+### Daemon auto-respawn on config mismatch
+`cli_client.call()` refuses to reuse a daemon bound to a different vault or started with a different embedder/reranker (P1 correctness fix), but falls back to cold-start on every subsequent CLI call after a switch until the user manually kills the stale daemon. Codex rated this P2: add a `shutdown` command to the daemon protocol, have the client shutdown + respawn on mismatch so the auto-spawn workflow keeps working across vault/model switches.
+
 ## Infrastructure
 
 ### PyPI v0.2 publishing
 Publish v0.2.0 to PyPI. v0.1.0 is already there (manually published).
+When setting this up, prefer a [Trusted Publisher (OIDC)](https://docs.pypi.org/trusted-publishers/) flow via a SHA-pinned `pypa/gh-action-pypi-publish` action instead of a long-lived API token. One-time config; removes the "what if the token leaks" supply-chain class entirely.
 
 ### Multi-vault daemon support
 Current daemon binds to a single socket (`~/.rhizome/seeklink.sock`) regardless of vault. If multiple vaults need concurrent daemons, hash the vault path into the socket name. Deferred until multi-vault is a real use case.

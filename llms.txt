@@ -1,0 +1,37 @@
+# SeekLink
+
+> Hybrid semantic search CLI for Obsidian-compatible markdown vaults. Combines BM25 + vector + knowledge-graph + title/alias channels via Reciprocal Rank Fusion. Native CJK tokenization (jieba). Optional cross-encoder reranking via MLX on Apple Silicon. Fully local — no API keys, no cloud.
+
+SeekLink is a Python CLI + optional Unix-socket daemon that searches personal markdown knowledge bases. It targets the niche of "markdown-native, hybrid keyword + semantic search, CJK-first, with the knowledge-graph signal your wikilinks already encode" — available as a single `pip install seeklink`.
+
+Runs on macOS and Linux, Python 3.11+. Indexes any folder of `.md` files (Obsidian-style `[[wikilinks]]` and `aliases` frontmatter are parsed but optional). Single-vault daemon; pass `--vault` for one-shot cold-start queries against a different vault.
+
+## Docs
+
+- [README](https://github.com/simonsysun/seeklink/blob/main/README.md): full install, quick start, CLI reference, architecture, support matrix, and when (not) to use SeekLink.
+- [CHANGELOG](https://github.com/simonsysun/seeklink/blob/main/CHANGELOG.md): version history in Keep-a-Changelog format.
+- [TODOS](https://github.com/simonsysun/seeklink/blob/main/TODOS.md): deferred work and v0.3 candidates.
+- [LICENSE](https://github.com/simonsysun/seeklink/blob/main/LICENSE): MIT.
+
+## Source
+
+- [seeklink/__main__.py](https://github.com/simonsysun/seeklink/blob/main/seeklink/__main__.py): CLI entry point. Dispatches to daemon-first or cold-start paths.
+- [seeklink/search.py](https://github.com/simonsysun/seeklink/blob/main/seeklink/search.py): four-channel RRF search engine.
+- [seeklink/daemon.py](https://github.com/simonsysun/seeklink/blob/main/seeklink/daemon.py): Unix-socket daemon with eager-loaded embedder and optional MLX reranker.
+- [seeklink/cli_client.py](https://github.com/simonsysun/seeklink/blob/main/seeklink/cli_client.py): thin client that auto-spawns the daemon when the socket is missing.
+- [seeklink/db.py](https://github.com/simonsysun/seeklink/blob/main/seeklink/db.py): SQLite + sqlite-vec + FTS5 storage layer.
+
+## Install
+
+- PyPI: `pip install seeklink` or `uv tool install seeklink`.
+- Source: `git clone https://github.com/simonsysun/seeklink && cd seeklink && uv sync --dev`.
+
+## Typical agent invocation
+
+An AI agent integrating SeekLink should shell out to the CLI. No MCP or custom protocol — SeekLink is CLI-first by design.
+
+```
+seeklink search "query" --vault /path/to/vault --top-k 5
+```
+
+For fast repeated queries against a known vault, set `SEEKLINK_VAULT=<path>` once; subsequent `seeklink search` calls (without `--vault`) reuse the resident daemon.
