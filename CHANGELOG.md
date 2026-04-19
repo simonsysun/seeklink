@@ -7,17 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-04-18
+
 ### Added
-- Daemon-first CLI dispatch: `seeklink search / index / status` auto-spawn the daemon on first invocation when `--vault` is not passed, then serve subsequent calls in ~10ms. Pass `--vault` to force cold-start.
-- PyPI `keywords` for discoverability.
+- Daemon-first CLI dispatch: `seeklink search` and `seeklink index` auto-spawn the daemon on first invocation when `--vault` is not passed, then serve subsequent calls in ~10ms. Pass `--vault` to force cold-start.
+- `cli_client.call()` preflights the daemon's vault and model config (embedder + reranker) before reusing it, so a stale daemon bound to a different `SEEKLINK_VAULT` / `SEEKLINK_EMBEDDER_MODEL` / `SEEKLINK_RERANKER_MODEL` cannot silently serve or mutate the wrong database.
+- `seeklink status` now prints the configured embedder and reranker names (computed from env, without importing the heavy modules).
+- PyPI `keywords` and richer classifiers for discoverability.
 - `Issues` and `Changelog` project URLs.
+- README: "Ideal for" tagline, "When to use / When not to use" sections, "How it compares" table, and "Support & limitations" matrix.
+- `llms.txt` at the repo root for LLM-assisted discovery.
+- `CHANGELOG.md` (this file).
 
 ### Changed
 - CI matrix expanded to Python 3.11, 3.12, 3.13, 3.14 to match declared classifier support.
 - CI "Verify install" step no longer masks failures with `|| true`; it now exercises `seeklink --help` and `seeklink status` against a temp vault.
+- `seeklink status` now always uses the cold-start path. It only reads SQLite stats + freshness, so routing it through the daemon was wasting a full embedder + reranker warmup (up to a 700MB download on first ever run) just to print a few numbers.
+- PyPI `description` rewritten to name Obsidian compatibility explicitly.
 
 ### Fixed
 - README claimed daemon auto-spawn but the CLI actually went direct to cold-start on every invocation. Behavior now matches docs.
+- Prevented a stale daemon bound to a different vault or started with a different embedder/reranker from silently serving incorrect results after the user switched `SEEKLINK_VAULT` / `SEEKLINK_EMBEDDER_MODEL` / `SEEKLINK_RERANKER_MODEL`. On mismatch the CLI falls back to cold-start; an auto-respawn follow-up is tracked in TODOS.md.
 
 ## [0.2.0] - 2026-04-16
 
@@ -45,6 +55,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Native CJK tokenization via jieba registered as a custom FTS5 tokenizer.
 - MCP server transport (`seeklink serve`) — removed in v0.2.0.
 
-[Unreleased]: https://github.com/simonsysun/seeklink/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/simonsysun/seeklink/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/simonsysun/seeklink/releases/tag/v0.2.1
 [0.2.0]: https://github.com/simonsysun/seeklink/releases/tag/v0.2.0
 [0.1.0]: https://github.com/simonsysun/seeklink/releases/tag/v0.1.0
