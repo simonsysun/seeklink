@@ -430,23 +430,22 @@ class TestTitleChannel:
 
 
 class TestPositionAwareBlending:
-    """Test v0.3 Item 1 — rerank blending preserves CONFIDENT first-stage
-    wins while letting the reranker break razor-thin ties.
+    """Test title-gated rerank blending (v0.3) preserves confident
+    first-stage wins while letting the reranker override when no title
+    signal is present.
 
-    Before v0.3: reranker score fully replaced RRF score, so an exact-title
-    or exact-alias hit at RRF rank 1 could be demoted if the reranker gave
-    a longer adjacent document a higher content-relevance score.
+    v0.2.x behavior: reranker score fully replaced the first-stage RRF
+    score, so an exact-title or exact-alias hit at RRF rank 1 could be
+    demoted if the reranker gave a longer adjacent document a higher
+    content-relevance score.
 
-    v0.3 formula (confidence-aware):
+    v0.3 formula (title-gated, confidence-aware):
         norm_score = rrf_score / max_rrf_score_in_pool
         alpha      = 0.60 (ranks 1-3), 0.50 (4-10), 0.40 (11+)
         blended    = alpha * norm_score + (1 - alpha) * rerank_score
-
-    Empirical note: an earlier v0.3-wip used `1/rank` as the position
-    signal with alpha 0.75/0.60/0.40 (qmd's defaults). On seeklink's
-    4-channel RRF that over-weighted rank 1 when the first-stage gap
-    was tiny, locking in wrong answers. Using the normalized RRF score
-    auto-handles tie cases.
+    Only applied when the title channel's rank-1 source is in the
+    rerank candidate pool; otherwise falls back to pure reranker
+    (pre-v0.3 behavior).
     """
 
     def test_blending_preserves_confident_rank_1(

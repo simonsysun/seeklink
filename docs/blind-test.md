@@ -58,7 +58,7 @@ Then `uv sync --dev`.
   expected_paths:
     - "notes/fsrs-algorithm.md"
     - "notes/spaced-repetition.md"
-    - "logs/rhizome-dev/2026-W15.md"
+    - "logs/2026-W15.md"
   tags: [cjk, common]
   expansion:
     - "间隔重复 遗忘曲线 FSRS"
@@ -80,7 +80,7 @@ Then `uv sync --dev`.
 **20-30 queries total.** Fewer than 15 and single-query noise dominates the
 averages.
 
-1. Real-user queries only. Pull from shell history, rhizome logs, or
+1. Real-user queries only. Pull from shell history, your own notes, or
    memory. No synthetic queries.
 2. For each, list 2-5 `expected_paths` you'd be annoyed if not in top 10.
    Hard must-hit semantics — not "would be nice".
@@ -94,8 +94,8 @@ averages.
    `short`, `ambiguous`, `technical`, `common`.
 
 **Ground-truth stability**: commit `queries.yaml` alongside a vault-state
-marker (e.g. the current `rhizome log` head SHA). If you re-run against an
-edited vault, note the drift.
+marker (e.g. the vault's git commit SHA if it's versioned). If you re-run
+against an edited vault, note the drift.
 
 ## Metrics
 
@@ -127,7 +127,7 @@ config, writes results JSON. Invocation:
 python tests/blind/run.py \
     --config A \
     --queries tests/blind/queries.yaml \
-    --vault ~/Rhizome \
+    --vault /path/to/vault \
     --out tests/blind/results/A.json
 
 # Ship candidate — requires v0.4 expansion hook (runner raises until then)
@@ -194,10 +194,11 @@ Abandon v0.4 and look at the embedder (v0.5+) or retrieval channels.
 
 - **Ground truth scope.** Hard must-hit only, or "should appear" (weaker)?
   → Propose: hard must-hit only. Weaker signal = more subjective.
-- **Expansion prompt template.** qmd uses `/no_think Expand this search
-  query: {query}` with GBNF output grammar, backed by a **fine-tuned**
-  Qwen3-1.7B. Base Qwen3-0.6B has no such training; needs a richer
-  few-shot prompt. Draft the prompt once; commit alongside queries.yaml.
+- **Expansion prompt template.** Base Qwen3-0.6B is not fine-tuned for
+  query rewriting, so config B will need a few-shot prompt (variants
+  produced, one per line, bounded length). Draft once and commit
+  alongside `queries.yaml`. Optionally constrain output format via a
+  GBNF grammar if using llama.cpp.
 - **Inference backend for B.** MLX (macOS) or llama.cpp (cross-platform)?
   → Run both, pick the one that hits the p95 budget. Record which.
 - **Randomness.** Qwen3 at temperature 0.7 is non-deterministic. Propose:
@@ -207,8 +208,7 @@ Abandon v0.4 and look at the embedder (v0.5+) or retrieval channels.
 
 ## Out of scope for this framework
 
-- Automated labeling (no — Simon labels ground truth by hand)
-- CI-integrated regression (no — this is a pre-release gate, not a
-  continuous monitor)
-- Comparison against external tools (qmd, ripgrep, etc.) — different
-  vaults, apples to oranges
+- Automated labeling (ground truth is labeled by hand).
+- CI-integrated regression (this is a pre-release gate, not a
+  continuous monitor).
+- Cross-tool comparison (different corpora are incommensurable).

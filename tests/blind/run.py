@@ -2,7 +2,7 @@
 
 Usage:
     python tests/blind/run.py --config A --queries tests/blind/queries.yaml \\
-        --vault ~/Rhizome --out tests/blind/results/A.json
+        --vault /path/to/vault --out tests/blind/results/A.json
 
 Three configs:
     A: baseline = current seeklink daemon path (search + reranker)

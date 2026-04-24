@@ -220,58 +220,37 @@ def search(
     results.sort(key=lambda r: r.score, reverse=True)
     results = results[:candidate_k]
 
-    # Cross-encoder reranking — v0.3 Item 1.
+    # Cross-encoder reranking — title-gated blending (v0.3).
     #
-    # Empirical discovery during v0.3 blind-testing: an unconditional
-    # blend (qmd's `1/rank` formula, or even a normalized-RRF-score
-    # formula) over-protects rank 1 for the class of queries where the
-    # first-stage RRF puts a genuinely BAD candidate at rank 1. The
-    # reranker correctly identifies a better candidate at (say) rank 11,
-    # but position weighting prevents it from winning. Example from the
-    # test corpus: query `把文档切块放进向量库` — `vector-embeddings.md` is at
-    # RRF rank 11 but correctly scored #1 by the reranker; any
-    # always-on blend keeps `agent-memory-patterns.md` at rank 1.
+    # The failure mode this guards against: an exact title / alias hit
+    # wins rank 1 cleanly from the title channel, then the reranker
+    # demotes it because the note is short or uses different phrasing
+    # than the query. In that scenario the title signal is a strong
+    # confidence prior and we want to protect rank 1.
     #
-    # The failure mode we DO want to prevent is "exact title/alias hit
-    # wins rank 1 cleanly from the title channel, but the reranker
-    # demotes it because the note is short or differently-phrased". In
-    # that case the title signal is a strong confidence prior and we
-    # want to protect rank 1.
-    #
-    # Design: TITLE-GATED BLENDING. Apply position-aware blending
-    # across the full candidate pool ONLY when the title channel
-    # produced a rank-1 match and that match survived into the pool.
-    # Otherwise fall back to pre-v0.3 pure reranker replacement so
-    # the reranker can correct wrong first-stage ordering.
+    # Design:
     #
     #   IF title channel rank 1 is in the rerank candidate pool:
     #       blended_i = alpha_i * (rrf_i / max_rrf) + (1 - alpha_i) * rerank_i
     #       with alpha = 0.60 (rank 1-3), 0.50 (4-10), 0.40 (11+)
     #   ELSE:
-    #       blended_i = rerank_i  (pure reranker, v0.2.2 behavior)
+    #       blended_i = rerank_i   (pure reranker, pre-v0.3 behavior)
     #
-    # Why "anywhere in pool", not strictly "pool rank 1":
-    # Empirically on the built-in blind test, exact-title queries like
-    # `Zettelkasten` sometimes put the title-winning note at pool
-    # rank 2 (e.g. indegree boost pushes another note to pool rank 1).
-    # Applying Option-B blending to the whole pool still lifts
-    # zettelkasten.md back to rank 1 via its high normalized RRF
-    # score and reasonable rerank, matching user intent. Gating
-    # strictly on "pool rank 1 === title winner" would drop those
-    # wins. See tests/blind/results/A_v0.3_optC*.json for the
-    # measured impact.
+    # Rationale for gating on "title winner anywhere in pool" (rather
+    # than strictly requiring pool rank 1 === title rank 1): exact-title
+    # queries sometimes put the title-winning note at pool rank 2
+    # because indegree or vector similarity boost another note to pool
+    # rank 1. Applying blending across the pool then lifts the title
+    # winner back to rank 1 via its high normalized RRF score, matching
+    # user intent. A tighter gate drops those wins on the current
+    # fixture corpus.
     #
-    # Theoretical risk: if a query produces a *weak* title hit whose
-    # winner is far down in the pool, this gate still activates blending
-    # for all candidates. On the 22-query blind test we never observed
-    # this (non-exact-title queries had empty title_ranks and the gate
-    # stayed off), but it's a latent corner case worth monitoring.
-    # Revisit this gate once we have labeled data that exercises
-    # weak-title-match queries.
-    #
-    # This preserves Zettelkasten / attention / RRF-style exact-hit
-    # queries at rank 1 while letting reranker correct poor first-stage
-    # ordering for everything else.
+    # Risk: a query that produces a weak title hit whose winner sits
+    # deep in the pool will still activate blending across all
+    # candidates. Not observed on the bundled fixture corpus (non-
+    # exact-title queries had empty title_ranks and the gate stayed
+    # off), but worth revisiting once a larger labeled corpus is
+    # available.
     #
     # Reranker failures downgrade gracefully (rerank() returns None →
     # keep first-stage RRF ordering).

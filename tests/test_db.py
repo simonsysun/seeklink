@@ -180,7 +180,7 @@ class TestSourceCRUD:
         assert updated.title == "Updated"
 
     def test_update_rejects_invalid_columns(self, db: Database):
-        """Codex finding #4: update_source must reject non-whitelisted columns."""
+        """update_source must reject non-whitelisted columns."""
         src = _make_source(db)
         with pytest.raises(ValueError, match="Cannot update columns"):
             db.update_source(src.id, uid="injected")
@@ -195,7 +195,7 @@ class TestSourceCRUD:
         assert db.get_chunks_by_source(src.id) == []
 
     def test_delete_cascades_suggestions(self, db: Database):
-        """Codex finding #2: deleting a source must cascade to suggestions."""
+        """deleting a source must cascade to suggestions."""
         s1 = _make_source(db)
         s2 = _make_source(db)
         db.add_suggestion(s1.id, s2.id, 0.85, "test")
@@ -263,7 +263,7 @@ class TestChunkCRUD:
         assert db.get_chunks_by_source(src.id) == []
 
     def test_delete_chunks_by_source_cleans_vec(self, db: Database):
-        """Codex finding #1: delete_chunks_by_source must also clean vec_chunks."""
+        """delete_chunks_by_source must also clean vec_chunks."""
         src = _make_source(db)
         c = db.add_chunk(src.id, "vectorized chunk", 0)
         emb = _random_embedding()
@@ -383,7 +383,7 @@ class TestForwardRefs:
         assert t.indegree == 1
 
     def test_retarget_link_updates_both_indegrees(self, db: Database):
-        """Codex finding #3: retargeting A→B must decrement A and increment B."""
+        """retargeting A→B must decrement A and increment B."""
         src = _make_source(db)
         target_a = _make_source(db)
         target_b = _make_source(db)

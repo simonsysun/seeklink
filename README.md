@@ -217,7 +217,7 @@ When the reranker is enabled, a cross-encoder (`Qwen3-Reranker-0.6B` on MLX, ~1-
 - **If the title channel's best match is in the candidate pool**, blend `alpha · normalized_rrf + (1 - alpha) · rerank_score` with `alpha = 0.60/0.50/0.40` by rank bucket. This protects exact title / alias hits from being demoted by a content-focused reranker.
 - **Otherwise** (no strong title signal), the reranker score is used directly — same as pre-v0.3 behavior. This lets the reranker correct poor first-stage ordering.
 
-On the built-in 22-query blind test, this improved mean MRR from 0.932 to 0.977 vs pure-reranker-override, with zero regressions. See `tests/blind/` for the methodology.
+On the bundled 22-query pilot (see `tests/blind/`), mean MRR moved from 0.932 to 0.977 vs pure-reranker-override with no per-query regressions. Sample size is a pilot, not a statistically powered benchmark — contributions of larger labeled corpora are welcome.
 
 Disable reranking entirely with: `export SEEKLINK_RERANKER_MODEL=""`
 
@@ -265,7 +265,7 @@ Notes are chunked (~400 tokens), embedded with jina-embeddings-v2-base-zh, and i
 
 ## What changed in v0.3
 
-- **Title-gated rerank blending**: when an exact title / alias hit drives rank 1, protect it from reranker demotion; otherwise fall back to pure reranker. Measured MRR gain of +4.5 pp over v0.2 on a 22-query blind test, with no regressions. See "How search works" above.
+- **Title-gated rerank blending**: when an exact title / alias hit drives rank 1, protect it from reranker demotion; otherwise fall back to pure reranker. Measured mean MRR 0.932 → 0.977 on the bundled 22-query pilot (see "How search works" for caveats on sample size).
 - **Line-range retrieval**: `search` results now include `line_start` / `line_end`, and a new `seeklink get PATH[:LINE] -l N` command prints line-precise windows. Agents can find-then-read without slurping whole files.
 - **Cold-start / daemon parity fix**: cold-start `seeklink search` now constructs a `Reranker()` and passes it to the search pipeline. Previously the same query returned different rankings depending on whether the daemon was running.
 - **Frontmatter-aware line mapping**: chunk offsets (stored against frontmatter-stripped body) are remapped to full-file line numbers, so `search` + `get` report lines the way you'd see them in a text editor.

@@ -29,7 +29,7 @@ The vault's `sources/` folder could store raw external content (textbooks, paper
 Currently freshness warnings only appear in the cold-start CLI path (`seeklink search/status`). The daemon doesn't propagate warnings back to clients. Add a `warnings` field to daemon JSON responses so `cli_client` can print them.
 
 ### Daemon auto-respawn on config mismatch
-`cli_client.call()` refuses to reuse a daemon bound to a different vault or started with a different embedder/reranker (P1 correctness fix), but falls back to cold-start on every subsequent CLI call after a switch until the user manually kills the stale daemon. Codex rated this P2: add a `shutdown` command to the daemon protocol, have the client shutdown + respawn on mismatch so the auto-spawn workflow keeps working across vault/model switches.
+`cli_client.call()` refuses to reuse a daemon bound to a different vault or started with a different embedder/reranker (P1 correctness fix), but falls back to cold-start on every subsequent CLI call after a switch until the user manually kills the stale daemon. P2 follow-up: add a `shutdown` command to the daemon protocol, have the client shutdown + respawn on mismatch so the auto-spawn workflow keeps working across vault/model switches.
 
 ## Infrastructure
 

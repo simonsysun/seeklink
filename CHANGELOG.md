@@ -7,49 +7,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-04-23
+
+Repository cleanup pass. No code changes affecting runtime behavior
+from 0.3.1; this release removes internal R&D artifacts from the public
+surface so the repo reads as a shipped tool rather than a work log.
+
+### Changed
+- Consolidated the 0.3.0 / 0.3.1 narrative into a single release entry (this one). The earlier entries described the same code twice with process detail that did not belong in public release notes.
+- Trimmed `tests/blind/results/` to the two measurements a reader actually needs: baseline (`A_v0.2.2.json`) and shipping (`A_v0.3.json`), plus the upper-bound reference (`C_v0.2.2.json`). Intermediate iteration results removed.
+- Tightened internal code comments and test docstrings so they describe current behavior rather than the iteration history that produced it.
+- README metric claims explicitly labeled as "pilot" with sample size.
+
+### Removed
+- `docs/v0.3-plan.md` — internal design scratch that should not have shipped in the public repo. The shipped design is documented in the "How search works" README section and in code comments.
+
 ## [0.3.1] - 2026-04-23
 
-Docs-only patch. No code changes from 0.3.0; this release exists purely
-to refresh the README snapshot shown on the PyPI project page.
-
-### Fixed (documentation)
-- Quick-start ordering corrected: `seeklink index` must run before `seeklink search` (searching an un-indexed vault returns no results).
-- `seeklink status` is always cold-start (direct SQLite + freshness read); removed incorrect mentions of it auto-spawning the daemon.
-- `seeklink get` is a direct filesystem read; clarified it doesn't involve the daemon either.
-- Latency figures separated by configuration: warm reranker-on path is ~1-2s per query (not ~0.5s); ~10ms applies only to the reranker-disabled path.
-- CLI vs daemon output surfaces split: CLI prints `path:line_start`; daemon JSON additionally carries `line_end`.
-
-### Added (documentation)
-- README "For agents" section: minimum workflow, output contract, exit codes, query-shape hints, daemon JSON fallback.
-- `llms.txt` rewritten as an explicit agent contract (no prose filler; terse sections on workflow, output format, exit codes, failure modes).
-
-## [0.3.0] - 2026-04-23
-
 ### Added
-- **Title-gated rerank blending.** When the title-channel's best match is in the rerank candidate pool, blend `alpha · normalized_rrf + (1 − alpha) · rerank_score` with `alpha = 0.60/0.50/0.40` by rank bucket. This protects confident exact-title / alias hits (e.g. searching `Zettelkasten`, `RRF`, `遗忘曲线`) from being demoted by a content-focused reranker. When no title hit is present, the reranker takes over fully — same as pre-v0.3 behavior — so poor first-stage ordering (e.g. `把文档切块放进向量库` where the correct answer is at RRF rank 11) is still recoverable. Measured on a 22-query blind test vs the same baseline: mean MRR 0.932 → 0.977 (+4.5 pp), mean Recall@10 unchanged, zero regressions. See `docs/v0.3-plan.md` for the iteration history (Options A / B / C) and `tests/blind/results/` for the raw JSON.
-- **Line-range retrieval end-to-end.**
-  - `SearchResult` now carries `line_start` and `line_end` (1-indexed, inclusive), computed by mapping chunk `char_start` / `char_end` back through the frontmatter strip to on-disk line numbers.
-  - Daemon search responses include `line_start` / `line_end`.
-  - CLI `_print_search_results` displays `path:line_start  title` so `path:LINE` can be piped straight into `seeklink get`.
-  - New `seeklink get PATH[:LINE] [-l N]` command reads the current on-disk file with universal-newline translation and prints the requested line range. Defaults: whole file (no `:LINE`), 100 lines starting at `LINE` (no `-l`), N lines (`-l`). Rejects path escapes, warns on beyond-EOF and `LINE < 1`.
-  - Helper `body_offset_to_file_line(full_text, body_char_offset) → int` handles the frontmatter offset; also correct when the frontmatter was deleted from disk after indexing.
-- **Blind-test framework** at `tests/blind/`: 32-file CJK+EN corpus (`tests/corpus/`), 22 ground-truth queries (`tests/blind/queries.yaml`), runner (`tests/blind/run.py`) that cold-starts seeklink once per invocation, warms the reranker, measures `recall_at_10` / `mrr` / `latency_ms` / `p95`. Three configurations: A (baseline), B (v0.4 query expansion — not yet implemented), C (hand-crafted expansion, RRF-fused; upper bound). Used to validate this release; gates v0.4.
-- **v0.3 plan + blind-test framework docs** at `docs/v0.3-plan.md` and `docs/blind-test.md`.
-- **FRONTMATTER_RE** is now a public export from `seeklink.ingest` so the search layer can reuse the same regex for offset mapping.
+- **Title-gated rerank blending.** When the title / alias channel produces a confident match in the rerank candidate pool, SeekLink blends a normalized first-stage score with the reranker output so exact title or alias hits (`Zettelkasten`, `RRF`, `遗忘曲线`, `[[alias]]`) are preserved at rank 1 instead of being demoted by a content-focused reranker. When no title signal is present, the reranker takes over fully — same behavior as v0.2.x — so poor first-stage ordering is still recoverable. On the bundled 22-query pilot (see `tests/blind/`): mean MRR 0.932 → 0.977, mean Recall@10 unchanged, no per-query regressions. Sample size is intentionally a pilot; larger labeled corpora are welcome.
+- **Line-range retrieval.** `SearchResult` now carries 1-indexed inclusive `line_start` / `line_end` fields mapped through the indexer's frontmatter strip back to on-disk line numbers. CLI `search` prints `SCORE  PATH:LINE  TITLE` so agents can pipe the hit into a precise window read. A new `seeklink get PATH[:LINE] [-l N]` command performs that window read directly from the filesystem — no DB round-trip, no daemon involvement, universal-newline translation, path-escape rejection.
+- **Cold-start `search` reranker parity.** `seeklink search --vault PATH` (the cold-start path) now constructs a reranker and passes it to the search pipeline, matching the daemon. Before this change, the same query returned different rankings depending on whether a daemon happened to be running.
+- **Agent-first documentation.** New "For agents" section in the README (minimum workflow, output contract, exit codes, query-shape hints, daemon JSON fallback). `llms.txt` rewritten as an explicit contract.
+- **Blind-test framework** at `tests/blind/`: 32-file bilingual (CJK + English) fixture corpus (`tests/corpus/`), 22 ground-truth queries (`tests/blind/queries.yaml`), runner that cold-starts once per invocation and measures `recall_at_10` / `mrr` / `latency_ms` / `p95`. Three configurations: `A` (current baseline), `B` (planned query expansion — not yet shipped), `C` (hand-crafted expansion, RRF-fused; upper bound). Used to gate this release.
 
 ### Fixed
-- **Cold-start vs daemon parity.** Cold-start `seeklink search` (the path triggered when `--vault` is passed or the daemon is unreachable) now constructs a `Reranker()` and passes it to `search()`, matching the daemon's behavior. Previously the same query returned different rankings depending on whether a daemon happened to be running — a silent correctness bug. `Reranker()` construction is safe on platforms without MLX (Linux, Intel macOS) because the instance self-disables at model-load time.
-- **Line-range accounting for newline-terminated files.** `seeklink get file:LINE` on a file that ends with `\n` no longer miscounts the trailing newline as an extra logical line. Line 6 of a 5-line (newline-terminated) file now correctly emits the `beyond-EOF` warning instead of returning a blank line.
-- **Title-only match with deleted file.** When a search result references a source whose file has been removed from disk (title-only match via alias to a stale source), `compute_lines_for_results` no longer returns `line_start=1` — it degrades to `0/0` so agents aren't handed a `path:1` that won't resolve. Consistent with other missing-file paths.
+- **`seeklink get` trailing-newline accounting.** `get FILE:LINE` on a newline-terminated file no longer counts the trailing `\n` as an extra logical line. `get FILE:6` on a 5-line file correctly emits the beyond-EOF warning instead of returning a blank line.
+- **Title-only match with missing file.** If a search surfaces a title-only match whose file has been deleted from disk, `SearchResult.line_start` / `line_end` now remain at `0` rather than returning a misleading `path:1`.
+
+### Changed
+- **`SearchResult` gains `line_start` and `line_end` (default `0`).** Backward compatible for existing callers; populated when `search()` is called with `vault_root`.
+- **`FRONTMATTER_RE`** is now a public export from `seeklink.ingest` (was `_FRONTMATTER_RE`), so the search layer can reuse it for offset mapping. The underscore-prefixed name still aliases it for backward compatibility.
 
 ### Dev
-- PyYAML added as a dev dependency (required by `tests/blind/run.py`).
-- Test suite: 185 → 203 tests (18 new). 3 for position-aware blending, 13 for `get` command + `body_offset_to_file_line` helper, 3 for end-to-end `SearchResult.line_start/line_end` population, 1 for trailing-newline EOF accounting. All green.
+- PyYAML added as a dev dependency (required by the blind-test runner).
+- Test suite: 185 → 204 tests (19 new).
 
-### Deferred to v0.3.1+
-- `SEEKLINK_DEBUG=1` blended-score logging (proposed in v0.3 plan, skipped to avoid scope creep).
-- Per-result `mtime > indexed_at` drift warnings on the daemon path (cold-start already warns globally via `check_freshness`). Daemon-side follow-up tracked in `TODOS.md`.
-- Linux reranker via llama.cpp / GGUF (`QuantFactory/Qwen3-Reranker-0.6B-GGUF` exists; wiring it into seeklink lives on after v0.3).
+### Deferred
+- `SEEKLINK_DEBUG=1` blended-score logging.
+- Per-result `mtime > indexed_at` drift warnings on the daemon path (cold-start already warns globally via `check_freshness`).
+- Linux reranker via llama.cpp / GGUF.
+
+### Superseded
+- This release supersedes the same-day `0.3.0` tag, which had the same code but shipped with inaccurate README content (quick-start ordering, latency numbers, `seeklink status` description). If you are pinning a version, use `0.3.1`.
 
 ## [0.2.2] - 2026-04-19
 

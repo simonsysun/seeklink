@@ -26,7 +26,7 @@
   intent: "architectural patterns for LLM agents with persistent state"
   expected_paths:
     - "notes/claude-memory-design.md"
-    - "logs/rhizome-dev/2026-W15.md"
+    - "logs/2026-W15.md"
   tags: [english, technical]
   expansion:
     - "persistent context agents"
