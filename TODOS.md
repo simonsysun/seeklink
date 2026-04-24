@@ -1,54 +1,70 @@
-# TODOs
+# Deferred work
 
-Deferred work for future releases.
+Known limitations and possible future work. Not commitments — items here
+ship if and when they become worth the cost.
 
-## v0.3 candidates
+## Search quality and features
 
 ### Cross-encoder performance optimization
-The MLX reranker (Qwen3-Reranker-0.6B) runs at ~60ms per pair on M3 Air Metal GPU, totaling ~1.2-2.7s for 20 candidates with realistic vault chunks. Potential paths to reduce this:
-- Batch inference (process all 20 pairs in one forward pass instead of sequentially)
-- Passage truncation (cap at 200 tokens for reranking, use full text only for final display)
-- Configurable `rerank_k` via CLI flag (reduce candidate pool when speed matters)
+The MLX reranker (`Qwen3-Reranker-0.6B`) runs at ~60 ms per pair on M3-class
+Apple Silicon, totaling ~1.2–2.7 s for 20 candidates on realistic vault
+chunks. Possible reductions:
 
-### `suggest_links` and `graph` CLI subcommands
-The helper functions exist in `seeklink/app.py` (moved from the deleted MCP server) but have no CLI exposure. Wire them as:
-- `seeklink suggest-links <path>` — find notes that should be linked
-- `seeklink resolve-suggestion <id> approve|reject` — approve writes `[[link]]`
-- `seeklink graph <path> --depth N` — show link neighborhood
+- Batch inference (process all pairs in one forward pass instead of
+  sequentially).
+- Passage truncation (cap at ~200 tokens for reranking, use full text only
+  for final display).
+- Configurable `rerank_k` via a CLI flag so callers can trade precision
+  for latency per query.
+
+### Additional CLI subcommands
+Helpers exist inside `seeklink/app.py` but are not exposed on the CLI:
+
+- `seeklink suggest-links <path>` — find notes that should be linked.
+- `seeklink resolve-suggestion <id> approve|reject` — accept / reject a
+  suggestion, writing `[[link]]` into the source on approval.
+- `seeklink graph <path> --depth N` — show the link neighborhood of a note.
 
 ### Embedder upgrade path
-Current: jina-embeddings-v2-base-zh (330MB, 768-dim). All 2026 multilingual alternatives (Qwen3-Embedding-0.6B, BGE-M3, jina-v3) are >2GB in ONNX form and not fastembed-supported. Revisit when a <500MB multilingual embedder with better CJK scores becomes available in fastembed. The `SEEKLINK_EMBEDDER_MODEL` env var is ready for a drop-in swap; a full re-index (`seeklink index --force`) is required after switching.
+Current default: `jinaai/jina-embeddings-v2-base-zh` (~330 MB, 768-dim).
+Stronger multilingual alternatives (`Qwen3-Embedding-0.6B`, `BGE-M3`,
+`jina-v3`) are >2 GB in ONNX form and not currently fastembed-supported.
+Revisit when a <500 MB multilingual embedder with better CJK scores
+becomes available in `fastembed`. `SEEKLINK_EMBEDDER_MODEL` is already
+configurable; a swap requires a full re-index.
 
-### Sources folder as RAG data source
-The vault's `sources/` folder could store raw external content (textbooks, papers, PDFs converted to markdown) for semantic search. Requires:
-- An ingest pipeline (MarkItDown / marker / docling for PDF→markdown)
-- LLM metadata extraction pass (title, aliases, tags, chapter structure)
-- Possibly chunk-by-chapter instead of chunk-by-400-tokens
+### Ingesting non-markdown sources
+A vault `sources/` folder could hold raw external content (PDFs, papers,
+textbooks) for semantic search. Requires a PDF→markdown pipeline
+(`markitdown` / `marker` / `docling`), optional LLM metadata extraction,
+and probably chapter-level chunking instead of the current fixed-size
+chunks.
+
+## Daemon and platform
 
 ### Daemon freshness integration
-Currently freshness warnings only appear in the cold-start CLI path (`seeklink search/status`). The daemon doesn't propagate warnings back to clients. Add a `warnings` field to daemon JSON responses so `cli_client` can print them.
+Cold-start `seeklink search` / `seeklink status` emit stderr warnings when
+indexed files have drifted on disk. The daemon path does not propagate
+those warnings back to clients. Adding a `warnings` field to the daemon
+JSON response would let `cli_client` surface them in the same shape.
 
 ### Daemon auto-respawn on config mismatch
-`cli_client.call()` refuses to reuse a daemon bound to a different vault or started with a different embedder/reranker (P1 correctness fix), but falls back to cold-start on every subsequent CLI call after a switch until the user manually kills the stale daemon. P2 follow-up: add a `shutdown` command to the daemon protocol, have the client shutdown + respawn on mismatch so the auto-spawn workflow keeps working across vault/model switches.
-
-## Infrastructure
-
-### PyPI publishing (in progress)
-`.github/workflows/publish.yml` (v0.2.1+) ships an OIDC-based Trusted Publisher flow via a SHA-pinned `pypa/gh-action-pypi-publish@v1.14.0`. Future tags matching `v*` will auto-publish once the Trusted Publisher has been registered on PyPI. One-time PyPI-side setup:
-
-1. Log in to https://pypi.org/manage/project/seeklink/settings/publishing/
-2. Add a new **trusted publisher** with:
-   - Owner: `simonsysun`
-   - Repository name: `seeklink`
-   - Workflow filename: `publish.yml`
-   - Environment name: `pypi`
-3. Trigger the workflow once for v0.2.1 via `gh workflow run publish.yml -f tag=v0.2.1` (or via the GitHub Actions UI with the `tag` input set to `v0.2.1`).
+`cli_client.call()` refuses to reuse a daemon bound to a different vault
+or started with a different embedder / reranker (correctness), but falls
+back to cold-start on every subsequent CLI call after a switch until the
+user manually kills the stale daemon. Add a `shutdown` command to the
+daemon protocol so the client can shut down and respawn on mismatch,
+keeping the auto-spawn workflow intact across vault / model switches.
 
 ### Multi-vault daemon support
-Current daemon binds to a single socket (`~/.rhizome/seeklink.sock`) regardless of vault. If multiple vaults need concurrent daemons, hash the vault path into the socket name. Deferred until multi-vault is a real use case.
+The daemon binds to a single socket (`~/.rhizome/seeklink.sock`) regardless
+of vault. For multiple vaults to run concurrent daemons, hash the vault
+path into the socket name. Deferred until multi-vault is a real user need.
 
-### Linux deployment
-The MLX reranker is Apple Silicon only. On Linux, either:
-- Disable reranker (`SEEKLINK_RERANKER_MODEL=""`) and rely on RRF only
-- Port to onnxruntime with CUDA (if GPU available)
-- Port to llama.cpp via GGUF format (`Mungert/Qwen3-Reranker-0.6B-GGUF`)
+### Linux reranker
+The MLX reranker is Apple Silicon only. On Linux it self-disables. Options
+to restore reranking on Linux:
+
+- Port the scoring loop to `onnxruntime` (CUDA or CPU).
+- Run a GGUF build of the same model via `llama.cpp` (e.g.
+  `Mungert/Qwen3-Reranker-0.6B-GGUF`).

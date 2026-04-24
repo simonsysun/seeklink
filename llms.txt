@@ -10,7 +10,7 @@ Runs on macOS and Linux, Python 3.11+. Indexes any folder of `.md` files (Obsidi
 
 - [README](https://github.com/simonsysun/seeklink/blob/main/README.md): full install, quick start, CLI reference, architecture, support matrix, and when (not) to use SeekLink.
 - [CHANGELOG](https://github.com/simonsysun/seeklink/blob/main/CHANGELOG.md): version history in Keep-a-Changelog format.
-- [TODOS](https://github.com/simonsysun/seeklink/blob/main/TODOS.md): deferred work and v0.3 candidates.
+- [TODOS](https://github.com/simonsysun/seeklink/blob/main/TODOS.md): deferred work and known limitations.
 - [LICENSE](https://github.com/simonsysun/seeklink/blob/main/LICENSE): MIT.
 
 ## Source
@@ -28,7 +28,7 @@ Runs on macOS and Linux, Python 3.11+. Indexes any folder of `.md` files (Obsidi
 
 ## Agent contract
 
-SeekLink is designed for AI agents to shell out to. No MCP wrapper; shell commands are the interface.
+SeekLink is designed for AI agents to shell out to. Shell commands are the primary interface. For structured output the daemon exposes a length-prefixed JSON protocol over a Unix socket — see below. There is no MCP server bundled.
 
 ### Minimum workflow
 
@@ -55,7 +55,7 @@ Set `SEEKLINK_VAULT=<path>` once to omit `--vault` on every call and route throu
 - `SCORE` is blended (reranker on) or raw RRF (reranker disabled). Don't compare scores across configurations.
 - Preview is truncated at 120 chars, newlines flattened to spaces.
 
-For structured output (e.g. to parse `line_end`, `indegree`), connect to the daemon's Unix socket at `~/.rhizome/seeklink.sock` directly. Protocol: 4-byte big-endian length + UTF-8 JSON. Request: `{"cmd":"search","args":{"query":"...","top_k":10,...}}`. Response: `{"ok":true,"result":[{"source_id","path","title","content_preview","score","indegree","line_start","line_end"},...]}`.
+For structured output (e.g. to parse `line_end`, `indegree`), connect to the daemon's Unix socket at `~/.rhizome/seeklink.sock` directly. Protocol: a 4-byte big-endian length prefix followed by a UTF-8 JSON body. Request body: `{"cmd":"search","args":{"query":"...","top_k":10}}`. Response body on success: `{"ok":true,"result":[...]}` where each item has `source_id`, `path`, `title`, `content_preview`, `score`, `indegree`, `line_start`, `line_end`.
 
 ### Exit codes
 

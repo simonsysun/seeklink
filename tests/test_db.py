@@ -1,4 +1,4 @@
-"""Tests for seeklink.db — covers all 8 Phase 1 acceptance criteria."""
+"""Tests for seeklink.db — schema, CRUD, FTS, vec, and link-graph maintenance."""
 
 from __future__ import annotations
 

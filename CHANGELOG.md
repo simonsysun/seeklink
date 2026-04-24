@@ -106,7 +106,10 @@ surface so the repo reads as a shipped tool rather than a work log.
 - Native CJK tokenization via jieba registered as a custom FTS5 tokenizer.
 - MCP server transport (`seeklink serve`) — removed in v0.2.0.
 
-[Unreleased]: https://github.com/simonsysun/seeklink/compare/v0.2.2...HEAD
+[Unreleased]: https://github.com/simonsysun/seeklink/compare/v0.3.2...HEAD
+[0.3.2]: https://github.com/simonsysun/seeklink/releases/tag/v0.3.2
+[0.3.1]: https://github.com/simonsysun/seeklink/releases/tag/v0.3.1
+[0.3.0]: https://github.com/simonsysun/seeklink/releases/tag/v0.3.0
 [0.2.2]: https://github.com/simonsysun/seeklink/releases/tag/v0.2.2
 [0.2.1]: https://github.com/simonsysun/seeklink/releases/tag/v0.2.1
 [0.2.0]: https://github.com/simonsysun/seeklink/releases/tag/v0.2.0

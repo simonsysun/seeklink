@@ -1,26 +1,26 @@
-# Query expansion blind test framework (v2, post-review)
+# Query expansion blind test framework
 
 ## Purpose
 
-Validate that query expansion (planned for v0.4) actually improves real
-search quality against a CJK-first personal vault **before** we commit to
-shipping it. Query expansion introduces:
+Validate that query expansion actually improves real search quality
+against a CJK-first personal vault **before** committing to shipping it.
+Query expansion introduces:
 
-- A new generative model (Qwen3-0.6B, ~500 MB quantized)
-- New dependency on MLX and/or llama.cpp for inference
-- Query-time latency (~200-500 ms extra per search)
+- A new generative model (Qwen3-0.6B, ~500 MB quantized).
+- A new runtime dependency (MLX or `llama.cpp`).
+- Extra query-time latency (dependent on backend and prompt).
 
-That cost is only justified if the win over baseline is real and consistent.
-If the test shows "indistinguishable from baseline" or "regresses on too
-many queries", **we cancel the feature**, not ship it and hope nobody
-notices.
+The cost is only justified if the win over baseline is real and
+consistent. If the test shows "indistinguishable from baseline" or
+"regresses on too many queries", the feature should be cancelled rather
+than shipped.
 
 ## Three configurations
 
 | ID | Pipeline | What it measures |
 |----|----------|------------------|
-| **A** | seeklink search + reranker (daemon-path behavior) | Baseline. *Must* match product behavior — the runner constructs a real `Reranker()` and passes it to `search()`, same as `daemon.py` does. |
-| **B** | seeklink + Qwen3-0.6B expansion (v0.4 candidate) | Ship candidate |
+| **A** | seeklink search + reranker (daemon-path behavior) | Baseline. Must match product behavior — the runner constructs a real `Reranker()` and passes it to `search()`, same as `daemon.py` does. |
+| **B** | seeklink + Qwen3-0.6B expansion | Ship candidate |
 | **C** | seeklink + hand-crafted expansion, RRF-fused | Upper bound |
 
 A and C are fixed points. B's distance from C tells us how much the small
@@ -28,25 +28,14 @@ model is leaving on the table; B's distance from A tells us whether
 shipping B is worth it at all.
 
 **Important**: config A is *not* "raw seeklink search without reranker".
-seeklink's cold-start CLI path has historically omitted the reranker (a
-known bug being fixed alongside v0.3); the daemon path has always used it.
-The blind test measures the daemon-path product behavior, because that's
-what users actually experience.
+The runner constructs a real `Reranker()` and passes it to `search()`,
+so A reproduces what a user gets from the default `seeklink search`
+invocation.
 
 ## Runtime requirement
 
-`tests/blind/run.py` imports `yaml`. PyYAML is not currently in
-`pyproject.toml`. Before running, add it as a dev dependency:
-
-```toml
-[dependency-groups]
-dev = [
-    # ... existing ...
-    "pyyaml>=6.0",
-]
-```
-
-Then `uv sync --dev`.
+`tests/blind/run.py` imports `yaml`. Install dev dependencies with
+`uv sync --dev` before running.
 
 ## Test data format
 
@@ -149,10 +138,10 @@ Runner:
 - Records per-query latency using `time.perf_counter()`. Model-load time
   is excluded by warmup.
 
-Human blind-scoring pass is a separate script (not yet written): take
-results/A,B,C.json, shuffle per-query, present you one query + 5 results
-(path + title + snippet) at a time without labels, record 1-5 score per
-config.
+For a human blind-scoring pass, run a small shuffling script over
+`results/A.json`, `results/B.json`, `results/C.json`: per query, present
+one query plus 5 results (path + title + snippet) at a time without
+labels, and record a 1-5 score per config.
 
 ## Acceptance criteria for shipping B (query expansion feature)
 
@@ -186,14 +175,14 @@ config.
 - Human score shows mixed signal: B is higher on some queries and lower on
   others with no tag-level explanation
 
-**Sanity ceiling check**: if C is also indistinguishable from A (`|C - A|
-< 0.05`), expansion is not the problem — retrieval or embedder is.
-Abandon v0.4 and look at the embedder (v0.5+) or retrieval channels.
+**Sanity ceiling check**: if C is also indistinguishable from A
+(`|C - A| < 0.05`), expansion is not the problem — retrieval or embedder
+is. Look at the embedder or retrieval channels instead.
 
-## Open questions (resolve before the first real run)
+## Notes on setup
 
-- **Ground truth scope.** Hard must-hit only, or "should appear" (weaker)?
-  → Propose: hard must-hit only. Weaker signal = more subjective.
+- **Ground truth scope.** Use hard must-hit semantics only. Weaker
+  signal is more subjective and blurs the numbers.
 - **Expansion prompt template.** Base Qwen3-0.6B is not fine-tuned for
   query rewriting, so config B will need a few-shot prompt (variants
   produced, one per line, bounded length). Draft once and commit

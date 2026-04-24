@@ -4,22 +4,19 @@ Subcommands:
   daemon   — run the Unix-socket daemon (eager-loaded models, never exits)
   search   — search the vault (daemon-first; cold-start fallback)
   index    — index notes (daemon-first; cold-start fallback)
-  status   — show vault / index stats (daemon-first; cold-start fallback)
+  status   — show vault / index stats (always cold-start; no model load)
+  get      — print a line range of a vault file (direct filesystem read)
 
-Dispatch: when `--vault` is not passed, the CLI tries the daemon socket
-first (auto-spawning the daemon on first call). If the daemon is unreachable
-or returns an error, the command falls back to an in-process cold-start.
-Passing `--vault` always uses cold-start because the daemon is bound to a
-single vault (selected via SEEKLINK_VAULT or cwd at daemon-start time);
-multi-vault daemon support is tracked in TODOS.md.
+Dispatch: when `--vault` is not passed to `search` / `index`, the CLI
+tries the daemon socket first (auto-spawning the daemon on first call)
+and falls back to an in-process cold-start if the daemon is unreachable.
+Passing `--vault` always uses cold-start because the daemon is bound to
+a single vault (selected via SEEKLINK_VAULT or cwd at daemon-start time).
+`status` and `get` never route through the daemon.
 
-Freshness warnings print only on the cold-start path today; daemon
-freshness integration is tracked in TODOS.md.
-
-The MCP server (`serve`) was removed in v0.1.1. See vault log
-`logs/rhizome-dev/2026-W16.md` for rationale. Agents that used to talk
-to seeklink over MCP should invoke the CLI via `subprocess` now, or
-connect to the daemon socket via `seeklink.cli_client`.
+Agents integrating SeekLink should invoke the CLI via `subprocess` or
+connect to the daemon socket via `seeklink.cli_client` for structured
+output.
 """
 
 from __future__ import annotations

@@ -1,4 +1,4 @@
-"""Tests for `seeklink get` command + line-range helpers (v0.3 Item 2)."""
+"""Tests for `seeklink get` command and the body-offset to file-line mapping helper."""
 
 from __future__ import annotations
 

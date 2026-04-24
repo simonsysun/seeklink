@@ -1,23 +1,18 @@
 """Freshness check — warn when vault files have changed since last index.
 
-Replacement for the watchdog-based file watcher. Instead of running a
-background daemon to observe filesystem events, we do a bidirectional
-scan on every `search` / `status` call:
+On every cold-start `search` / `status` call we do a bidirectional scan:
 
-  1. Disk → DB: find new .md files that haven't been indexed yet
-  2. DB → Disk: find indexed entries whose file was modified or deleted
+  1. Disk → DB: find new .md files that haven't been indexed yet.
+  2. DB → Disk: find indexed entries whose file was modified or deleted.
 
 If either direction finds problems, a warning is printed to stderr
-suggesting the user run `seeklink index` (or `--force`).
+suggesting the user run `seeklink index`. Intentionally non-destructive:
+no automatic re-indexing, no blocking. The user always decides when to
+pay the re-index cost.
 
-This is intentionally non-destructive: no automatic reindexing, no
-blocking. The user always decides when to pay the reindex cost.
-
-Known limitations (Mac-only v0.1.1 scope):
-- mtime is not preserved by `git clone`, `scp`, `tar` without `-m` etc.
-  → false positives, solve with `seeklink index --force`
-- Single daemon socket is not keyed by vault path; multi-vault on one
-  machine will route to the wrong daemon. Fix when multi-vault is real.
+Known limitation: mtime is not preserved by `git clone`, `scp`, or
+`tar` without `-m`, which can produce false positives. Delete
+`.seeklink/` and re-run `seeklink index` to reset.
 """
 
 from __future__ import annotations

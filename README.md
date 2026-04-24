@@ -33,13 +33,13 @@ You:   seeklink daemon --vault ~/notes
 - You want search that understands *meaning*, not just exact words — and that surfaces short log entries on equal footing with titled permanent notes.
 - You want it to work offline, with no API keys, no cloud, and no data leaving your machine.
 - You write in English, Chinese, or both. CJK is a first-class tokenization path (`jieba` as a custom FTS5 tokenizer), not an afterthought.
-- You want a CLI an agent can shell out to. Any tool that can `exec()` a binary can use SeekLink — no MCP client or vendor lock-in.
+- You want a CLI an agent can shell out to. Anything that can `exec()` a binary — editor plugins, shell scripts, LLM agents — can use SeekLink.
 
 ## When **not** to use SeekLink
 
 - Your notes are not markdown (Notion export, Bear, Apple Notes native format, Roam). Convert them first, or pick a tool built for that format.
 - You want a hosted, synced, multi-user search service. SeekLink is single-machine, single-user.
-- You want a GUI inside Obsidian. SeekLink is a CLI + daemon — there's no Obsidian plugin (yet).
+- You want a GUI inside Obsidian. SeekLink is a CLI + daemon; there is no Obsidian plugin.
 - You need sub-millisecond search over millions of notes. SeekLink targets personal vaults (thousands to low tens-of-thousands of notes). At that scale it's fast; beyond, you want a real search service (Typesense, Meilisearch, Elastic).
 - You're on Windows. macOS and Linux are tested; Windows should mostly work (Python is portable, the Unix-socket daemon isn't) but is not a supported path.
 
@@ -121,7 +121,7 @@ The daemon stays resident across terminal sessions until you `kill` it or restar
 
 ## For agents
 
-SeekLink is designed to be shelled out to by AI agents (Claude Code, Cursor, custom RAG pipelines), not just typed by humans. The contract:
+SeekLink is designed to be shelled out to by LLM agents and RAG pipelines, not just typed by humans. The contract:
 
 1. **Index once, then search.** Agents should check `seeklink status --vault PATH` before first use; if `Notes: 0` or stale, run `seeklink index --vault PATH`.
 2. **Search.** `seeklink search "query" --vault PATH --top-k N`. Each result line is:
@@ -155,11 +155,11 @@ Options:
 
 ### `seeklink daemon`
 
-Starts a Unix-socket daemon that keeps the embedding model (and reranker, if enabled) resident in memory. First query after startup takes ~2s (model warmup); subsequent queries return in ~10ms without reranker or ~2s with reranker.
+Starts a Unix-socket daemon that keeps the embedding model (and reranker, if enabled) resident in memory. First query after startup takes ~2s for model warmup; warm queries return in ~1-2s with the reranker on (default) or ~10ms with `SEEKLINK_RERANKER_MODEL=""`.
 
 **You almost never run this directly.** `seeklink search` and `seeklink index` auto-spawn a daemon on cold machines when `--vault` is not passed. `seeklink status` is always cold-start (no model load). `seeklink get` is a direct filesystem read (no daemon). The daemon uses `SEEKLINK_VAULT` (or cwd) as its vault and never auto-exits — kill it with `kill` or restart your machine.
 
-Passing `--vault` always uses cold-start instead of the daemon, because the daemon binds to a single vault at startup. Multi-vault daemon support is tracked in TODOS.md.
+Passing `--vault` always uses cold-start instead of the daemon, because the daemon binds to a single vault at startup.
 
 ```
 seeklink daemon --vault PATH    # foreground, for debugging
@@ -263,22 +263,9 @@ Notes are chunked (~400 tokens), embedded with jina-embeddings-v2-base-zh, and i
 | `SEEKLINK_EMBEDDER_MODEL` | `jinaai/jina-embeddings-v2-base-zh` | Embedding model (fastembed-supported) |
 | `SEEKLINK_RERANKER_MODEL` | `mlx-community/Qwen3-Reranker-0.6B-mxfp8` | Reranker model (set to `""` to disable) |
 
-## What changed in v0.3
+## Release history
 
-- **Title-gated rerank blending**: when an exact title / alias hit drives rank 1, protect it from reranker demotion; otherwise fall back to pure reranker. Measured mean MRR 0.932 → 0.977 on the bundled 22-query pilot (see "How search works" for caveats on sample size).
-- **Line-range retrieval**: `search` results now include `line_start` / `line_end`, and a new `seeklink get PATH[:LINE] -l N` command prints line-precise windows. Agents can find-then-read without slurping whole files.
-- **Cold-start / daemon parity fix**: cold-start `seeklink search` now constructs a `Reranker()` and passes it to the search pipeline. Previously the same query returned different rankings depending on whether the daemon was running.
-- **Frontmatter-aware line mapping**: chunk offsets (stored against frontmatter-stripped body) are remapped to full-file line numbers, so `search` + `get` report lines the way you'd see them in a text editor.
-- **Blind-test framework** at `tests/blind/`: 32-file corpus + 22 ground-truth queries + runner that measures Recall@10 / MRR / latency. Used to validate v0.3 before tagging; gates v0.4 (query expansion) the same way.
-
-## What changed in v0.2
-
-- **CLI-first**: MCP server removed. All interaction via `seeklink search/index/status/daemon`.
-- **Daemon mode**: Unix-socket resident server with auto-spawn. Models stay loaded for fast queries.
-- **Reranker**: Qwen3-Reranker-0.6B via MLX on Apple Silicon. Optional, default enabled.
-- **Freshness check**: bidirectional mtime scan replaces the file watcher. Warns on stale/new/deleted files.
-- **Title weight 1.5**: down from 3.0, so log entries and journal notes compete fairly with titled permanent notes.
-- **Leaner deps**: `mcp` and `watchfiles` removed. 4 runtime dependencies instead of 6.
+See [CHANGELOG.md](CHANGELOG.md).
 
 ## Contributing
 

@@ -1,4 +1,4 @@
-"""Tests for seeklink.search — three-channel RRF fusion with graph expansion."""
+"""Tests for seeklink.search — four-channel RRF fusion, title-gated rerank blending, line-range computation."""
 
 from __future__ import annotations
 

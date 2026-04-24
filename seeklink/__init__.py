@@ -1,4 +1,4 @@
-"""SeekLink — personal knowledge management engine."""
+"""SeekLink — hybrid search for markdown vaults."""
 
 from seeklink.chunker import ChunkSpan, chunk_markdown
 from seeklink.db import CapabilityError, Database

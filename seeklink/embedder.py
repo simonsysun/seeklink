@@ -24,9 +24,9 @@ class Embedder:
 
     Defaults to jina-embeddings-v2-base-zh (330MB, strong CJK+English).
     Override via SEEKLINK_EMBEDDER_MODEL env var if you want to try a
-    different fastembed-supported model. After switching models, you
-    must re-index the vault (`seeklink index --force`) because the
-    vector space is not compatible across models.
+    different fastembed-supported model. After switching models, delete
+    `.seeklink/` and re-run `seeklink index` — vector spaces are not
+    compatible across models.
 
     Thread-safe: model loads once on first use via double-checked locking.
     """

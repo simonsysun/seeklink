@@ -46,9 +46,8 @@ classifiers = [
     "Operating System :: POSIX :: Linux",
 ]
 # The license is declared above as the SPDX expression `license = "MIT"`.
-# Do NOT add a `License :: OSI Approved :: MIT License` classifier here —
-# modern setuptools rejects the pair (PEP 639). Previously fixed in
-# `c0d261a` and regressed in the v0.2.1 chore commit; this note pins it.
+# Do not add a `License :: OSI Approved :: MIT License` classifier here —
+# modern setuptools rejects the pair under PEP 639.
 dependencies = [
     "fastembed>=0.7.4",
     "jieba>=0.42.1",

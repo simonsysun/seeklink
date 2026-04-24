@@ -1,9 +1,10 @@
 """Shared app bootstrap + graph/link helpers.
 
-Used to live in server.py alongside the FastMCP server. The MCP server
-was removed in v0.1.1 (see vault log `logs/rhizome-dev/2026-W16.md`).
-These helpers survived because the daemon and CLI still rely on them
-for db initialization and graph traversal.
+`init_app()` returns a `(db, embedder, vault_root)` triple and is the
+entry point both the daemon and the cold-start CLI path build on.
+Additional helpers here handle wikilink graph traversal and related-
+note suggestion — used by the reverse-link / neighbour APIs and
+reserved for future CLI subcommands.
 """
 
 from __future__ import annotations
