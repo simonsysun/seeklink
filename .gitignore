@@ -26,3 +26,7 @@ wheels/
 
 # Dev log (private)
 .claude/devlog.md
+
+# Development scratch (design notes, intermediate benchmark runs).
+# See CLAUDE.md "Daily coding discipline" for intended use.
+.scratch/
