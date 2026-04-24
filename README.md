@@ -161,6 +161,21 @@ seeklink status --vault PATH
 
 Shows index stats and freshness warnings. If files have changed since last index, prints a warning to stderr.
 
+### `seeklink get`
+
+Print a line range of a vault file directly to stdout. Designed for agents that have a search hit like `notes/fsrs.md:42` and want to read a precise window without fetching the whole file.
+
+```
+seeklink get PATH[:LINE] [-l N] [--vault PATH]
+
+  seeklink get notes/fsrs.md              # entire file
+  seeklink get notes/fsrs.md:120          # 100 lines starting at line 120
+  seeklink get notes/fsrs.md:120 -l 40    # 40 lines starting at line 120
+  seeklink get notes/fsrs.md -l 50        # first 50 lines
+```
+
+Line numbers match `search` output. CRLF files print with universal newlines. Path escapes (`../..`) are rejected.
+
 ## How search works
 
 SeekLink runs four search channels in parallel and merges results with Reciprocal Rank Fusion:
@@ -174,11 +189,20 @@ SeekLink runs four search channels in parallel and merges results with Reciproca
 
 Many personal knowledge bases contain a mix of **titled articles** (permanent notes, literature reviews) and **untitled process notes** (daily logs, journal entries, quick captures). A high title weight systematically buries untitled content — even when it's the most relevant result for the query. The default of 1.5 keeps title matching useful for precise `[[alias]]` lookups while letting content-based matches compete on their own merits. Override with `--title-weight` per query if needed.
 
-### Optional: cross-encoder reranking
+### Title-gated rerank blending (v0.3+)
 
-When enabled (default on Apple Silicon), the top-20 RRF candidates are re-scored by Qwen3-Reranker-0.6B running on MLX (Metal GPU). This reads each (query, passage) pair with full cross-attention — more accurate than vector similarity alone, at the cost of ~1-2s per query.
+When the reranker is enabled, a cross-encoder (`Qwen3-Reranker-0.6B` on MLX, ~1-2s per query) re-scores the top-20 RRF candidates for precision. SeekLink applies **title-gated position blending** on top of this:
 
-Disable with: `export SEEKLINK_RERANKER_MODEL=""`
+- **If the title channel's best match is in the candidate pool**, blend `alpha · normalized_rrf + (1 - alpha) · rerank_score` with `alpha = 0.60/0.50/0.40` by rank bucket. This protects exact title / alias hits from being demoted by a content-focused reranker.
+- **Otherwise** (no strong title signal), the reranker score is used directly — same as pre-v0.3 behavior. This lets the reranker correct poor first-stage ordering.
+
+On the built-in 22-query blind test, this improved mean MRR from 0.932 to 0.977 vs pure-reranker-override, with zero regressions. See `tests/blind/` for the methodology.
+
+Disable reranking entirely with: `export SEEKLINK_RERANKER_MODEL=""`
+
+### Results carry line numbers
+
+Every `search` result returns `path:line_start-line_end` pointing at the best chunk within the current on-disk file. Agents can pipe that into `seeklink get` for a precise window read — no need to slurp entire files just to see context around a hit.
 
 ## Frontmatter
 
@@ -212,6 +236,14 @@ Notes are chunked (~400 tokens), embedded with jina-embeddings-v2-base-zh, and i
 | `SEEKLINK_VAULT` | `.` | Path to vault root |
 | `SEEKLINK_EMBEDDER_MODEL` | `jinaai/jina-embeddings-v2-base-zh` | Embedding model (fastembed-supported) |
 | `SEEKLINK_RERANKER_MODEL` | `mlx-community/Qwen3-Reranker-0.6B-mxfp8` | Reranker model (set to `""` to disable) |
+
+## What changed in v0.3
+
+- **Title-gated rerank blending**: when an exact title / alias hit drives rank 1, protect it from reranker demotion; otherwise fall back to pure reranker. Measured MRR gain of +4.5 pp over v0.2 on a 22-query blind test, with no regressions. See "How search works" above.
+- **Line-range retrieval**: `search` results now include `line_start` / `line_end`, and a new `seeklink get PATH[:LINE] -l N` command prints line-precise windows. Agents can find-then-read without slurping whole files.
+- **Cold-start / daemon parity fix**: cold-start `seeklink search` now constructs a `Reranker()` and passes it to the search pipeline. Previously the same query returned different rankings depending on whether the daemon was running.
+- **Frontmatter-aware line mapping**: chunk offsets (stored against frontmatter-stripped body) are remapped to full-file line numbers, so `search` + `get` report lines the way you'd see them in a text editor.
+- **Blind-test framework** at `tests/blind/`: 32-file corpus + 22 ground-truth queries + runner that measures Recall@10 / MRR / latency. Used to validate v0.3 before tagging; gates v0.4 (query expansion) the same way.
 
 ## What changed in v0.2
 

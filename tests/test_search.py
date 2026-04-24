@@ -496,50 +496,81 @@ class TestPositionAwareBlending:
             f"{[r.path for r in results]}"
         )
 
-    def test_blending_breaks_ties_via_reranker(
+    def test_gate_off_without_title_match(
         self, db: Database, embedder: Embedder, vault: Path
     ):
-        """When first-stage RRF is a razor-thin tie, a confident reranker
-        should break the tie. This is the CORRECTNESS property v0.3's
-        confidence-aware blending adds vs the earlier 1/rank formula.
-
-        We can't easily force a first-stage tie in unit-test fixtures,
-        so instead we verify the weaker invariant: a strongly-confident
-        reranker CAN reorder results when its signal exceeds the
-        first-stage margin. The blind-test corpus covers the tie case
-        empirically (`红烧肉做法` query).
-        """
+        """When the query has no title/alias hit at all, blending must
+        be OFF — final scores equal the raw reranker scores, and the
+        reranker's ordering wins (pre-v0.3 behavior)."""
         _ingest_corpus(db, embedder, vault)
 
-        class ConfidentReranker:
+        rerank_seq = [0.1, 0.9, 0.4, 0.7]
+
+        class SeqReranker:
             disabled = False
 
             def rerank(self, query, passages):
-                n = len(passages)
-                if n == 0:
-                    return []
-                # Reranker strongly prefers the LAST candidate (rerank=1.0)
-                # over the rank-1 candidate (rerank=0.0). With a small
-                # first-stage margin this should flip the order.
-                return [0.0 if i == 0 else 1.0 for i in range(n)]
+                return rerank_seq[: len(passages)]
 
+        # Query with no match against any title or alias in the fixture
+        # corpus (ml-basics / deep-learning / cooking / hub-note titles).
         results = search(
-            db, embedder, "learn",  # generic query → weaker first-stage signal
-            reranker=ConfidentReranker(),  # type: ignore[arg-type]
+            db, embedder, "xyz-nonsense-no-title-match-qqq",
+            reranker=SeqReranker(),  # type: ignore[arg-type]
             top_k=4,
             rerank_k=4,
         )
-        # Don't assert specific ordering — we just check that blending
-        # isn't a no-op. The top result's blended score should reflect
-        # BOTH position AND rerank signals.
         if results:
+            # Pure reranker path → each score equals its rerank score
+            # (not blended). The set of scores should equal the set of
+            # rerank scores used (ignoring order since we sort by score
+            # descending).
+            actual_scores = sorted((r.score for r in results), reverse=True)
+            expected_scores = sorted(rerank_seq[: len(results)], reverse=True)
+            for a, e in zip(actual_scores, expected_scores):
+                assert abs(a - e) < 1e-9, (
+                    f"Gate-off scores should equal rerank scores; "
+                    f"got {actual_scores}, expected {expected_scores}"
+                )
+
+    def test_gate_on_when_title_winner_in_pool(
+        self, db: Database, embedder: Embedder, vault: Path
+    ):
+        """When the title channel ranks a source at its rank 1 AND that
+        source is in the rerank candidate pool, blending activates.
+        Scores then show the blended math (not raw reranker).
+
+        This is the empirically-preferred "loose" gate semantics — if
+        title has a confident winner anywhere in the pool, lift its
+        protection across the candidate set so the title winner can
+        rise back to rank 1 even from pool position 2+ (the
+        Zettelkasten case on the blind-test corpus).
+        """
+        _ingest_corpus(db, embedder, vault)
+
+        class UniformReranker:
+            disabled = False
+
+            def rerank(self, query, passages):
+                return [0.5] * len(passages)
+
+        # "Machine Learning" fires the title channel hard on ml-basics.md
+        # which has that exact title. Gate should be ON.
+        results = search(
+            db, embedder, "Machine Learning",
+            reranker=UniformReranker(),  # type: ignore[arg-type]
+            top_k=4,
+            rerank_k=4,
+        )
+        if results:
+            # Rank 1 under blending: alpha_1=0.60, norm=1.0, rerank=0.5
+            #   blended = 0.60 * 1.0 + 0.40 * 0.5 = 0.80
+            # Under pure-reranker (gate off), it would be 0.5.
             top_score = results[0].score
-            # Either the reranker flipped the order (confident top hit)
-            # or RRF's confidence was strong enough to resist. Both are
-            # valid outcomes — assert only that blending computed a
-            # sensible 0-1 range.
-            assert 0.0 <= top_score <= 1.0, (
-                f"Blended scores should be in [0, 1]; got {top_score}"
+            assert abs(top_score - 0.80) < 1e-6, (
+                f"Expected gate-on rank 1 blended score 0.80 for "
+                f"'Machine Learning' query (ml-basics.md has that title), "
+                f"got {top_score}"
             )
 
     def test_blending_formula_properties(

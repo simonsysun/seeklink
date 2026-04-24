@@ -238,16 +238,36 @@ def search(
     # that case the title signal is a strong confidence prior and we
     # want to protect rank 1.
     #
-    # Design: TITLE-GATED BLENDING. Only apply position protection when
-    # rank 1 of the candidate pool was ALSO rank 1 in the title channel
-    # — i.e. a title/alias match is genuinely driving it. Otherwise
-    # fall back to the pre-v0.3 pure reranker replacement.
+    # Design: TITLE-GATED BLENDING. Apply position-aware blending
+    # across the full candidate pool ONLY when the title channel
+    # produced a rank-1 match and that match survived into the pool.
+    # Otherwise fall back to pre-v0.3 pure reranker replacement so
+    # the reranker can correct wrong first-stage ordering.
     #
-    #   IF title_channel_rank_1_source in final top RRF results:
-    #       blended_i = alpha_i * norm_score_i + (1 - alpha_i) * rerank_i
+    #   IF title channel rank 1 is in the rerank candidate pool:
+    #       blended_i = alpha_i * (rrf_i / max_rrf) + (1 - alpha_i) * rerank_i
     #       with alpha = 0.60 (rank 1-3), 0.50 (4-10), 0.40 (11+)
     #   ELSE:
     #       blended_i = rerank_i  (pure reranker, v0.2.2 behavior)
+    #
+    # Why "anywhere in pool", not strictly "pool rank 1":
+    # Empirically on the built-in blind test, exact-title queries like
+    # `Zettelkasten` sometimes put the title-winning note at pool
+    # rank 2 (e.g. indegree boost pushes another note to pool rank 1).
+    # Applying Option-B blending to the whole pool still lifts
+    # zettelkasten.md back to rank 1 via its high normalized RRF
+    # score and reasonable rerank, matching user intent. Gating
+    # strictly on "pool rank 1 === title winner" would drop those
+    # wins. See tests/blind/results/A_v0.3_optC*.json for the
+    # measured impact.
+    #
+    # Theoretical risk: if a query produces a *weak* title hit whose
+    # winner is far down in the pool, this gate still activates blending
+    # for all candidates. On the 22-query blind test we never observed
+    # this (non-exact-title queries had empty title_ranks and the gate
+    # stayed off), but it's a latent corner case worth monitoring.
+    # Revisit this gate once we have labeled data that exercises
+    # weak-title-match queries.
     #
     # This preserves Zettelkasten / attention / RRF-style exact-hit
     # queries at rank 1 while letting reranker correct poor first-stage
@@ -261,8 +281,9 @@ def search(
         if rerank_scores is not None and len(rerank_scores) == len(results):
             # Title-channel rank 1 is the strongest "this source was
             # confidently identified by title/alias" signal. If that
-            # source is also in the candidate pool we're reranking, we
-            # apply position protection; otherwise we trust the reranker.
+            # source is anywhere in the candidate pool, apply position
+            # blending; otherwise trust the reranker fully. See the
+            # block comment above for the "anywhere in pool" rationale.
             title_rank_1_sid: int | None = None
             for sid, rank in title_ranks.items():
                 if rank == 1:
