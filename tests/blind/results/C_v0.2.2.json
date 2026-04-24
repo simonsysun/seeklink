@@ -1,0 +1,1352 @@
+{
+  "config": "C",
+  "queries_file": "tests/blind/queries.yaml",
+  "vault": "/Users/siyuansun/Dev/rhizome-dev/seeklink/tests/corpus",
+  "n_queries": 22,
+  "with_reranker": true,
+  "aggregate": {
+    "mean_recall_at_10": 0.9772727272727273,
+    "mean_mrr": 0.9772727272727273,
+    "mean_latency_ms": 8931.237342963206,
+    "p95_latency_ms": 13246.575708966702
+  },
+  "results": [
+    {
+      "query": "记忆保持力",
+      "config": "C",
+      "hits": [
+        "notes/memory-consolidation.md",
+        "notes/spaced-repetition.md",
+        "notes/forgetting-curve.md",
+        "sources/wikipedia-forgetting-curve.md",
+        "sources/wikipedia-spaced-repetition.md",
+        "notes/fsrs-algorithm.md",
+        "notes/zettelkasten.md",
+        "sources/anki-and-flashcards-intro.md",
+        "notes/feynman-technique.md",
+        "notes/deep-work-deliberate-practice.md"
+      ],
+      "titles": [
+        "记忆巩固 Memory consolidation",
+        "Spaced repetition",
+        "遗忘曲线 Forgetting curve",
+        "Forgetting curve (Wikipedia summary)",
+        "Spaced repetition (Wikipedia summary)",
+        "FSRS algorithm",
+        "Zettelkasten",
+        "Anki and flashcards — a practical intro",
+        "Feynman technique",
+        "Deep work and deliberate practice"
+      ],
+      "snippets": [
+        "# 记忆巩固 Memory consolidation\n\n学习到一个新东西之后，它最初存在海马体（hippocampus）的快速编码系统里。\n如果不干预，这个痕迹几小时内就开始衰减（见 [[forgetting-curve]]）。**记忆\n巩固**指的是大脑把短期痕迹\"烧录\"到长期皮层存储的过程——主要发生在睡眠\n期间，尤其是慢波睡眠（SWS）和 REM 阶段。",
+        "## The 记忆保持力 problem\n\nThe core question of spaced repetition is: **how do we maximize memory\nretention per hour of study?** Daily re-reading wastes most of the time\non material you already know. One-p",
+        "## 参考\n- [[spaced-repetition]] —— 对抗遗忘曲线的主要实践\n- [[FSRS]] —— 建模和拟合遗忘曲线的现代算法\n- [[memory-consolidation]] —— 生物学层面的记忆巩固过程",
+        "## Countermeasures\n\nThe forgetting curve can be flattened by:\n\n1. **Active recall** — retrieving the memory, not re-reading. Each\n   retrieval attempt strengthens the trace disproportionately.\n2. **Sp",
+        "## Applications\n\nMedical education (pharmacology, anatomy), foreign language\nacquisition (vocabulary), bar exam preparation, and programming\ncertification all report significant improvements when swit",
+        "## Related\n- [[spaced-repetition]] — the practice that FSRS optimizes\n- [[forgetting-curve]] — the phenomenon being modeled\n- [[note-to-card-workflow]] — how permanent notes become reviewable cards",
+        "## 与 spaced repetition 的区别\n\nZettelkasten 解决的是**写作 + 思考**问题：怎么让新想法和旧想法碰撞出火花。\n[[spaced-repetition]] 解决的是**记忆保持**问题：怎么让已知的事实留在脑子里。\n\n两者互补，不重复。典型工作流：\n- Zettelkasten 建立理解和结构\n- 从 permanent notes 蒸馏出关键 claims",
+        "## Algorithms\n\nAnki's default scheduler has been **SM-2** (derived from SuperMemo's\n1985 algorithm) for most of its history. Since 2024, **FSRS** is\nshipped as an optional (now default on 2.1.66+) rep",
+        "## 为什么有效\n\n- 自然语言不允许\"大概就是那个意思\"\n- 需要检索（recall），不是识别（recognize）—— 参见 [[spaced-repetition]]\n- 强制识别你的核心 claim 和依赖——正好是 [[atomic-notes]] 的起点",
+        "## Why this matters for learning systems\n\nSpaced repetition, Zettelkasten, and Feynman technique all assume\ndeliberate practice conditions. If you're reviewing Anki cards while\nwatching YouTube, you'r"
+      ],
+      "scores": [
+        0.06362179985690734,
+        0.06259734084890788,
+        0.06228216228216228,
+        0.06053250016696721,
+        0.059728115276460506,
+        0.04680818916672962,
+        0.04640914640914641,
+        0.04504312675751676,
+        0.043064182194616975,
+        0.029857397504456328
+      ],
+      "latency_ms": 6555.571625009179,
+      "reranker_active": true,
+      "recall_at_10": 0.75,
+      "mrr": 1.0,
+      "expansions_used": [
+        "间隔重复 遗忘曲线 FSRS",
+        "如何让大脑记住的东西不忘记",
+        "长期记忆保留 间隔算法"
+      ]
+    },
+    {
+      "query": "遗忘规律",
+      "config": "C",
+      "hits": [
+        "logs/2026-W16.md",
+        "sources/wikipedia-forgetting-curve.md",
+        "notes/forgetting-curve.md",
+        "notes/memory-consolidation.md",
+        "sources/wikipedia-spaced-repetition.md",
+        "notes/spaced-repetition.md",
+        "notes/fsrs-algorithm.md",
+        "sources/anki-and-flashcards-intro.md",
+        "notes/note-to-card-workflow.md",
+        "notes/zettelkasten.md"
+      ],
+      "titles": [
+        "2026-W16",
+        "Forgetting curve (Wikipedia summary)",
+        "遗忘曲线 Forgetting curve",
+        "记忆巩固 Memory consolidation",
+        "Spaced repetition (Wikipedia summary)",
+        "Spaced repetition",
+        "FSRS algorithm",
+        "Anki and flashcards — a practical intro",
+        "Note-to-card workflow",
+        "Zettelkasten"
+      ],
+      "snippets": [
+        "### 遗忘曲线不是指数\n\n这个是真 surprise。传统教科书都说遗忘是 `e^(-t/τ)`（指数衰减）。但\nEbbinghaus 的原始数据和现代大样本研究都显示是**幂律**：",
+        "## Countermeasures\n\nThe forgetting curve can be flattened by:\n\n1. **Active recall** — retrieving the memory, not re-reading. Each\n   retrieval attempt strengthens the trace disproportionately.\n2. **Sp",
+        "# 遗忘曲线 Forgetting curve\n\n赫尔曼·艾宾浩斯（Hermann Ebbinghaus, 1850-1909）在 1880 年代用自己做受试者，\n记忆了一批无意义音节（CVC 结构：WID、ZOF 等），然后在不同时间间隔后测量\n还能回忆多少。他画出的曲线是心理学史上第一条严谨的实验曲线，后来被称为\n**遗忘曲线**（forgetting curve）。\n\n基本形状：记住一个新东",
+        "## 关键发现\n\n- **睡眠剥夺直接降低新记忆的保留率**。一整晚不睡后学的东西，一周后剩下\n  的比正常睡眠少 30-40%。\n- **巩固不是被动的重放**。睡眠中大脑会主动\"重新体验\"白天的关键片段，\n  这个过程压缩了时间（几十毫秒 → 几秒），并把记忆和旧知识网络建立连接。\n- **间隔重复 + 睡眠 = 最优组合**。[[spaced-repetition]] 的每次复习启动\n  一",
+        "## History\n\nThe phenomenon was first characterized by **Hermann Ebbinghaus** in\nthe 1880s through experiments on himself using nonsense syllables. He\ndocumented the forgetting curve — retention drops ",
+        "# Spaced repetition\n\nSpaced repetition is the practice of reviewing material at increasing\nintervals, timed to catch you right before you'd forget. It's the single\nmost evidence-backed intervention in",
+        "# FSRS algorithm\n\nFSRS (Free Spaced Repetition Scheduler) is a memory model that replaces\nAnki's SM-2 as the default scheduling algorithm in modern flashcard apps.\nIt predicts how long you'll remember",
+        "## Algorithms\n\nAnki's default scheduler has been **SM-2** (derived from SuperMemo's\n1985 algorithm) for most of its history. Since 2024, **FSRS** is\nshipped as an optional (now default on 2.1.66+) rep",
+        "## Example\n\n**Note** ([[FSRS]]): argues FSRS beats SM-2 because it models\npopulation-fitted stability instead of per-card ease.\n\n**Card front**: \"Why does FSRS outperform SM-2 at the same retention\nta",
+        "## 与 spaced repetition 的区别\n\nZettelkasten 解决的是**写作 + 思考**问题：怎么让新想法和旧想法碰撞出火花。\n[[spaced-repetition]] 解决的是**记忆保持**问题：怎么让已知的事实留在脑子里。\n\n两者互补，不重复。典型工作流：\n- Zettelkasten 建立理解和结构\n- 从 permanent notes 蒸馏出关键 claims"
+      ],
+      "scores": [
+        0.06478893337698204,
+        0.06402049075403121,
+        0.06327607388058208,
+        0.062119801754268796,
+        0.0610865036704589,
+        0.06069231211546203,
+        0.04569460390355913,
+        0.04500226142017187,
+        0.02964426877470356,
+        0.029411764705882353
+      ],
+      "latency_ms": 6007.715375046246,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 0.5,
+      "expansions_used": [
+        "Ebbinghaus 遗忘曲线",
+        "记忆衰减的数学规律",
+        "forgetting curve 幂律 指数"
+      ]
+    },
+    {
+      "query": "卡片盒笔记法",
+      "config": "C",
+      "hits": [
+        "notes/zettelkasten.md",
+        "logs/2026-W14.md",
+        "notes/atomic-notes.md",
+        "sources/niklas-luhmann-zettelkasten.md",
+        "notes/note-to-card-workflow.md",
+        "README.md",
+        "notes/deep-work-deliberate-practice.md",
+        "notes/spaced-repetition.md",
+        "sources/anki-and-flashcards-intro.md",
+        "sources/wikipedia-spaced-repetition.md"
+      ],
+      "titles": [
+        "Zettelkasten",
+        "2026-W14",
+        "Atomic notes",
+        "Niklas Luhmann's Zettelkasten (essay summary)",
+        "Note-to-card workflow",
+        "seeklink test corpus",
+        "Deep work and deliberate practice",
+        "Spaced repetition",
+        "Anki and flashcards — a practical intro",
+        "Spaced repetition (Wikipedia summary)"
+      ],
+      "snippets": [
+        "## 三类 zettel\n\n1. **Fleeting notes（灵光笔记）** - 脑子里冒出来的，随手记，几天内整理或丢弃\n2. **Literature notes（文献笔记）** - 读书/看论文时的摘录 + 自己的话复述\n3. **Permanent notes（永久笔记）** - 真正的 zettel，用自己的话写清楚一个\n   原子思想，放进卡片盒，编号，链接到相关卡片\n\nPerm",
+        "### 几个候选方案\n\n1. **纯 Zettelkasten**：每个想法写一张 permanent note，用 wikilink 连接。\n   问题：我查找卡片的姿势本来就是搜索，卡片数到 200+ 以后拓扑已经没法靠\n   脑子维护。需要 seeklink 这种工具。\n2. **Anki + FSRS**：把所有 claim 做成卡片喂给 SRS。[[spaced-repetition]]",
+        "## Related\n- [[zettelkasten]] — the note system this serves\n- [[note-to-card-workflow]] — turning atomic notes into SRS cards\n- [[feynman-technique]] — explaining-for-strangers discipline",
+        "## The structure\n\nCards were 14.8 × 10.5 cm (A6). Each card contained one thought,\none quote, or one reference, in his handwriting. Cards were kept in\napproximate topical neighborhoods inside the draw",
+        "# Note-to-card workflow\n\nThe bridge between [[zettelkasten]] (where you *think*) and\n[[spaced-repetition]] (where you *retain*). Permanent notes are too\nlong to review daily. Flashcards are too atomic",
+        "## Layout\n\n| Folder | Purpose | Style |\n|---|---|---|\n| `notes/` | Permanent notes | Strong frontmatter (tags, aliases), clear titles, wikilinks between notes, 300-800 words |\n| `logs/` | Weekly/daily",
+        "## Why this matters for learning systems\n\nSpaced repetition, Zettelkasten, and Feynman technique all assume\ndeliberate practice conditions. If you're reviewing Anki cards while\nwatching YouTube, you'r",
+        "## How it works in practice\n\nApps like Anki, SuperMemo, and Mochi implement spaced repetition via\nflashcards. You create a card (question front, answer back), and the app\nschedules it. You rate each r",
+        "## Common mistakes\n\n- **Cloze overuse.** Cloze cards (`The capital of France is {{c1::Paris}}`)\n  are quick to make but often test recognition, not recall.\n- **Same-card images.** If you're memorizing",
+        "## References\n\nThe Wikipedia article cites: Ebbinghaus (1885), Bjork (1988),\nKarpicke (2009), Cepeda et al. (2006) meta-analysis, and the SuperMemo\nliterature."
+      ],
+      "scores": [
+        0.0633657834718587,
+        0.0623485622536856,
+        0.06232843114189456,
+        0.06168458525348346,
+        0.04764267990074442,
+        0.046649531024531024,
+        0.045730413377472204,
+        0.04412400911045794,
+        0.04370384104323105,
+        0.043064182194616975
+      ],
+      "latency_ms": 5737.672416027635,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "expansions_used": [
+        "Zettelkasten Luhmann",
+        "永久笔记 原子笔记",
+        "slip-box note taking"
+      ]
+    },
+    {
+      "query": "红烧肉做法",
+      "config": "C",
+      "hits": [
+        "recipes/red-braised-pork.md",
+        "logs/2026-W15.md",
+        "recipes/pad-thai.md",
+        "notes/vector-embeddings.md",
+        "notes/agent-memory-patterns.md",
+        "notes/note-to-card-workflow.md",
+        "recipes/sourdough-starter.md",
+        "README.md",
+        "notes/deep-work-deliberate-practice.md",
+        "cards/card-rrf-formula.md"
+      ],
+      "titles": [
+        "红烧肉 Red-braised pork",
+        "2026-W15",
+        "Pad Thai",
+        "Vector embeddings",
+        "Agent memory patterns",
+        "Note-to-card workflow",
+        "Sourdough starter from scratch",
+        "seeklink test corpus",
+        "Deep work and deliberate practice",
+        "Card: RRF formula"
+      ],
+      "snippets": [
+        "# 红烧肉 Red-braised pork\n\n经典的家常做法，南方版（上海/无锡偏甜）。",
+        "### 这个项目的立意\n\nseeklink 的差异化不是\"又一个语义搜索\"，是**把 IR 工业界做了 20 年的\n最佳实践带到个人 vault + agent 场景**：\n- BM25 + vector + graph + title 四路召回（[[RRF]] 融合）\n- 可选 cross-encoder 重排（[[attention-mechanism]]）\n- CJK 一等公民（jieba ",
+        "## Ingredients (serves 2)\n\nFor the sauce:\n- 3 tbsp tamarind paste\n- 2 tbsp palm sugar (or brown sugar)\n- 2 tbsp fish sauce\n- 1 tbsp soy sauce\n\nFor the stir-fry:\n- 200g flat rice noodles, soaked in roo",
+        "## Re-indexing cost\n\nEvery vault document must be re-embedded when you change the embedder,\nbecause embeddings from different models live in incompatible vector\nspaces. This is why seeklink doesn't sw",
+        "## 5. Knowledge graph\n\nParse facts out of interactions; store as `(subject, relation, object)`\ntriples; query by relation pattern. Much more work to build, harder\nthan RAG for most use cases. A few sp",
+        "## The distillation step\n\nFor each permanent note worth retaining:\n\n1. Identify the **claim** the note argues for. One sentence.\n2. Write it as a question whose answer is that claim. Front side.\n3. Wr",
+        "## What can go wrong\n\n- **Pink/orange streaks**: contamination. Throw it out, start over.\n- **Harsh ammonia smell**: starving. Feed more frequently.\n- **Liquid on top (\"hooch\")**: hungry but not dange",
+        "# seeklink test corpus\n\nA self-contained fixture vault for the blind-test framework (see\n`docs/blind-test.md`). Not the user's personal vault — everything here is\nhand-authored or synthesized for test",
+        "# Deep work and deliberate practice\n\nTwo overlapping concepts that are often conflated:\n\n**Deep work** (Cal Newport) — professional activity performed in a\nstate of distraction-free concentration that",
+        "```\nscore(c) = Σ_i w_i / (k + rank_i(c))\n```\n"
+      ],
+      "scores": [
+        0.04918032786885246,
+        0.047619047619047616,
+        0.04696394686907021,
+        0.04529532967032967,
+        0.04526926877470356,
+        0.030309988518943745,
+        0.030090497737556562,
+        0.03007688828584351,
+        0.029211087420042643,
+        0.02877846790890269
+      ],
+      "latency_ms": 4864.816709072329,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "expansions_used": [
+        "五花肉 糖色 红烧",
+        "braised pork belly Chinese"
+      ]
+    },
+    {
+      "query": "睡眠对记忆的影响",
+      "config": "C",
+      "hits": [
+        "notes/memory-consolidation.md",
+        "notes/forgetting-curve.md",
+        "sources/wikipedia-spaced-repetition.md",
+        "sources/wikipedia-forgetting-curve.md",
+        "notes/spaced-repetition.md",
+        "logs/2026-W16.md",
+        "logs/2026-W14.md",
+        "notes/zettelkasten.md",
+        "notes/feynman-technique.md",
+        "notes/deep-work-deliberate-practice.md"
+      ],
+      "titles": [
+        "记忆巩固 Memory consolidation",
+        "遗忘曲线 Forgetting curve",
+        "Spaced repetition (Wikipedia summary)",
+        "Forgetting curve (Wikipedia summary)",
+        "Spaced repetition",
+        "2026-W16",
+        "2026-W14",
+        "Zettelkasten",
+        "Feynman technique",
+        "Deep work and deliberate practice"
+      ],
+      "snippets": [
+        "## 关键发现\n\n- **睡眠剥夺直接降低新记忆的保留率**。一整晚不睡后学的东西，一周后剩下\n  的比正常睡眠少 30-40%。\n- **巩固不是被动的重放**。睡眠中大脑会主动\"重新体验\"白天的关键片段，\n  这个过程压缩了时间（几十毫秒 → 几秒），并把记忆和旧知识网络建立连接。\n- **间隔重复 + 睡眠 = 最优组合**。[[spaced-repetition]] 的每次复习启动\n  一",
+        "## 实践启示\n\n- 学习后**当天晚上**做一次短复习比三天后多一次复习效果更好。\n- 长间隔不等于懒复习——只要每次都\"踩\"在曲线下降的关键点。\n- 课堂教学的一次性讲授，如果没有后续复习机制，从遗忘曲线看基本是浪费。",
+        "## History\n\nThe phenomenon was first characterized by **Hermann Ebbinghaus** in\nthe 1880s through experiments on himself using nonsense syllables. He\ndocumented the forgetting curve — retention drops ",
+        "## Countermeasures\n\nThe forgetting curve can be flattened by:\n\n1. **Active recall** — retrieving the memory, not re-reading. Each\n   retrieval attempt strengthens the trace disproportionately.\n2. **Sp",
+        "## The 记忆保持力 problem\n\nThe core question of spaced repetition is: **how do we maximize memory\nretention per hour of study?** Daily re-reading wastes most of the time\non material you already know. One-p",
+        "### See also\n- [[FSRS]] — 理论总览\n- [[forgetting-curve]] — 底层现象\n- [[memory-consolidation]] — 生物学层面的解释",
+        "## 2026-W14 周记\n\n本周主要在想**记忆保持力**这个问题。起因是发现自己读完 [[zettelkasten]] 相关\n的几本书（Ahrens 的《How to Take Smart Notes》，然后 Luhmann 原文的几篇\n论文），真正能\"用\"的想法其实不多。问题不在于没读懂，是没沉淀到能调用的\n程度。\n\n读懂 ≠ 记住 ≠ 会用。这三个之间的落差是学习系统设计的核心。",
+        "## 与 spaced repetition 的区别\n\nZettelkasten 解决的是**写作 + 思考**问题：怎么让新想法和旧想法碰撞出火花。\n[[spaced-repetition]] 解决的是**记忆保持**问题：怎么让已知的事实留在脑子里。\n\n两者互补，不重复。典型工作流：\n- Zettelkasten 建立理解和结构\n- 从 permanent notes 蒸馏出关键 claims",
+        "## 为什么有效\n\n- 自然语言不允许\"大概就是那个意思\"\n- 需要检索（recall），不是识别（recognize）—— 参见 [[spaced-repetition]]\n- 强制识别你的核心 claim 和依赖——正好是 [[atomic-notes]] 的起点",
+        "## Why this matters for learning systems\n\nSpaced repetition, Zettelkasten, and Feynman technique all assume\ndeliberate practice conditions. If you're reviewing Anki cards while\nwatching YouTube, you'r"
+      ],
+      "scores": [
+        0.06557377049180328,
+        0.06258094635703744,
+        0.06084611905507428,
+        0.048131080389144903,
+        0.046679405392392875,
+        0.046634615384615385,
+        0.04435015112764473,
+        0.03125763125763126,
+        0.029910714285714284,
+        0.028985507246376812
+      ],
+      "latency_ms": 8970.40787502192,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "expansions_used": [
+        "睡眠 巩固 海马体 记忆",
+        "sleep consolidation hippocampus",
+        "为什么熬夜学不进去"
+      ]
+    },
+    {
+      "query": "spaced repetition algorithm",
+      "config": "C",
+      "hits": [
+        "notes/fsrs-algorithm.md",
+        "notes/memory-consolidation.md",
+        "logs/2026-W14.md",
+        "sources/wikipedia-spaced-repetition.md",
+        "sources/anki-and-flashcards-intro.md",
+        "notes/spaced-repetition.md",
+        "sources/wikipedia-forgetting-curve.md",
+        "notes/note-to-card-workflow.md",
+        "notes/zettelkasten.md",
+        "notes/forgetting-curve.md"
+      ],
+      "titles": [
+        "FSRS algorithm",
+        "记忆巩固 Memory consolidation",
+        "2026-W14",
+        "Spaced repetition (Wikipedia summary)",
+        "Anki and flashcards — a practical intro",
+        "Spaced repetition",
+        "Forgetting curve (Wikipedia summary)",
+        "Note-to-card workflow",
+        "Zettelkasten",
+        "遗忘曲线 Forgetting curve"
+      ],
+      "snippets": [
+        "# FSRS algorithm\n\nFSRS (Free Spaced Repetition Scheduler) is a memory model that replaces\nAnki's SM-2 as the default scheduling algorithm in modern flashcard apps.\nIt predicts how long you'll remember",
+        "## Related\n- [[forgetting-curve]] —— 如果不巩固的衰减曲线\n- [[spaced-repetition]] —— 利用巩固窗口的实践",
+        "### 几个候选方案\n\n1. **纯 Zettelkasten**：每个想法写一张 permanent note，用 wikilink 连接。\n   问题：我查找卡片的姿势本来就是搜索，卡片数到 200+ 以后拓扑已经没法靠\n   脑子维护。需要 seeklink 这种工具。\n2. **Anki + FSRS**：把所有 claim 做成卡片喂给 SRS。[[spaced-repetition]]",
+        "## Modern implementations\n\nThe first computer-based spaced repetition system was **SuperMemo**,\ndeveloped by Piotr Wozniak starting in 1985. SuperMemo introduced the\nSM-2 algorithm, which is still wid",
+        "## Algorithms\n\nAnki's default scheduler has been **SM-2** (derived from SuperMemo's\n1985 algorithm) for most of its history. Since 2024, **FSRS** is\nshipped as an optional (now default on 2.1.66+) rep",
+        "## How it works in practice\n\nApps like Anki, SuperMemo, and Mochi implement spaced repetition via\nflashcards. You create a card (question front, answer back), and the app\nschedules it. You rate each r",
+        "## Implications for learners\n\nWithout systematic review, most of any study session is forgotten\nwithin a month. With a review pattern tuned to catch each item near\nthe retrievability threshold (typica",
+        "## Related\n- [[FSRS]] — scheduler that processes the cards\n- [[atomic-notes]] — what you're distilling from\n- [[spaced-repetition]] — why distillation is worth doing",
+        "## 与 spaced repetition 的区别\n\nZettelkasten 解决的是**写作 + 思考**问题：怎么让新想法和旧想法碰撞出火花。\n[[spaced-repetition]] 解决的是**记忆保持**问题：怎么让已知的事实留在脑子里。\n\n两者互补，不重复。典型工作流：\n- Zettelkasten 建立理解和结构\n- 从 permanent notes 蒸馏出关键 claims",
+        "## 参考\n- [[spaced-repetition]] —— 对抗遗忘曲线的主要实践\n- [[FSRS]] —— 建模和拟合遗忘曲线的现代算法\n- [[memory-consolidation]] —— 生物学层面的记忆巩固过程"
+      ],
+      "scores": [
+        0.06400409626216078,
+        0.06061301882197405,
+        0.06022070280465803,
+        0.048171500630517027,
+        0.048131080389144903,
+        0.04655217278168097,
+        0.04548239750445633,
+        0.044610507246376815,
+        0.044563279857397504,
+        0.030330882352941176
+      ],
+      "latency_ms": 15252.102375030518,
+      "reranker_active": true,
+      "recall_at_10": 0.75,
+      "mrr": 1.0,
+      "expansions_used": [
+        "SRS scheduler Anki SuperMemo",
+        "how Anki decides when to show a card",
+        "FSRS SM-2 memory model"
+      ]
+    },
+    {
+      "query": "why is BM25 still useful",
+      "config": "C",
+      "hits": [
+        "notes/retrieval-augmented-generation.md",
+        "notes/bm25-intuition.md",
+        "notes/vector-embeddings.md",
+        "notes/attention-mechanism.md",
+        "notes/reciprocal-rank-fusion.md",
+        "notes/sqlite-fts5-cjk.md",
+        "README.md",
+        "logs/2026-W15.md",
+        "notes/feynman-technique.md",
+        "sources/wikipedia-forgetting-curve.md"
+      ],
+      "titles": [
+        "Retrieval-augmented generation",
+        "BM25 intuition",
+        "Vector embeddings",
+        "Attention mechanism",
+        "Reciprocal Rank Fusion (RRF)",
+        "SQLite FTS5 + CJK (jieba)",
+        "seeklink test corpus",
+        "2026-W15",
+        "Feynman technique",
+        "Forgetting curve (Wikipedia summary)"
+      ],
+      "snippets": [
+        "## Related\n- [[BM25]] — keyword retrieval channel\n- [[RRF]] — fusion\n- [[vector-embeddings]] — semantic channel\n- [[attention-mechanism]] — reranker internals\n- [[agent-memory-patterns]] — RAG as memo",
+        "# BM25 intuition\n\nBM25 is the classic keyword-matching ranking function from 1990s IR\nresearch. It scores a (query, document) pair based on how often the\nquery's terms appear in the document, with two",
+        "## Related\n- [[BM25]] — sparse retrieval counterpart\n- [[attention-mechanism]] — what the embedder is doing internally\n- [[retrieval-augmented-generation]] — end-to-end system",
+        "## Why it works\n\n- **Parallel**: unlike RNNs, all positions compute simultaneously.\n- **Long range**: the softmax over all positions means a token 2000\n  away can still influence the output if its key",
+        "## Why RRF works\n\n- **Scale-free**: BM25 returns raw scores in [0, 30]; vector similarity\n  returns [0, 1]. Can't average these directly. RRF only uses ranks,\n  which are always 1, 2, 3...\n- **Rank-se",
+        "## Related\n- [[bm25-intuition]] — BM25 is what runs on this index\n- [[RRF]] — how the BM25 channel gets combined with vector",
+        "## Topics\n\nThree semantic clusters:\n\n1. **Learning science / PKM** — FSRS, spaced repetition, Zettelkasten,\n   Feynman technique, forgetting curve. Heavily cross-linked.\n2. **ML / IR / agents** — atte",
+        "### 这个项目的立意\n\nseeklink 的差异化不是\"又一个语义搜索\"，是**把 IR 工业界做了 20 年的\n最佳实践带到个人 vault + agent 场景**：\n- BM25 + vector + graph + title 四路召回（[[RRF]] 融合）\n- 可选 cross-encoder 重排（[[attention-mechanism]]）\n- CJK 一等公民（jieba ",
+        "## 为什么有效\n\n- 自然语言不允许\"大概就是那个意思\"\n- 需要检索（recall），不是识别（recognize）—— 参见 [[spaced-repetition]]\n- 强制识别你的核心 claim 和依赖——正好是 [[atomic-notes]] 的起点",
+        "## Mathematical models\n\n- **Ebbinghaus (1885)**: proposed an exponential-decay-like form with\n  decreasing marginal rate.\n- **Wickelgren (1972)**: power-function memory trace model.\n- **Wixted & Ebbes"
+      ],
+      "scores": [
+        0.06456494325346786,
+        0.06281683163029506,
+        0.061567619776575,
+        0.0601803993108341,
+        0.04787506400409626,
+        0.047379032258064516,
+        0.04483608742004264,
+        0.03128054740957967,
+        0.029857397504456328,
+        0.029411764705882353
+      ],
+      "latency_ms": 13246.575708966702,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "expansions_used": [
+        "keyword retrieval vs vector search",
+        "hybrid retrieval BM25 dense",
+        "when does lexical match beat semantic"
+      ]
+    },
+    {
+      "query": "agent memory architectures",
+      "config": "C",
+      "hits": [
+        "notes/agent-memory-patterns.md",
+        "logs/2026-W15.md",
+        "notes/retrieval-augmented-generation.md",
+        "notes/memory-consolidation.md",
+        "notes/fsrs-algorithm.md",
+        "notes/zettelkasten.md",
+        "sources/wikipedia-spaced-repetition.md",
+        "sources/wikipedia-forgetting-curve.md",
+        "notes/forgetting-curve.md",
+        "notes/spaced-repetition.md"
+      ],
+      "titles": [
+        "Agent memory patterns",
+        "2026-W15",
+        "Retrieval-augmented generation",
+        "记忆巩固 Memory consolidation",
+        "FSRS algorithm",
+        "Zettelkasten",
+        "Spaced repetition (Wikipedia summary)",
+        "Forgetting curve (Wikipedia summary)",
+        "遗忘曲线 Forgetting curve",
+        "Spaced repetition"
+      ],
+      "snippets": [
+        "# Agent memory patterns\n\nLLMs are stateless between calls. Any \"memory\" an agent exhibits comes\nfrom something external that persists across invocations. A few patterns\nin current practice:",
+        "## 2026-W15 周记\n\n这周主题：[[agent-memory-patterns]]。为什么 Claude / Cursor / 本地 agent 都\n在这个问题上卡住——不是模型太弱，是 retrieval 太差。",
+        "## Related\n- [[BM25]] — keyword retrieval channel\n- [[RRF]] — fusion\n- [[vector-embeddings]] — semantic channel\n- [[attention-mechanism]] — reranker internals\n- [[agent-memory-patterns]] — RAG as memo",
+        "# 记忆巩固 Memory consolidation\n\n学习到一个新东西之后，它最初存在海马体（hippocampus）的快速编码系统里。\n如果不干预，这个痕迹几小时内就开始衰减（见 [[forgetting-curve]]）。**记忆\n巩固**指的是大脑把短期痕迹\"烧录\"到长期皮层存储的过程——主要发生在睡眠\n期间，尤其是慢波睡眠（SWS）和 REM 阶段。",
+        "# FSRS algorithm\n\nFSRS (Free Spaced Repetition Scheduler) is a memory model that replaces\nAnki's SM-2 as the default scheduling algorithm in modern flashcard apps.\nIt predicts how long you'll remember",
+        "# Zettelkasten\n\nZettelkasten (德语：\"卡片盒\")是德国社会学家 Niklas Luhmann 在 1960-90 年代\n使用的个人知识系统，他用它在 30 年里写了 70 多本书、400 多篇论文。核心是一\n堆编号索引卡（约 9 万张），每张一个原子想法，卡片之间通过编号互相引用。\n\n关键不是卡片，是**原子性 + 引用**。每张卡只讲一件事；卡片之间的链接形成\n一张",
+        "## Applications\n\nMedical education (pharmacology, anatomy), foreign language\nacquisition (vocabulary), bar exam preparation, and programming\ncertification all report significant improvements when swit",
+        "## Mathematical models\n\n- **Ebbinghaus (1885)**: proposed an exponential-decay-like form with\n  decreasing marginal rate.\n- **Wickelgren (1972)**: power-function memory trace model.\n- **Wixted & Ebbes",
+        "## 参考\n- [[spaced-repetition]] —— 对抗遗忘曲线的主要实践\n- [[FSRS]] —— 建模和拟合遗忘曲线的现代算法\n- [[memory-consolidation]] —— 生物学层面的记忆巩固过程",
+        "## The 记忆保持力 problem\n\nThe core question of spaced repetition is: **how do we maximize memory\nretention per hour of study?** Daily re-reading wastes most of the time\non material you already know. One-p"
+      ],
+      "scores": [
+        0.06504494976203068,
+        0.06228216228216228,
+        0.047891458495966696,
+        0.04621952999562108,
+        0.045799361928394185,
+        0.04525625548726953,
+        0.04504312675751676,
+        0.045028884159318945,
+        0.044864612511671335,
+        0.03131881575727918
+      ],
+      "latency_ms": 11729.417124995962,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "expansions_used": [
+        "LLM long-term memory patterns",
+        "RAG memory for chatbots",
+        "how does Claude remember between sessions"
+      ]
+    },
+    {
+      "query": "attention mechanism",
+      "config": "C",
+      "hits": [
+        "notes/attention-mechanism.md",
+        "cards/card-attention-formula.md",
+        "notes/vector-embeddings.md",
+        "notes/retrieval-augmented-generation.md",
+        "notes/agent-memory-patterns.md",
+        "logs/2026-W15.md",
+        "notes/reciprocal-rank-fusion.md",
+        "notes/bm25-intuition.md",
+        "sources/anki-and-flashcards-intro.md",
+        "README.md"
+      ],
+      "titles": [
+        "Attention mechanism",
+        "Card: Attention formula",
+        "Vector embeddings",
+        "Retrieval-augmented generation",
+        "Agent memory patterns",
+        "2026-W15",
+        "Reciprocal Rank Fusion (RRF)",
+        "BM25 intuition",
+        "Anki and flashcards — a practical intro",
+        "seeklink test corpus"
+      ],
+      "snippets": [
+        "# Attention mechanism\n\nThe operation at the core of Transformer architectures. Given a sequence\nof tokens, attention lets every position look at every other position\nwith learnable weights. For the ou",
+        "Query `Q`, key `K`, value `V` are linear projections of the input.\nScaling by `sqrt(d_k)` prevents softmax saturation at high dimension.\n\nSee [[attention-mechanism]] for why each piece is there.",
+        "## Related\n- [[BM25]] — sparse retrieval counterpart\n- [[attention-mechanism]] — what the embedder is doing internally\n- [[retrieval-augmented-generation]] — end-to-end system",
+        "## Related\n- [[BM25]] — keyword retrieval channel\n- [[RRF]] — fusion\n- [[vector-embeddings]] — semantic channel\n- [[attention-mechanism]] — reranker internals\n- [[agent-memory-patterns]] — RAG as memo",
+        "## Search quality dominates\n\nIn all RAG-based memory systems, **the agent is only as smart as its\nsearch layer**. If seeklink returns the wrong three chunks, the agent\nanswers wrong with confidence. R",
+        "### 这个项目的立意\n\nseeklink 的差异化不是\"又一个语义搜索\"，是**把 IR 工业界做了 20 年的\n最佳实践带到个人 vault + agent 场景**：\n- BM25 + vector + graph + title 四路召回（[[RRF]] 融合）\n- 可选 cross-encoder 重排（[[attention-mechanism]]）\n- CJK 一等公民（jieba ",
+        "## Related\n- [[bm25-intuition]]\n- [[vector-embeddings]]\n- [[retrieval-augmented-generation]]",
+        "# BM25 intuition\n\nBM25 is the classic keyword-matching ranking function from 1990s IR\nresearch. It scores a (query, document) pair based on how often the\nquery's terms appear in the document, with two",
+        "## How to make a good card\n\n1. **One claim per card.** If the back side has \"AND\", split it.\n2. **Question, not prompt.** \"Explain how attention works\" is a\n   prompt; \"Why does multi-head attention o",
+        "## Topics\n\nThree semantic clusters:\n\n1. **Learning science / PKM** — FSRS, spaced repetition, Zettelkasten,\n   Feynman technique, forgetting curve. Heavily cross-linked.\n2. **ML / IR / agents** — atte"
+      ],
+      "scores": [
+        0.06504494976203068,
+        0.06402049075403121,
+        0.061101419310374536,
+        0.0582026840586981,
+        0.04627081163075462,
+        0.045730413377472204,
+        0.04482363597612958,
+        0.03149801587301587,
+        0.030621785881252923,
+        0.03055037313432836
+      ],
+      "latency_ms": 11249.096916988492,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "expansions_used": [
+        "scaled dot-product attention",
+        "multi-head self attention",
+        "softmax QK^T / sqrt(d_k)"
+      ]
+    },
+    {
+      "query": "sourdough bread starter",
+      "config": "C",
+      "hits": [
+        "recipes/sourdough-starter.md",
+        "README.md",
+        "notes/reciprocal-rank-fusion.md",
+        "recipes/pad-thai.md",
+        "recipes/red-braised-pork.md",
+        "notes/retrieval-augmented-generation.md",
+        "notes/agent-memory-patterns.md",
+        "notes/fsrs-algorithm.md",
+        "notes/bm25-intuition.md",
+        "logs/2026-W18.md"
+      ],
+      "titles": [
+        "Sourdough starter from scratch",
+        "seeklink test corpus",
+        "Reciprocal Rank Fusion (RRF)",
+        "Pad Thai",
+        "红烧肉 Red-braised pork",
+        "Retrieval-augmented generation",
+        "Agent memory patterns",
+        "FSRS algorithm",
+        "BM25 intuition",
+        "2026-W18"
+      ],
+      "snippets": [
+        "# Sourdough starter from scratch\n\nTakes 7-10 days to build a viable starter. No yeast, no commercial\ncultures. Just flour, water, and wild yeast from the air.",
+        "## Layout\n\n| Folder | Purpose | Style |\n|---|---|---|\n| `notes/` | Permanent notes | Strong frontmatter (tags, aliases), clear titles, wikilinks between notes, 300-800 words |\n| `logs/` | Weekly/daily",
+        "```\nbm25:    1.0\nvector:  1.0\nindegree: 0.3\ntitle:   1.5\n```\n",
+        "## Method\n\n1. **Make sauce**: whisk tamarind, palm sugar, fish sauce, soy sauce in\n   a bowl until sugar dissolves. Taste — should be equal parts sweet,\n   salty, sour. Adjust.\n2. **Prep**: have all i",
+        "## 用料\n\n- 五花肉 500g（三层分明的最好）\n- 生抽 2 汤匙\n- 老抽 1 汤匙\n- 冰糖 30g\n- 料酒 2 汤匙\n- 姜片 3 片\n- 葱段 2 根\n- 八角 1 颗\n- 水或高汤 约 500ml",
+        "# Retrieval-augmented generation\n\nRAG is the pattern of augmenting an LLM's prompt with retrieved documents\nat query time, so the model can answer from up-to-date or private\ninformation it wasn't trai",
+        "## Hybrid patterns in production\n\nMost capable agents today combine several:\n- Conversation summary for recent context\n- RAG over long-term document store\n- File-based scratchpad for working memory\n- ",
+        "```\nS_new = S * (1 + exp(w_8) * (11 - D) * S^(-w_9) * (exp((1-R) * w_10) - 1))\n```\n",
+        "where `k1 ≈ 1.2-2.0` and `b ≈ 0.75`.",
+        "## 2026-W18 — 关于 RAG pipeline 的几个碎片\n\nrandom notes this week, 没打算写成完整论证。"
+      ],
+      "scores": [
+        0.04918032786885246,
+        0.048131080389144903,
+        0.04787506400409626,
+        0.04640151515151515,
+        0.03076923076923077,
+        0.030330882352941176,
+        0.030090497737556562,
+        0.029418126757516764,
+        0.029211087420042643,
+        0.02877846790890269
+      ],
+      "latency_ms": 7213.986166054383,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "expansions_used": [
+        "wild yeast starter flour water",
+        "making bread from scratch natural fermentation"
+      ]
+    },
+    {
+      "query": "how to stop forgetting things I study",
+      "config": "C",
+      "hits": [
+        "notes/spaced-repetition.md",
+        "notes/memory-consolidation.md",
+        "sources/wikipedia-forgetting-curve.md",
+        "sources/wikipedia-spaced-repetition.md",
+        "notes/feynman-technique.md",
+        "notes/zettelkasten.md",
+        "logs/2026-W14.md",
+        "notes/forgetting-curve.md",
+        "notes/fsrs-algorithm.md",
+        "notes/deep-work-deliberate-practice.md"
+      ],
+      "titles": [
+        "Spaced repetition",
+        "记忆巩固 Memory consolidation",
+        "Forgetting curve (Wikipedia summary)",
+        "Spaced repetition (Wikipedia summary)",
+        "Feynman technique",
+        "Zettelkasten",
+        "2026-W14",
+        "遗忘曲线 Forgetting curve",
+        "FSRS algorithm",
+        "Deep work and deliberate practice"
+      ],
+      "snippets": [
+        "## The 记忆保持力 problem\n\nThe core question of spaced repetition is: **how do we maximize memory\nretention per hour of study?** Daily re-reading wastes most of the time\non material you already know. One-p",
+        "## 关键发现\n\n- **睡眠剥夺直接降低新记忆的保留率**。一整晚不睡后学的东西，一周后剩下\n  的比正常睡眠少 30-40%。\n- **巩固不是被动的重放**。睡眠中大脑会主动\"重新体验\"白天的关键片段，\n  这个过程压缩了时间（几十毫秒 → 几秒），并把记忆和旧知识网络建立连接。\n- **间隔重复 + 睡眠 = 最优组合**。[[spaced-repetition]] 的每次复习启动\n  一",
+        "## Implications for learners\n\nWithout systematic review, most of any study session is forgotten\nwithin a month. With a review pattern tuned to catch each item near\nthe retrievability threshold (typica",
+        "## Applications\n\nMedical education (pharmacology, anatomy), foreign language\nacquisition (vocabulary), bar exam preparation, and programming\ncertification all report significant improvements when swit",
+        "## 为什么有效\n\n- 自然语言不允许\"大概就是那个意思\"\n- 需要检索（recall），不是识别（recognize）—— 参见 [[spaced-repetition]]\n- 强制识别你的核心 claim 和依赖——正好是 [[atomic-notes]] 的起点",
+        "## 与 spaced repetition 的区别\n\nZettelkasten 解决的是**写作 + 思考**问题：怎么让新想法和旧想法碰撞出火花。\n[[spaced-repetition]] 解决的是**记忆保持**问题：怎么让已知的事实留在脑子里。\n\n两者互补，不重复。典型工作流：\n- Zettelkasten 建立理解和结构\n- 从 permanent notes 蒸馏出关键 claims",
+        "## 2026-W14 周记\n\n本周主要在想**记忆保持力**这个问题。起因是发现自己读完 [[zettelkasten]] 相关\n的几本书（Ahrens 的《How to Take Smart Notes》，然后 Luhmann 原文的几篇\n论文），真正能\"用\"的想法其实不多。问题不在于没读懂，是没沉淀到能调用的\n程度。\n\n读懂 ≠ 记住 ≠ 会用。这三个之间的落差是学习系统设计的核心。",
+        "## 实践启示\n\n- 学习后**当天晚上**做一次短复习比三天后多一次复习效果更好。\n- 长间隔不等于懒复习——只要每次都\"踩\"在曲线下降的关键点。\n- 课堂教学的一次性讲授，如果没有后续复习机制，从遗忘曲线看基本是浪费。",
+        "## Related\n- [[spaced-repetition]] — the practice that FSRS optimizes\n- [[forgetting-curve]] — the phenomenon being modeled\n- [[note-to-card-workflow]] — how permanent notes become reviewable cards",
+        "## Why this matters for learning systems\n\nSpaced repetition, Zettelkasten, and Feynman technique all assume\ndeliberate practice conditions. If you're reviewing Anki cards while\nwatching YouTube, you'r"
+      ],
+      "scores": [
+        0.06381141627043267,
+        0.06293722142479413,
+        0.06184452999562108,
+        0.0606266282736871,
+        0.05776397515527951,
+        0.04762704813108039,
+        0.046671404880360104,
+        0.04648394036050738,
+        0.044136460554371,
+        0.030776515151515152
+      ],
+      "latency_ms": 9620.05233403761,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "expansions_used": [
+        "retention techniques memorization",
+        "spaced repetition flashcards active recall",
+        "why I forget everything I read"
+      ]
+    },
+    {
+      "query": "学完就忘怎么办",
+      "config": "C",
+      "hits": [
+        "notes/spaced-repetition.md",
+        "notes/memory-consolidation.md",
+        "notes/forgetting-curve.md",
+        "sources/wikipedia-spaced-repetition.md",
+        "notes/deep-work-deliberate-practice.md",
+        "sources/wikipedia-forgetting-curve.md",
+        "notes/zettelkasten.md",
+        "sources/anki-and-flashcards-intro.md",
+        "notes/note-to-card-workflow.md",
+        "logs/2026-W14.md"
+      ],
+      "titles": [
+        "Spaced repetition",
+        "记忆巩固 Memory consolidation",
+        "遗忘曲线 Forgetting curve",
+        "Spaced repetition (Wikipedia summary)",
+        "Deep work and deliberate practice",
+        "Forgetting curve (Wikipedia summary)",
+        "Zettelkasten",
+        "Anki and flashcards — a practical intro",
+        "Note-to-card workflow",
+        "2026-W14"
+      ],
+      "snippets": [
+        "## The 记忆保持力 problem\n\nThe core question of spaced repetition is: **how do we maximize memory\nretention per hour of study?** Daily re-reading wastes most of the time\non material you already know. One-p",
+        "## 关键发现\n\n- **睡眠剥夺直接降低新记忆的保留率**。一整晚不睡后学的东西，一周后剩下\n  的比正常睡眠少 30-40%。\n- **巩固不是被动的重放**。睡眠中大脑会主动\"重新体验\"白天的关键片段，\n  这个过程压缩了时间（几十毫秒 → 几秒），并把记忆和旧知识网络建立连接。\n- **间隔重复 + 睡眠 = 最优组合**。[[spaced-repetition]] 的每次复习启动\n  一",
+        "## 实践启示\n\n- 学习后**当天晚上**做一次短复习比三天后多一次复习效果更好。\n- 长间隔不等于懒复习——只要每次都\"踩\"在曲线下降的关键点。\n- 课堂教学的一次性讲授，如果没有后续复习机制，从遗忘曲线看基本是浪费。",
+        "## History\n\nThe phenomenon was first characterized by **Hermann Ebbinghaus** in\nthe 1880s through experiments on himself using nonsense syllables. He\ndocumented the forgetting curve — retention drops ",
+        "## Why this matters for learning systems\n\nSpaced repetition, Zettelkasten, and Feynman technique all assume\ndeliberate practice conditions. If you're reviewing Anki cards while\nwatching YouTube, you'r",
+        "## Implications for learners\n\nWithout systematic review, most of any study session is forgotten\nwithin a month. With a review pattern tuned to catch each item near\nthe retrievability threshold (typica",
+        "## 与 spaced repetition 的区别\n\nZettelkasten 解决的是**写作 + 思考**问题：怎么让新想法和旧想法碰撞出火花。\n[[spaced-repetition]] 解决的是**记忆保持**问题：怎么让已知的事实留在脑子里。\n\n两者互补，不重复。典型工作流：\n- Zettelkasten 建立理解和结构\n- 从 permanent notes 蒸馏出关键 claims",
+        "## When not to use Anki\n\n- If you haven't understood the material yet. Anki entrenches; it\n  doesn't teach. Understand first (Feynman), then memorize.\n- If the material has a 2-week shelf life. Use a ",
+        "# Note-to-card workflow\n\nThe bridge between [[zettelkasten]] (where you *think*) and\n[[spaced-repetition]] (where you *retain*). Permanent notes are too\nlong to review daily. Flashcards are too atomic",
+        "## 2026-W14 周记\n\n本周主要在想**记忆保持力**这个问题。起因是发现自己读完 [[zettelkasten]] 相关\n的几本书（Ahrens 的《How to Take Smart Notes》，然后 Luhmann 原文的几篇\n论文），真正能\"用\"的想法其实不多。问题不在于没读懂，是没沉淀到能调用的\n程度。\n\n读懂 ≠ 记住 ≠ 会用。这三个之间的落差是学习系统设计的核心。"
+      ],
+      "scores": [
+        0.06478893337698202,
+        0.06303568926519747,
+        0.06137104514713623,
+        0.05997515112764473,
+        0.05862921417755941,
+        0.04762704813108039,
+        0.045773301032768075,
+        0.04459570280465803,
+        0.03036576949620428,
+        0.030330882352941176
+      ],
+      "latency_ms": 8351.315542007796,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "expansions_used": [
+        "记忆保持 间隔重复",
+        "防止遗忘的学习方法",
+        "读完书记不住 how to fix"
+      ]
+    },
+    {
+      "query": "second brain slip box",
+      "config": "C",
+      "hits": [
+        "notes/zettelkasten.md",
+        "logs/2026-W14.md",
+        "sources/niklas-luhmann-zettelkasten.md",
+        "notes/atomic-notes.md",
+        "logs/2026-W17.md",
+        "notes/reciprocal-rank-fusion.md",
+        "notes/note-to-card-workflow.md",
+        "README.md",
+        "sources/anki-and-flashcards-intro.md",
+        "notes/fsrs-algorithm.md"
+      ],
+      "titles": [
+        "Zettelkasten",
+        "2026-W14",
+        "Niklas Luhmann's Zettelkasten (essay summary)",
+        "Atomic notes",
+        "2026-W17",
+        "Reciprocal Rank Fusion (RRF)",
+        "Note-to-card workflow",
+        "seeklink test corpus",
+        "Anki and flashcards — a practical intro",
+        "FSRS algorithm"
+      ],
+      "snippets": [
+        "# Zettelkasten\n\nZettelkasten (德语：\"卡片盒\")是德国社会学家 Niklas Luhmann 在 1960-90 年代\n使用的个人知识系统，他用它在 30 年里写了 70 多本书、400 多篇论文。核心是一\n堆编号索引卡（约 9 万张），每张一个原子想法，卡片之间通过编号互相引用。\n\n关键不是卡片，是**原子性 + 引用**。每张卡只讲一件事；卡片之间的链接形成\n一张",
+        "### 当前想法\n\n**三者都要**，但不要求每个想法都进所有三个层。典型生命周期：\n- 读到一个想法 → fleeting note（草）\n- 想清楚了 → permanent note in zettelkasten\n- 想不想持续调用？想 → 蒸馏成 1-3 张 flashcard 进 Anki\n- 不想进 Anki 也 ok，zettelkasten 查得到就行\n\n关键是 **seekli",
+        "## Contemporary inheritors\n\nDigital Zettelkasten-inspired tools include Obsidian, Roam Research,\nLogseq, and various plain-markdown vault systems. They share Luhmann's\natomic-note + wikilink pattern b",
+        "## Related\n- [[zettelkasten]] — the note system this serves\n- [[note-to-card-workflow]] — turning atomic notes into SRS cards\n- [[feynman-technique]] — explaining-for-strangers discipline",
+        "## 2026-W17 — Zettelkasten 几本书的交叉笔记\n\n这周读完三本 zettelkasten 相关的：\n\n1. **Sönke Ahrens, How to Take Smart Notes (2017)** — 最流行的入门\n2. **Niklas Luhmann, Communicating with Slip Boxes (1981)** — Luhmann 自己写的方法",
+        "## Related\n- [[bm25-intuition]]\n- [[vector-embeddings]]\n- [[retrieval-augmented-generation]]",
+        "# Note-to-card workflow\n\nThe bridge between [[zettelkasten]] (where you *think*) and\n[[spaced-repetition]] (where you *retain*). Permanent notes are too\nlong to review daily. Flashcards are too atomic",
+        "## Topics\n\nThree semantic clusters:\n\n1. **Learning science / PKM** — FSRS, spaced repetition, Zettelkasten,\n   Feynman technique, forgetting curve. Heavily cross-linked.\n2. **ML / IR / agents** — atte",
+        "## Ecosystem\n\n- **AnkiWeb** (free sync)\n- **AnkiMobile** (iOS, paid, funds development)\n- **AnkiDroid** (Android, free)\n- Shared decks: anki.space, large community of shared decks for\n  medicine, lang",
+        "# FSRS algorithm\n\nFSRS (Free Spaced Repetition Scheduler) is a memory model that replaces\nAnki's SM-2 as the default scheduling algorithm in modern flashcard apps.\nIt predicts how long you'll remember"
+      ],
+      "scores": [
+        0.0630968737648454,
+        0.06159053592852341,
+        0.04740957966764418,
+        0.04715356328259554,
+        0.045750384880819665,
+        0.044117647058823525,
+        0.032018442622950824,
+        0.031099324975891997,
+        0.030309988518943745,
+        0.030117753623188408
+      ],
+      "latency_ms": 8101.000875001773,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "expansions_used": [
+        "Zettelkasten",
+        "Luhmann index card system",
+        "personal knowledge management note linking"
+      ]
+    },
+    {
+      "query": "把文档切块放进向量库",
+      "config": "C",
+      "hits": [
+        "notes/vector-embeddings.md",
+        "notes/agent-memory-patterns.md",
+        "notes/attention-mechanism.md",
+        "notes/bm25-intuition.md",
+        "notes/retrieval-augmented-generation.md",
+        "notes/reciprocal-rank-fusion.md",
+        "logs/2026-W18.md",
+        "notes/sqlite-fts5-cjk.md",
+        "cards/card-attention-formula.md",
+        "logs/2026-W15.md"
+      ],
+      "titles": [
+        "Vector embeddings",
+        "Agent memory patterns",
+        "Attention mechanism",
+        "BM25 intuition",
+        "Retrieval-augmented generation",
+        "Reciprocal Rank Fusion (RRF)",
+        "2026-W18",
+        "SQLite FTS5 + CJK (jieba)",
+        "Card: Attention formula",
+        "2026-W15"
+      ],
+      "snippets": [
+        "# Vector embeddings\n\nAn embedding is a fixed-length numeric vector that represents a piece\nof text (or image, or code) in a geometric space where **semantic\nsimilarity maps to geometric proximity**. T",
+        "## 4. File-based scratchpad\n\nAgent writes to and reads from files as needed. Simpler than vector DB;\nworks well when the agent knows file paths. Claude Code's CLAUDE.md\nfiles and the memory file syste",
+        "where `Q`, `K`, `V` are linear projections of the input (queries, keys,\nvalues), and `d_k` is the key dimension (scaling prevents softmax\nsaturation at large dims).",
+        "## Related\n- [[RRF]] — how BM25 and vector channels are combined\n- [[sqlite-fts5-cjk]] — seeklink's implementation\n- [[vector-embeddings]] — semantic counterpart",
+        "## Related\n- [[BM25]] — keyword retrieval channel\n- [[RRF]] — fusion\n- [[vector-embeddings]] — semantic channel\n- [[attention-mechanism]] — reranker internals\n- [[agent-memory-patterns]] — RAG as memo",
+        "## Related\n- [[bm25-intuition]]\n- [[vector-embeddings]]\n- [[retrieval-augmented-generation]]",
+        "### TODO\n- [ ] 想想 query expansion 的 prompt template 要不要做多语言\n- [ ] 看看 qmd 的最新 branch 在搞什么",
+        "# SQLite FTS5 + CJK (jieba)\n\nSQLite's FTS5 extension provides full-text search out of the box, but\nits default tokenizers (`simple`, `porter`, `unicode61`) all assume\nwhitespace or Unicode word bounda",
+        "```\nAttention(Q, K, V) = softmax(Q @ K.T / sqrt(d_k)) @ V\n```\n",
+        "### 这个项目的立意\n\nseeklink 的差异化不是\"又一个语义搜索\"，是**把 IR 工业界做了 20 年的\n最佳实践带到个人 vault + agent 场景**：\n- BM25 + vector + graph + title 四路召回（[[RRF]] 融合）\n- 可选 cross-encoder 重排（[[attention-mechanism]]）\n- CJK 一等公民（jieba "
+      ],
+      "scores": [
+        0.06430053288858155,
+        0.06351569577376029,
+        0.062119801754268796,
+        0.061189822713448555,
+        0.047891458495966696,
+        0.045949904158859384,
+        0.045062229437229435,
+        0.04483608742004264,
+        0.030309988518943745,
+        0.03007688828584351
+      ],
+      "latency_ms": 11343.421916943043,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "expansions_used": [
+        "RAG 检索增强生成",
+        "chunk embedding vector DB",
+        "文档向量化 搜索"
+      ]
+    },
+    {
+      "query": "Luhmann 原子笔记",
+      "config": "C",
+      "hits": [
+        "notes/zettelkasten.md",
+        "logs/2026-W17.md",
+        "sources/niklas-luhmann-zettelkasten.md",
+        "notes/atomic-notes.md",
+        "notes/feynman-technique.md",
+        "sources/wikipedia-spaced-repetition.md",
+        "logs/2026-W14.md",
+        "README.md",
+        "notes/note-to-card-workflow.md",
+        "notes/forgetting-curve.md"
+      ],
+      "titles": [
+        "Zettelkasten",
+        "2026-W17",
+        "Niklas Luhmann's Zettelkasten (essay summary)",
+        "Atomic notes",
+        "Feynman technique",
+        "Spaced repetition (Wikipedia summary)",
+        "2026-W14",
+        "seeklink test corpus",
+        "Note-to-card workflow",
+        "遗忘曲线 Forgetting curve"
+      ],
+      "snippets": [
+        "## 引用\n- [[atomic-notes]] —— 原子性的深度讨论\n- [[note-to-card-workflow]] —— 从 zettel 到 flashcard 的蒸馏\n- [[deep-work-deliberate-practice]] —— 配套的工作姿态",
+        "### 共识\n\n- 三本书都同意 [[atomic-notes]] 是核心。\n- 三本书都警告**装饰型 vault** 的陷阱——漂亮的目录结构 ≠ 思考工具。\n- 三本都说 permanent note 必须是**自己的话**。",
+        "# Niklas Luhmann's Zettelkasten (essay summary)\n\n*Paraphrased summary of Luhmann's 1981 essay \"Communicating with Slip\nBoxes\" and surrounding interviews, for the test corpus.*\n\nLuhmann (1927-1998) was",
+        "## Why atomicity matters\n\n- **Linking**: you can only usefully link to a note if the note has a\n  clear subject. \"My thoughts on memory\" is unlinkable; \"Forgetting\n  curves are empirically power-law, ",
+        "## Related\n- [[deep-work-deliberate-practice]] —— 包含费曼技巧的更大框架\n- [[atomic-notes]] —— 产出物",
+        "## Limitations\n\nSpaced repetition excels at atomic facts (vocabulary, formulas, named\nentities) but does not automatically produce *deep* understanding. It\ncomplements but does not replace study techn",
+        "## 2026-W14 周记\n\n本周主要在想**记忆保持力**这个问题。起因是发现自己读完 [[zettelkasten]] 相关\n的几本书（Ahrens 的《How to Take Smart Notes》，然后 Luhmann 原文的几篇\n论文），真正能\"用\"的想法其实不多。问题不在于没读懂，是没沉淀到能调用的\n程度。\n\n读懂 ≠ 记住 ≠ 会用。这三个之间的落差是学习系统设计的核心。",
+        "## Layout\n\n| Folder | Purpose | Style |\n|---|---|---|\n| `notes/` | Permanent notes | Strong frontmatter (tags, aliases), clear titles, wikilinks between notes, 300-800 words |\n| `logs/` | Weekly/daily",
+        "## Related\n- [[FSRS]] — scheduler that processes the cards\n- [[atomic-notes]] — what you're distilling from\n- [[spaced-repetition]] — why distillation is worth doing",
+        "# 遗忘曲线 Forgetting curve\n\n赫尔曼·艾宾浩斯（Hermann Ebbinghaus, 1850-1909）在 1880 年代用自己做受试者，\n记忆了一批无意义音节（CVC 结构：WID、ZOF 等），然后在不同时间间隔后测量\n还能回忆多少。他画出的曲线是心理学史上第一条严谨的实验曲线，后来被称为\n**遗忘曲线**（forgetting curve）。\n\n基本形状：记住一个新东"
+      ],
+      "scores": [
+        0.04841188524590165,
+        0.04689826302729529,
+        0.04655217278168098,
+        0.04603174603174603,
+        0.04548239750445633,
+        0.04370384104323105,
+        0.0315136476426799,
+        0.030834914611005692,
+        0.03055037313432836,
+        0.029418126757516764
+      ],
+      "latency_ms": 7447.405584040098,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "expansions_used": [
+        "atomic notes 原子性 卡片",
+        "Luhmann zettel 单一想法"
+      ]
+    },
+    {
+      "query": "FSRS 算法原理",
+      "config": "C",
+      "hits": [
+        "notes/fsrs-algorithm.md",
+        "sources/wikipedia-forgetting-curve.md",
+        "notes/note-to-card-workflow.md",
+        "notes/memory-consolidation.md",
+        "cards/card-fsrs-core-idea.md",
+        "logs/2026-W16.md",
+        "sources/anki-and-flashcards-intro.md",
+        "sources/wikipedia-spaced-repetition.md",
+        "notes/forgetting-curve.md",
+        "notes/bm25-intuition.md"
+      ],
+      "titles": [
+        "FSRS algorithm",
+        "Forgetting curve (Wikipedia summary)",
+        "Note-to-card workflow",
+        "记忆巩固 Memory consolidation",
+        "Card: FSRS core idea",
+        "2026-W16",
+        "Anki and flashcards — a practical intro",
+        "Spaced repetition (Wikipedia summary)",
+        "遗忘曲线 Forgetting curve",
+        "BM25 intuition"
+      ],
+      "snippets": [
+        "# FSRS algorithm\n\nFSRS (Free Spaced Repetition Scheduler) is a memory model that replaces\nAnki's SM-2 as the default scheduling algorithm in modern flashcard apps.\nIt predicts how long you'll remember",
+        "## Mathematical models\n\n- **Ebbinghaus (1885)**: proposed an exponential-decay-like form with\n  decreasing marginal rate.\n- **Wickelgren (1972)**: power-function memory trace model.\n- **Wixted & Ebbes",
+        "## Example\n\n**Note** ([[FSRS]]): argues FSRS beats SM-2 because it models\npopulation-fitted stability instead of per-card ease.\n\n**Card front**: \"Why does FSRS outperform SM-2 at the same retention\nta",
+        "## 和 FSRS 的关系\n\n[[FSRS]] 不建模睡眠——它只建模时间。但实际使用中，规律睡眠的人能在\nFSRS 的 90% 目标上稳定超出，睡眠紊乱的人会稳定低 5-10%。这不是算法的\n锅，是生理的锅。",
+        "# Card: FSRS core idea\n\n**Q**: What does FSRS do differently from SM-2?\n\n**A**: FSRS fits a **17-parameter power-law memory model** on\npopulation review data, outputting per-card intervals that target",
+        "### FSRS 不是\"黑盒算法\"\n\n以为 FSRS 是某种神经网络。其实不是——它是一个**17 参数的经验公式**，\n通过在 11M 条真实 review log 上 L-BFGS 拟合出来的。每个参数都有物理\n含义（stability growth, difficulty decay, etc.），可以逐个解读。\n\n这意味着：\n- 可以在**你自己的 review log** 上重新拟合参数",
+        "## Algorithms\n\nAnki's default scheduler has been **SM-2** (derived from SuperMemo's\n1985 algorithm) for most of its history. Since 2024, **FSRS** is\nshipped as an optional (now default on 2.1.66+) rep",
+        "## Modern implementations\n\nThe first computer-based spaced repetition system was **SuperMemo**,\ndeveloped by Piotr Wozniak starting in 1985. SuperMemo introduced the\nSM-2 algorithm, which is still wid",
+        "其中 `R(t)` 是时间 `t` 后的 retrievability（可回忆概率），`S` 是 stability\n（保持期常数），`c` 是经验指数。现代模型（如 FSRS）用类似的幂律或指数衰减，\n并让 `S` 随每次复习增长——这就是**间隔重复**的理论基础。",
+        "## Why it still matters in 2026\n\nVector embedders are strong at semantic match, but they lose on exact\nvocabulary. \"FSRS\" is a proper noun that means one thing; if the\nembedder maps it near general \"s"
+      ],
+      "scores": [
+        0.06428490111891752,
+        0.06172111085714493,
+        0.060653884159318945,
+        0.058622852125924996,
+        0.04839549075403121,
+        0.04692742126540875,
+        0.046634615384615385,
+        0.04640914640914641,
+        0.0454615036704589,
+        0.04327731092436975
+      ],
+      "latency_ms": 9952.765208901837,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "expansions_used": [
+        "FSRS 算法 参数",
+        "Free Spaced Repetition Scheduler",
+        "SM-2 对比 FSRS 公式"
+      ]
+    },
+    {
+      "query": "Zettelkasten",
+      "config": "C",
+      "hits": [
+        "notes/zettelkasten.md",
+        "notes/note-to-card-workflow.md",
+        "sources/niklas-luhmann-zettelkasten.md",
+        "notes/atomic-notes.md",
+        "logs/2026-W17.md",
+        "notes/deep-work-deliberate-practice.md",
+        "README.md",
+        "logs/2026-W14.md",
+        "notes/spaced-repetition.md",
+        "notes/feynman-technique.md"
+      ],
+      "titles": [
+        "Zettelkasten",
+        "Note-to-card workflow",
+        "Niklas Luhmann's Zettelkasten (essay summary)",
+        "Atomic notes",
+        "2026-W17",
+        "Deep work and deliberate practice",
+        "seeklink test corpus",
+        "2026-W14",
+        "Spaced repetition",
+        "Feynman technique"
+      ],
+      "snippets": [
+        "## 与 spaced repetition 的区别\n\nZettelkasten 解决的是**写作 + 思考**问题：怎么让新想法和旧想法碰撞出火花。\n[[spaced-repetition]] 解决的是**记忆保持**问题：怎么让已知的事实留在脑子里。\n\n两者互补，不重复。典型工作流：\n- Zettelkasten 建立理解和结构\n- 从 permanent notes 蒸馏出关键 claims",
+        "# Note-to-card workflow\n\nThe bridge between [[zettelkasten]] (where you *think*) and\n[[spaced-repetition]] (where you *retain*). Permanent notes are too\nlong to review daily. Flashcards are too atomic",
+        "## Contemporary inheritors\n\nDigital Zettelkasten-inspired tools include Obsidian, Roam Research,\nLogseq, and various plain-markdown vault systems. They share Luhmann's\natomic-note + wikilink pattern b",
+        "## Related\n- [[zettelkasten]] — the note system this serves\n- [[note-to-card-workflow]] — turning atomic notes into SRS cards\n- [[feynman-technique]] — explaining-for-strangers discipline",
+        "## 2026-W17 — Zettelkasten 几本书的交叉笔记\n\n这周读完三本 zettelkasten 相关的：\n\n1. **Sönke Ahrens, How to Take Smart Notes (2017)** — 最流行的入门\n2. **Niklas Luhmann, Communicating with Slip Boxes (1981)** — Luhmann 自己写的方法",
+        "## Related\n- [[feynman-technique]]\n- [[zettelkasten]] — benefits from deep work, suffers without",
+        "## Topics\n\nThree semantic clusters:\n\n1. **Learning science / PKM** — FSRS, spaced repetition, Zettelkasten,\n   Feynman technique, forgetting curve. Heavily cross-linked.\n2. **ML / IR / agents** — atte",
+        "### 当前想法\n\n**三者都要**，但不要求每个想法都进所有三个层。典型生命周期：\n- 读到一个想法 → fleeting note（草）\n- 想清楚了 → permanent note in zettelkasten\n- 想不想持续调用？想 → 蒸馏成 1-3 张 flashcard 进 Anki\n- 不想进 Anki 也 ok，zettelkasten 查得到就行\n\n关键是 **seekli",
+        "## Related\n- [[FSRS]] — state-of-the-art scheduler\n- [[forgetting-curve]] — what the spacing fights against\n- [[feynman-technique]] — complementary practice for deep understanding\n- [[zettelkasten]] —",
+        "## 与 Zettelkasten 的关系\n\n写 permanent note 的过程基本就是一次 Feynman pass：你在用自己的话重新\n组织一个想法。如果你的 zettel 是复制粘贴 + 摘录，它就不是一张工作型\nzettel，它是装饰品。见 [[zettelkasten]] 对 reformulation 的讨论。"
+      ],
+      "scores": [
+        0.04765107388058208,
+        0.04701522850420375,
+        0.045773301032768075,
+        0.03252247488101534,
+        0.03036576949620428,
+        0.030330882352941176,
+        0.030330882352941176,
+        0.030309988518943745,
+        0.029211087420042643,
+        0.015873015873015872
+      ],
+      "latency_ms": 6197.205875068903,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "expansions_used": [
+        "卡片盒笔记法",
+        "Luhmann slip box"
+      ]
+    },
+    {
+      "query": "RRF",
+      "config": "C",
+      "hits": [
+        "notes/reciprocal-rank-fusion.md",
+        "notes/retrieval-augmented-generation.md",
+        "cards/card-rrf-formula.md",
+        "notes/bm25-intuition.md",
+        "logs/2026-W15.md",
+        "notes/sqlite-fts5-cjk.md",
+        "notes/agent-memory-patterns.md",
+        "logs/2026-W18.md",
+        "README.md",
+        "logs/2026-W16.md"
+      ],
+      "titles": [
+        "Reciprocal Rank Fusion (RRF)",
+        "Retrieval-augmented generation",
+        "Card: RRF formula",
+        "BM25 intuition",
+        "2026-W15",
+        "SQLite FTS5 + CJK (jieba)",
+        "Agent memory patterns",
+        "2026-W18",
+        "seeklink test corpus",
+        "2026-W16"
+      ],
+      "snippets": [
+        "# Reciprocal Rank Fusion (RRF)\n\nA simple algorithm for combining ranked lists from multiple retrieval\nsystems into a single ranked list. Given `N` channels, each producing\nits own ranking of the same ",
+        "## Related\n- [[BM25]] — keyword retrieval channel\n- [[RRF]] — fusion\n- [[vector-embeddings]] — semantic channel\n- [[attention-mechanism]] — reranker internals\n- [[agent-memory-patterns]] — RAG as memo",
+        "# Card: RRF formula\n\n**Q**: How does Reciprocal Rank Fusion combine rankings from multiple\nretrieval channels?\n\n**A**:",
+        "## Related\n- [[RRF]] — how BM25 and vector channels are combined\n- [[sqlite-fts5-cjk]] — seeklink's implementation\n- [[vector-embeddings]] — semantic counterpart",
+        "### 技术债记录\n\n- cold-start 路径没传 reranker（和 daemon 行为不一致）—— 得修\n- line-range retrieval 缺失，agent 用起来浪费 context\n- title 权重 1.5 是 v0.2 拍的，没 A/B 过\n- reranker 的 yes/no sigmoid 直接替换 RRF 分数，exact alias 硬命中会被\n  de",
+        "## Related\n- [[bm25-intuition]] — BM25 is what runs on this index\n- [[RRF]] — how the BM25 channel gets combined with vector",
+        "## Related\n- [[retrieval-augmented-generation]]\n- [[vector-embeddings]]\n- [[RRF]]",
+        "### 4. Hybrid retrieval 的论文很多但工具很少\n\nIR 会议论文几乎都在做 hybrid + rerank，但 pip install 能用的\nend-to-end 工具寥寥无几。seeklink 的定位就站这个缝里：论文早有，\n好用的 CLI 罕见。",
+        "## Topics\n\nThree semantic clusters:\n\n1. **Learning science / PKM** — FSRS, spaced repetition, Zettelkasten,\n   Feynman technique, forgetting curve. Heavily cross-linked.\n2. **ML / IR / agents** — atte",
+        "```\nR(t) = 1 / (1 + (t/S)^c)\n```\n"
+      ],
+      "scores": [
+        0.06480532786885246,
+        0.06427650713907986,
+        0.06374807987711213,
+        0.06167237780141006,
+        0.058409723396172224,
+        0.045934988518943745,
+        0.04547511312217195,
+        0.030776515151515152,
+        0.029857397504456328,
+        0.02964426877470356
+      ],
+      "latency_ms": 7419.007707969286,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "expansions_used": [
+        "reciprocal rank fusion",
+        "combining search channels",
+        "RRF 倒数排名融合"
+      ]
+    },
+    {
+      "query": "遗忘曲线",
+      "config": "C",
+      "hits": [
+        "notes/memory-consolidation.md",
+        "sources/wikipedia-forgetting-curve.md",
+        "logs/2026-W16.md",
+        "notes/forgetting-curve.md",
+        "sources/wikipedia-spaced-repetition.md",
+        "notes/spaced-repetition.md",
+        "notes/fsrs-algorithm.md",
+        "notes/note-to-card-workflow.md",
+        "sources/anki-and-flashcards-intro.md",
+        "notes/reciprocal-rank-fusion.md"
+      ],
+      "titles": [
+        "记忆巩固 Memory consolidation",
+        "Forgetting curve (Wikipedia summary)",
+        "2026-W16",
+        "遗忘曲线 Forgetting curve",
+        "Spaced repetition (Wikipedia summary)",
+        "Spaced repetition",
+        "FSRS algorithm",
+        "Note-to-card workflow",
+        "Anki and flashcards — a practical intro",
+        "Reciprocal Rank Fusion (RRF)"
+      ],
+      "snippets": [
+        "## Related\n- [[forgetting-curve]] —— 如果不巩固的衰减曲线\n- [[spaced-repetition]] —— 利用巩固窗口的实践",
+        "# Forgetting curve (Wikipedia summary)\n\n*Summary paraphrased from the Wikipedia article.*\n\nThe forgetting curve describes the decrease in retention of information\nover time when there is no attempt at",
+        "### 遗忘曲线不是指数\n\n这个是真 surprise。传统教科书都说遗忘是 `e^(-t/τ)`（指数衰减）。但\nEbbinghaus 的原始数据和现代大样本研究都显示是**幂律**：",
+        "## 参考\n- [[spaced-repetition]] —— 对抗遗忘曲线的主要实践\n- [[FSRS]] —— 建模和拟合遗忘曲线的现代算法\n- [[memory-consolidation]] —— 生物学层面的记忆巩固过程",
+        "## History\n\nThe phenomenon was first characterized by **Hermann Ebbinghaus** in\nthe 1880s through experiments on himself using nonsense syllables. He\ndocumented the forgetting curve — retention drops ",
+        "## Related\n- [[FSRS]] — state-of-the-art scheduler\n- [[forgetting-curve]] — what the spacing fights against\n- [[feynman-technique]] — complementary practice for deep understanding\n- [[zettelkasten]] —",
+        "## Why FSRS beats SM-2\n\nSM-2 uses a fixed formula tied to a user-reported \"ease factor\" per card.\nIt doesn't learn from population data, and its intervals tend to grow\ntoo fast for hard cards and too ",
+        "## Example\n\n**Note** ([[FSRS]]): argues FSRS beats SM-2 because it models\npopulation-fitted stability instead of per-card ease.\n\n**Card front**: \"Why does FSRS outperform SM-2 at the same retention\nta",
+        "## Algorithms\n\nAnki's default scheduler has been **SM-2** (derived from SuperMemo's\n1985 algorithm) for most of its history. Since 2024, **FSRS** is\nshipped as an optional (now default on 2.1.66+) rep",
+        "## Related\n- [[bm25-intuition]]\n- [[vector-embeddings]]\n- [[retrieval-augmented-generation]]"
+      ],
+      "scores": [
+        0.04817150063051703,
+        0.04787506400409626,
+        0.04765107388058208,
+        0.04718343765045739,
+        0.046875,
+        0.04479638009049774,
+        0.02964426877470356,
+        0.02964426877470356,
+        0.029631255487269532,
+        0.015151515151515152
+      ],
+      "latency_ms": 5004.456125083379,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "expansions_used": [
+        "Ebbinghaus 遗忘",
+        "forgetting curve"
+      ]
+    },
+    {
+      "query": "how transformers relate to information retrieval",
+      "config": "C",
+      "hits": [
+        "notes/attention-mechanism.md",
+        "notes/agent-memory-patterns.md",
+        "notes/retrieval-augmented-generation.md",
+        "logs/2026-W15.md",
+        "notes/reciprocal-rank-fusion.md",
+        "notes/vector-embeddings.md",
+        "logs/2026-W18.md",
+        "notes/zettelkasten.md",
+        "notes/bm25-intuition.md",
+        "logs/2026-W16.md"
+      ],
+      "titles": [
+        "Attention mechanism",
+        "Agent memory patterns",
+        "Retrieval-augmented generation",
+        "2026-W15",
+        "Reciprocal Rank Fusion (RRF)",
+        "Vector embeddings",
+        "2026-W18",
+        "Zettelkasten",
+        "BM25 intuition",
+        "2026-W16"
+      ],
+      "snippets": [
+        "# Attention mechanism\n\nThe operation at the core of Transformer architectures. Given a sequence\nof tokens, attention lets every position look at every other position\nwith learnable weights. For the ou",
+        "## 3. Retrieval-based (RAG)\n\nStore turns, notes, and tool outputs as documents; index them with\n[[vector-embeddings]] + [[BM25]]; retrieve relevant ones at each turn.\nSee [[retrieval-augmented-generat",
+        "## The hybrid retrieval insight\n\nPure vector retrieval misses exact keyword matches. Pure keyword\n([[BM25]]) misses semantic matches. **Hybrid** combines both channels\nvia a fusion algorithm, typicall",
+        "### 讨论记录\n\n和 C 讨论了一个小时。主要 insight：\n\n1. LLM 本身 stateless，所有\"记忆\"都是 retrieval。\n2. Retrieval 质量 = agent 智商上限。返回错的 chunk = agent 自信地胡说。\n3. 现有方案多是 vector-only RAG，对 CJK 极差，对 exact-keyword 极差。\n4. 没人认真做 hybrid",
+        "## Why RRF works\n\n- **Scale-free**: BM25 returns raw scores in [0, 30]; vector similarity\n  returns [0, 1]. Can't average these directly. RRF only uses ranks,\n  which are always 1, 2, 3...\n- **Rank-se",
+        "## Bi-encoder vs cross-encoder\n\n- **Bi-encoder**: embed query and document separately, compare via dot\n  product. Fast (~ms per query over millions of docs via approximate\n  nearest neighbor).\n- **Cro",
+        "### 4. Hybrid retrieval 的论文很多但工具很少\n\nIR 会议论文几乎都在做 hybrid + rerank，但 pip install 能用的\nend-to-end 工具寥寥无几。seeklink 的定位就站这个缝里：论文早有，\n好用的 CLI 罕见。",
+        "# Zettelkasten\n\nZettelkasten (德语：\"卡片盒\")是德国社会学家 Niklas Luhmann 在 1960-90 年代\n使用的个人知识系统，他用它在 30 年里写了 70 多本书、400 多篇论文。核心是一\n堆编号索引卡（约 9 万张），每张一个原子想法，卡片之间通过编号互相引用。\n\n关键不是卡片，是**原子性 + 引用**。每张卡只讲一件事；卡片之间的链接形成\n一张",
+        "## Why it still matters in 2026\n\nVector embedders are strong at semantic match, but they lose on exact\nvocabulary. \"FSRS\" is a proper noun that means one thing; if the\nembedder maps it near general \"s",
+        "### 对系统的启示\n\n- seeklink 目前没有任何记忆衰减模型——它是纯\"现状\"搜索，不知道什么\n  东西你最近想起过\n- 如果想给笔记做 FSRS 式调度，需要存**每次访问时间戳**（现在没存）\n- 这个不是 v0.3/v0.4 的事，更像 v1.0+ 的大胆实验"
+      ],
+      "scores": [
+        0.06430053288858155,
+        0.06162880427622292,
+        0.06136775362318841,
+        0.06069486069486069,
+        0.06024667931688804,
+        0.04701522850420375,
+        0.04620592054390803,
+        0.04482184482184482,
+        0.031024531024531024,
+        0.02877846790890269
+      ],
+      "latency_ms": 9379.040583968163,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "expansions_used": [
+        "attention reranker cross-encoder",
+        "embedding models in search",
+        "transformer architecture retrieval"
+      ]
+    },
+    {
+      "query": "为什么 hybrid 搜索比纯向量好",
+      "config": "C",
+      "hits": [
+        "notes/retrieval-augmented-generation.md",
+        "notes/attention-mechanism.md",
+        "notes/reciprocal-rank-fusion.md",
+        "notes/vector-embeddings.md",
+        "notes/bm25-intuition.md",
+        "logs/2026-W15.md",
+        "sources/wikipedia-spaced-repetition.md",
+        "logs/2026-W18.md",
+        "logs/2026-W16.md",
+        "cards/card-attention-formula.md"
+      ],
+      "titles": [
+        "Retrieval-augmented generation",
+        "Attention mechanism",
+        "Reciprocal Rank Fusion (RRF)",
+        "Vector embeddings",
+        "BM25 intuition",
+        "2026-W15",
+        "Spaced repetition (Wikipedia summary)",
+        "2026-W18",
+        "2026-W16",
+        "Card: Attention formula"
+      ],
+      "snippets": [
+        "## The hybrid retrieval insight\n\nPure vector retrieval misses exact keyword matches. Pure keyword\n([[BM25]]) misses semantic matches. **Hybrid** combines both channels\nvia a fusion algorithm, typicall",
+        "## Why it works\n\n- **Parallel**: unlike RNNs, all positions compute simultaneously.\n- **Long range**: the softmax over all positions means a token 2000\n  away can still influence the output if its key",
+        "## Why RRF works\n\n- **Scale-free**: BM25 returns raw scores in [0, 30]; vector similarity\n  returns [0, 1]. Can't average these directly. RRF only uses ranks,\n  which are always 1, 2, 3...\n- **Rank-se",
+        "## Bi-encoder vs cross-encoder\n\n- **Bi-encoder**: embed query and document separately, compare via dot\n  product. Fast (~ms per query over millions of docs via approximate\n  nearest neighbor).\n- **Cro",
+        "# BM25 intuition\n\nBM25 is the classic keyword-matching ranking function from 1990s IR\nresearch. It scores a (query, document) pair based on how often the\nquery's terms appear in the document, with two",
+        "### 这个项目的立意\n\nseeklink 的差异化不是\"又一个语义搜索\"，是**把 IR 工业界做了 20 年的\n最佳实践带到个人 vault + agent 场景**：\n- BM25 + vector + graph + title 四路召回（[[RRF]] 融合）\n- 可选 cross-encoder 重排（[[attention-mechanism]]）\n- CJK 一等公民（jieba ",
+        "## Limitations\n\nSpaced repetition excels at atomic facts (vocabulary, formulas, named\nentities) but does not automatically produce *deep* understanding. It\ncomplements but does not replace study techn",
+        "### 4. Hybrid retrieval 的论文很多但工具很少\n\nIR 会议论文几乎都在做 hybrid + rerank，但 pip install 能用的\nend-to-end 工具寥寥无几。seeklink 的定位就站这个缝里：论文早有，\n好用的 CLI 罕见。",
+        "### 对系统的启示\n\n- seeklink 目前没有任何记忆衰减模型——它是纯\"现状\"搜索，不知道什么\n  东西你最近想起过\n- 如果想给笔记做 FSRS 式调度，需要存**每次访问时间戳**（现在没存）\n- 这个不是 v0.3/v0.4 的事，更像 v1.0+ 的大胆实验",
+        "Query `Q`, key `K`, value `V` are linear projections of the input.\nScaling by `sqrt(d_k)` prevents softmax saturation at high dimension.\n\nSee [[attention-mechanism]] for why each piece is there."
+      ],
+      "scores": [
+        0.06530936012691697,
+        0.059482001755926245,
+        0.05934794372294372,
+        0.05928853754940712,
+        0.04762704813108039,
+        0.04664224664224664,
+        0.032018442622950824,
+        0.03200204813108039,
+        0.030536130536130537,
+        0.029411764705882353
+      ],
+      "latency_ms": 11416.821124963462,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "expansions_used": [
+        "hybrid retrieval BM25 vector 融合",
+        "为什么关键词匹配还有用",
+        "dense retrieval 的局限"
+      ]
+    },
+    {
+      "query": "从笔记到 Anki 卡片的流程",
+      "config": "C",
+      "hits": [
+        "notes/note-to-card-workflow.md",
+        "logs/2026-W14.md",
+        "notes/atomic-notes.md",
+        "notes/zettelkasten.md",
+        "notes/spaced-repetition.md",
+        "README.md",
+        "sources/anki-and-flashcards-intro.md",
+        "notes/deep-work-deliberate-practice.md",
+        "notes/fsrs-algorithm.md",
+        "sources/wikipedia-spaced-repetition.md"
+      ],
+      "titles": [
+        "Note-to-card workflow",
+        "2026-W14",
+        "Atomic notes",
+        "Zettelkasten",
+        "Spaced repetition",
+        "seeklink test corpus",
+        "Anki and flashcards — a practical intro",
+        "Deep work and deliberate practice",
+        "FSRS algorithm",
+        "Spaced repetition (Wikipedia summary)"
+      ],
+      "snippets": [
+        "# Note-to-card workflow\n\nThe bridge between [[zettelkasten]] (where you *think*) and\n[[spaced-repetition]] (where you *retain*). Permanent notes are too\nlong to review daily. Flashcards are too atomic",
+        "### 当前想法\n\n**三者都要**，但不要求每个想法都进所有三个层。典型生命周期：\n- 读到一个想法 → fleeting note（草）\n- 想清楚了 → permanent note in zettelkasten\n- 想不想持续调用？想 → 蒸馏成 1-3 张 flashcard 进 Anki\n- 不想进 Anki 也 ok，zettelkasten 查得到就行\n\n关键是 **seekli",
+        "## Why atomicity matters\n\n- **Linking**: you can only usefully link to a note if the note has a\n  clear subject. \"My thoughts on memory\" is unlinkable; \"Forgetting\n  curves are empirically power-law, ",
+        "## 三类 zettel\n\n1. **Fleeting notes（灵光笔记）** - 脑子里冒出来的，随手记，几天内整理或丢弃\n2. **Literature notes（文献笔记）** - 读书/看论文时的摘录 + 自己的话复述\n3. **Permanent notes（永久笔记）** - 真正的 zettel，用自己的话写清楚一个\n   原子思想，放进卡片盒，编号，链接到相关卡片\n\nPerm",
+        "## How it works in practice\n\nApps like Anki, SuperMemo, and Mochi implement spaced repetition via\nflashcards. You create a card (question front, answer back), and the app\nschedules it. You rate each r",
+        "## Layout\n\n| Folder | Purpose | Style |\n|---|---|---|\n| `notes/` | Permanent notes | Strong frontmatter (tags, aliases), clear titles, wikilinks between notes, 300-800 words |\n| `logs/` | Weekly/daily",
+        "## When not to use Anki\n\n- If you haven't understood the material yet. Anki entrenches; it\n  doesn't teach. Understand first (Feynman), then memorize.\n- If the material has a 2-week shelf life. Use a ",
+        "## Why this matters for learning systems\n\nSpaced repetition, Zettelkasten, and Feynman technique all assume\ndeliberate practice conditions. If you're reviewing Anki cards while\nwatching YouTube, you'r",
+        "# FSRS algorithm\n\nFSRS (Free Spaced Repetition Scheduler) is a memory model that replaces\nAnki's SM-2 as the default scheduling algorithm in modern flashcard apps.\nIt predicts how long you'll remember",
+        "## Modern implementations\n\nThe first computer-based spaced repetition system was **SuperMemo**,\ndeveloped by Piotr Wozniak starting in 1985. SuperMemo introduced the\nSM-2 algorithm, which is still wid"
+      ],
+      "scores": [
+        0.06452452301209573,
+        0.06324404761904762,
+        0.062084914611005695,
+        0.061385287745334055,
+        0.0604004862565003,
+        0.06030432300365599,
+        0.0479384003974168,
+        0.045454545454545456,
+        0.04395604395604395,
+        0.02919863597612958
+      ],
+      "latency_ms": 11427.366374991834,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "expansions_used": [
+        "note-to-card workflow 蒸馏",
+        "permanent note 转 flashcard",
+        "Anki 卡片制作 从笔记"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,295 @@
+# Blind test queries for the seeklink test corpus (tests/corpus/).
+#
+# Design principles (see docs/blind-test.md):
+# - Cover CJK-only, English-only, mixed, short, long, technical, casual
+# - Avoid queries whose exact substring matches a title (title channel
+#   would trivially win — tests nothing about hybrid / expansion)
+# - `expected_paths` are hard must-hits; being outside top-10 is a failure
+# - `expansion:` gives 2-3 hand-crafted alternates for config C
+# - Tags are used for per-tag acceptance-criteria slicing
+#
+# 22 queries total.
+
+# ============================================================================
+# CJK-heavy queries (test jieba tokenizer + jina-v2-zh embedder on Chinese)
+# ============================================================================
+
+- query: "记忆保持力"
+  intent: "find notes about how long memories last and how to extend retention"
+  expected_paths:
+    - "notes/spaced-repetition.md"
+    - "notes/forgetting-curve.md"
+    - "notes/memory-consolidation.md"
+    - "logs/2026-W14.md"
+  tags: [cjk, common, mid-length]
+  expansion:
+    - "间隔重复 遗忘曲线 FSRS"
+    - "如何让大脑记住的东西不忘记"
+    - "长期记忆保留 间隔算法"
+
+- query: "遗忘规律"
+  intent: "the underlying curve of how memory decays, not the practice of repetition"
+  expected_paths:
+    - "notes/forgetting-curve.md"
+    - "sources/wikipedia-forgetting-curve.md"
+    - "notes/memory-consolidation.md"
+  tags: [cjk, short]
+  expansion:
+    - "Ebbinghaus 遗忘曲线"
+    - "记忆衰减的数学规律"
+    - "forgetting curve 幂律 指数"
+
+- query: "卡片盒笔记法"
+  intent: "Luhmann's Zettelkasten method"
+  expected_paths:
+    - "notes/zettelkasten.md"
+    - "sources/niklas-luhmann-zettelkasten.md"
+    - "notes/atomic-notes.md"
+  tags: [cjk, methodology, mid-length]
+  expansion:
+    - "Zettelkasten Luhmann"
+    - "永久笔记 原子笔记"
+    - "slip-box note taking"
+
+- query: "红烧肉做法"
+  intent: "recipe for red-braised pork — tests off-topic discrimination"
+  expected_paths:
+    - "recipes/red-braised-pork.md"
+  tags: [cjk, off-topic, short]
+  expansion:
+    - "五花肉 糖色 红烧"
+    - "braised pork belly Chinese"
+
+- query: "睡眠对记忆的影响"
+  intent: "sleep's role in memory consolidation"
+  expected_paths:
+    - "notes/memory-consolidation.md"
+    - "sources/wikipedia-forgetting-curve.md"
+  tags: [cjk, scientific, long]
+  expansion:
+    - "睡眠 巩固 海马体 记忆"
+    - "sleep consolidation hippocampus"
+    - "为什么熬夜学不进去"
+
+# ============================================================================
+# English queries (test BM25 with standard tokenizer + embedder on English)
+# ============================================================================
+
+- query: "spaced repetition algorithm"
+  intent: "algorithms behind spaced-repetition systems"
+  expected_paths:
+    - "notes/fsrs-algorithm.md"
+    - "notes/spaced-repetition.md"
+    - "sources/wikipedia-spaced-repetition.md"
+    - "logs/2026-W16.md"
+  tags: [english, common, mid-length]
+  expansion:
+    - "SRS scheduler Anki SuperMemo"
+    - "how Anki decides when to show a card"
+    - "FSRS SM-2 memory model"
+
+- query: "why is BM25 still useful"
+  intent: "role of keyword retrieval when vector embeddings exist"
+  expected_paths:
+    - "notes/bm25-intuition.md"
+    - "notes/retrieval-augmented-generation.md"
+    - "notes/reciprocal-rank-fusion.md"
+  tags: [english, technical, long]
+  expansion:
+    - "keyword retrieval vs vector search"
+    - "hybrid retrieval BM25 dense"
+    - "when does lexical match beat semantic"
+
+- query: "agent memory architectures"
+  intent: "how LLM agents implement long-term memory"
+  expected_paths:
+    - "notes/agent-memory-patterns.md"
+    - "notes/retrieval-augmented-generation.md"
+    - "logs/2026-W15.md"
+  tags: [english, technical, long]
+  expansion:
+    - "LLM long-term memory patterns"
+    - "RAG memory for chatbots"
+    - "how does Claude remember between sessions"
+
+- query: "attention mechanism"
+  intent: "transformer attention"
+  expected_paths:
+    - "notes/attention-mechanism.md"
+    - "cards/card-attention-formula.md"
+  tags: [english, technical, short]
+  expansion:
+    - "scaled dot-product attention"
+    - "multi-head self attention"
+    - "softmax QK^T / sqrt(d_k)"
+
+- query: "sourdough bread starter"
+  intent: "off-topic — recipe"
+  expected_paths:
+    - "recipes/sourdough-starter.md"
+  tags: [english, off-topic, short]
+  expansion:
+    - "wild yeast starter flour water"
+    - "making bread from scratch natural fermentation"
+
+# ============================================================================
+# Vocabulary-mismatch queries (query phrasing != note phrasing)
+# These should benefit most from query expansion (config C should win big)
+# ============================================================================
+
+- query: "how to stop forgetting things I study"
+  intent: "the natural-language UI version of 'spaced repetition intro'"
+  expected_paths:
+    - "notes/spaced-repetition.md"
+    - "sources/wikipedia-spaced-repetition.md"
+    - "notes/forgetting-curve.md"
+  tags: [english, vocab-mismatch, long, natural-language]
+  expansion:
+    - "retention techniques memorization"
+    - "spaced repetition flashcards active recall"
+    - "why I forget everything I read"
+
+- query: "学完就忘怎么办"
+  intent: "colloquial CJK phrasing for memory retention problem"
+  expected_paths:
+    - "notes/spaced-repetition.md"
+    - "notes/forgetting-curve.md"
+    - "logs/2026-W14.md"
+  tags: [cjk, vocab-mismatch, natural-language]
+  expansion:
+    - "记忆保持 间隔重复"
+    - "防止遗忘的学习方法"
+    - "读完书记不住 how to fix"
+
+- query: "second brain slip box"
+  intent: "Zettelkasten via different terminology"
+  expected_paths:
+    - "notes/zettelkasten.md"
+    - "sources/niklas-luhmann-zettelkasten.md"
+    - "notes/atomic-notes.md"
+  tags: [english, vocab-mismatch, synonym]
+  expansion:
+    - "Zettelkasten"
+    - "Luhmann index card system"
+    - "personal knowledge management note linking"
+
+- query: "把文档切块放进向量库"
+  intent: "CJK natural language for RAG indexing"
+  expected_paths:
+    - "notes/retrieval-augmented-generation.md"
+    - "notes/vector-embeddings.md"
+  tags: [cjk, vocab-mismatch, technical]
+  expansion:
+    - "RAG 检索增强生成"
+    - "chunk embedding vector DB"
+    - "文档向量化 搜索"
+
+# ============================================================================
+# Cross-language queries (query in one language, best notes in another)
+# ============================================================================
+
+- query: "Luhmann 原子笔记"
+  intent: "mixed-language query about Luhmann's atomic-note principle"
+  expected_paths:
+    - "notes/atomic-notes.md"
+    - "notes/zettelkasten.md"
+    - "sources/niklas-luhmann-zettelkasten.md"
+  tags: [cjk-en-mixed, methodology]
+  expansion:
+    - "atomic notes 原子性 卡片"
+    - "Luhmann zettel 单一想法"
+
+- query: "FSRS 算法原理"
+  intent: "FSRS algorithm principle, CJK framing of English-named algorithm"
+  expected_paths:
+    - "notes/fsrs-algorithm.md"
+    - "cards/card-fsrs-core-idea.md"
+    - "logs/2026-W16.md"
+    - "sources/anki-and-flashcards-intro.md"
+  tags: [cjk-en-mixed, technical, short]
+  expansion:
+    - "FSRS 算法 参数"
+    - "Free Spaced Repetition Scheduler"
+    - "SM-2 对比 FSRS 公式"
+
+# ============================================================================
+# Title/alias queries (test position-aware blending preserves exact hits)
+# ============================================================================
+
+- query: "Zettelkasten"
+  intent: "exact-title lookup — should return the zettelkasten note at rank 1"
+  expected_paths:
+    - "notes/zettelkasten.md"
+    - "sources/niklas-luhmann-zettelkasten.md"
+    - "notes/atomic-notes.md"
+  tags: [english, exact-title, short]
+  expansion:
+    - "卡片盒笔记法"
+    - "Luhmann slip box"
+
+- query: "RRF"
+  intent: "exact alias — should return the RRF note at rank 1"
+  expected_paths:
+    - "notes/reciprocal-rank-fusion.md"
+    - "cards/card-rrf-formula.md"
+    - "notes/retrieval-augmented-generation.md"
+  tags: [english, exact-alias, short]
+  expansion:
+    - "reciprocal rank fusion"
+    - "combining search channels"
+    - "RRF 倒数排名融合"
+
+- query: "遗忘曲线"
+  intent: "exact CJK alias — should return the forgetting curve note at rank 1"
+  expected_paths:
+    - "notes/forgetting-curve.md"
+    - "sources/wikipedia-forgetting-curve.md"
+    - "notes/memory-consolidation.md"
+  tags: [cjk, exact-alias, short]
+  expansion:
+    - "Ebbinghaus 遗忘"
+    - "forgetting curve"
+
+# ============================================================================
+# Multi-concept queries (should surface intersection or cross-linked notes)
+# ============================================================================
+
+- query: "how transformers relate to information retrieval"
+  intent: "conceptual bridge — attention + IR"
+  expected_paths:
+    - "notes/attention-mechanism.md"
+    - "notes/vector-embeddings.md"
+    - "notes/retrieval-augmented-generation.md"
+  tags: [english, conceptual, long]
+  expansion:
+    - "attention reranker cross-encoder"
+    - "embedding models in search"
+    - "transformer architecture retrieval"
+
+- query: "为什么 hybrid 搜索比纯向量好"
+  intent: "motivation for hybrid IR — user wants BM25-vs-dense-vs-hybrid tradeoff, not fusion mechanics"
+  expected_paths:
+    - "notes/bm25-intuition.md"
+    - "notes/vector-embeddings.md"
+    - "notes/retrieval-augmented-generation.md"
+  tags: [cjk-en-mixed, technical, long]
+  expansion:
+    - "hybrid retrieval BM25 vector 融合"
+    - "为什么关键词匹配还有用"
+    - "dense retrieval 的局限"
+
+# ============================================================================
+# Agentic / workflow queries (test retrieval for agent-like usage)
+# ============================================================================
+
+- query: "从笔记到 Anki 卡片的流程"
+  intent: "workflow — zettelkasten to flashcard distillation"
+  expected_paths:
+    - "notes/note-to-card-workflow.md"
+    - "notes/atomic-notes.md"
+    - "sources/anki-and-flashcards-intro.md"
+  tags: [cjk-en-mixed, workflow, long]
+  expansion:
+    - "note-to-card workflow 蒸馏"
+    - "permanent note 转 flashcard"
+    - "Anki 卡片制作 从笔记"
