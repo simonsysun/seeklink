@@ -220,24 +220,38 @@ def search(
     results.sort(key=lambda r: r.score, reverse=True)
     results = results[:candidate_k]
 
-    # Cross-encoder reranking — blends a position-based retrieval signal
-    # with the reranker's relevance score, weighted by the pre-rerank
-    # RRF rank. This protects confident first-stage wins (exact title
-    # or alias hits) from being demoted by a reranker that's
-    # content-focused. Formula adapted from qmd/src/store.ts:4230-4234.
+    # Cross-encoder reranking — v0.3 Item 1.
     #
-    # For each candidate at pre-rerank rank `r` (1-indexed after RRF sort):
-    #   rank_pos = 1 / r              (0-1, aligns scale with rerank score)
-    #   alpha = 0.75 if r <= 3
-    #         = 0.60 if r <= 10
-    #         = 0.40 otherwise
-    #   blended = alpha * rank_pos + (1 - alpha) * rerank_score
+    # Empirical discovery during v0.3 blind-testing: an unconditional
+    # blend (qmd's `1/rank` formula, or even a normalized-RRF-score
+    # formula) over-protects rank 1 for the class of queries where the
+    # first-stage RRF puts a genuinely BAD candidate at rank 1. The
+    # reranker correctly identifies a better candidate at (say) rank 11,
+    # but position weighting prevents it from winning. Example from the
+    # test corpus: query `把文档切块放进向量库` — `vector-embeddings.md` is at
+    # RRF rank 11 but correctly scored #1 by the reranker; any
+    # always-on blend keeps `agent-memory-patterns.md` at rank 1.
     #
-    # Note: blending applies to ALL candidates in the pool (up to
-    # candidate_k = max(rerank_k, top_k)). If the caller passes a
-    # top_k > rerank_k, positions rerank_k+1..top_k also blend under
-    # alpha=0.40 (reranker-dominant), matching qmd's trust-the-reranker-
-    # more-at-the-tail intuition.
+    # The failure mode we DO want to prevent is "exact title/alias hit
+    # wins rank 1 cleanly from the title channel, but the reranker
+    # demotes it because the note is short or differently-phrased". In
+    # that case the title signal is a strong confidence prior and we
+    # want to protect rank 1.
+    #
+    # Design: TITLE-GATED BLENDING. Only apply position protection when
+    # rank 1 of the candidate pool was ALSO rank 1 in the title channel
+    # — i.e. a title/alias match is genuinely driving it. Otherwise
+    # fall back to the pre-v0.3 pure reranker replacement.
+    #
+    #   IF title_channel_rank_1_source in final top RRF results:
+    #       blended_i = alpha_i * norm_score_i + (1 - alpha_i) * rerank_i
+    #       with alpha = 0.60 (rank 1-3), 0.50 (4-10), 0.40 (11+)
+    #   ELSE:
+    #       blended_i = rerank_i  (pure reranker, v0.2.2 behavior)
+    #
+    # This preserves Zettelkasten / attention / RRF-style exact-hit
+    # queries at rank 1 while letting reranker correct poor first-stage
+    # ordering for everything else.
     #
     # Reranker failures downgrade gracefully (rerank() returns None →
     # keep first-stage RRF ordering).
@@ -245,17 +259,39 @@ def search(
         passages = [r.content for r in results]
         rerank_scores = reranker.rerank(query, passages)
         if rerank_scores is not None and len(rerank_scores) == len(results):
+            # Title-channel rank 1 is the strongest "this source was
+            # confidently identified by title/alias" signal. If that
+            # source is also in the candidate pool we're reranking, we
+            # apply position protection; otherwise we trust the reranker.
+            title_rank_1_sid: int | None = None
+            for sid, rank in title_ranks.items():
+                if rank == 1:
+                    title_rank_1_sid = sid
+                    break
+            candidate_sids = {r.source_id for r in results}
+            apply_blend = (
+                title_rank_1_sid is not None
+                and title_rank_1_sid in candidate_sids
+            )
+
+            max_rrf = results[0].score if results[0].score > 0 else 1.0
             blended: list[SearchResult] = []
             for i, r in enumerate(results):
-                rrf_rank = i + 1  # 1-indexed rank after RRF fusion
-                rank_pos = 1.0 / rrf_rank
-                if rrf_rank <= 3:
-                    alpha = 0.75
-                elif rrf_rank <= 10:
-                    alpha = 0.60
+                rerank_s = float(rerank_scores[i])
+                if apply_blend:
+                    norm_score = r.score / max_rrf
+                    rrf_rank = i + 1
+                    if rrf_rank <= 3:
+                        alpha = 0.60
+                    elif rrf_rank <= 10:
+                        alpha = 0.50
+                    else:
+                        alpha = 0.40
+                    blended_score = alpha * norm_score + (1.0 - alpha) * rerank_s
                 else:
-                    alpha = 0.40
-                blended_score = alpha * rank_pos + (1.0 - alpha) * float(rerank_scores[i])
+                    # No title-channel confidence → pure reranker override
+                    # (pre-v0.3 behavior). Reranker has the full say.
+                    blended_score = rerank_s
                 blended.append(SearchResult(
                     source_id=r.source_id,
                     chunk_id=r.chunk_id,
