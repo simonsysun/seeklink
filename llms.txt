@@ -26,12 +26,53 @@ Runs on macOS and Linux, Python 3.11+. Indexes any folder of `.md` files (Obsidi
 - PyPI: `pip install seeklink` or `uv tool install seeklink`.
 - Source: `git clone https://github.com/simonsysun/seeklink && cd seeklink && uv sync --dev`.
 
-## Typical agent invocation
+## Agent contract
 
-An AI agent integrating SeekLink should shell out to the CLI. No MCP or custom protocol — SeekLink is CLI-first by design.
+SeekLink is designed for AI agents to shell out to. No MCP wrapper; shell commands are the interface.
+
+### Minimum workflow
 
 ```
-seeklink search "query" --vault /path/to/vault --top-k 5
+seeklink status --vault PATH           # precheck; look for "Notes: N > 0"
+seeklink index  --vault PATH           # if needed (first run or after edits)
+seeklink search "QUERY" --vault PATH   # retrieval
+seeklink get    PATH:LINE -l N         # read window around a hit
 ```
 
-For fast repeated queries against a known vault, set `SEEKLINK_VAULT=<path>` once; subsequent `seeklink search` calls (without `--vault`) reuse the resident daemon.
+Set `SEEKLINK_VAULT=<path>` once to omit `--vault` on every call and route through the resident daemon (first call after boot: ~2s; warm: ~1-2s with reranker, ~10ms without).
+
+### Output contract
+
+`seeklink search` text output, one result per 2 lines:
+
+```
+  SCORE  PATH[:LINE]  TITLE
+           <indented content preview, up to 120 chars>
+```
+
+- `PATH` is vault-relative.
+- `:LINE` is 1-indexed; pointing at the first line of the best chunk in the on-disk file. Omitted when the match is title-only on a stale file.
+- `SCORE` is blended (reranker on) or raw RRF (reranker disabled). Don't compare scores across configurations.
+- Preview is truncated at 120 chars, newlines flattened to spaces.
+
+For structured output (e.g. to parse `line_end`, `indegree`), connect to the daemon's Unix socket at `~/.rhizome/seeklink.sock` directly. Protocol: 4-byte big-endian length + UTF-8 JSON. Request: `{"cmd":"search","args":{"query":"...","top_k":10,...}}`. Response: `{"ok":true,"result":[{"source_id","path","title","content_preview","score","indegree","line_start","line_end"},...]}`.
+
+### Exit codes
+
+- `0` — success, including "no results".
+- `1` — vault-resolution error, file missing (`get`), or unrecoverable config mismatch.
+
+No other codes.
+
+### Query shape
+
+- Raw CJK is fine. jieba tokenizer handles word segmentation.
+- Short queries that match a note title or alias get title-gated position protection so the exact hit anchors at rank 1.
+- Filters: `--tags T1 T2` (AND), `--folder PREFIX`. Multi-word filter values not supported.
+- `--title-weight F` override (default 1.5; raise to 3.0 for "find the definitive article", lower to 0.5 for "surface raw log moments").
+
+### Common failure modes
+
+- Empty results on a fresh vault → index not built yet. Run `seeklink index --vault PATH`.
+- Daemon won't auto-spawn → `--vault` was passed (cold-start mandatory in that case), or another daemon is bound to a different vault. Run `status` to see `vault` / `embedder` / `reranker` and respawn if needed.
+- Line numbers look wrong → file was edited after indexing. Re-index. `status` prints a freshness warning on cold-start.

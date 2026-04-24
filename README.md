@@ -23,7 +23,8 @@ You:   seeklink search "记忆保持力" --vault ~/notes --title-weight 0.5
        → surfaces raw log entries alongside polished articles
 
 You:   seeklink daemon --vault ~/notes
-       → resident mode: first search ~2s, every search after ~10ms
+       → resident mode: first search ~2s; warm reranker-on ~1-2s,
+         reranker-disabled ~10ms
 ```
 
 ## When to use SeekLink
@@ -98,23 +99,43 @@ pip install seeklink
 ## Quick start
 
 ```bash
-# One-shot: search a specific vault (always cold-start, no daemon)
-seeklink search "machine learning" --vault /path/to/vault
-
-# Full vault rebuild (cold-start)
+# 1. Build the index first (searching an un-indexed vault returns no hits).
 seeklink index --vault /path/to/vault
+
+# 2. Search it.
+seeklink search "machine learning" --vault /path/to/vault
 ```
 
-**Recommended for daily use** — set your default vault once, then every search auto-uses the fast daemon:
+**Recommended for daily use** — set your default vault once, then every `search` / `index` auto-uses the fast daemon:
 
 ```bash
 export SEEKLINK_VAULT=/path/to/vault
+seeklink index                         # first run: builds the index
 seeklink search "machine learning"
-# First call after a cold boot: ~2s (spawns the daemon, loads the embedder).
-# Every call after that: ~10ms without reranker, ~0.5s with reranker.
+# First search after a cold boot: ~2s (spawns the daemon, loads the embedder).
+# Warm reranker-on path (default): ~1-2s per query.
+# Warm reranker-disabled path: ~10ms per query.
 ```
 
-The daemon stays resident across terminal sessions until you `kill` it or restart. No manual startup needed — `seeklink search / index / status` auto-spawn it when missing.
+The daemon stays resident across terminal sessions until you `kill` it or restart. `seeklink search` and `seeklink index` auto-spawn it when missing; `seeklink status` is always cold-start (it only reads SQLite stats, no model load) and `seeklink get` is a direct filesystem read (no daemon involved either).
+
+## For agents
+
+SeekLink is designed to be shelled out to by AI agents (Claude Code, Cursor, custom RAG pipelines), not just typed by humans. The contract:
+
+1. **Index once, then search.** Agents should check `seeklink status --vault PATH` before first use; if `Notes: 0` or stale, run `seeklink index --vault PATH`.
+2. **Search.** `seeklink search "query" --vault PATH --top-k N`. Each result line is:
+   ```
+     SCORE  PATH[:LINE]  TITLE
+              <indented content preview, up to 120 chars, one line>
+   ```
+   `PATH` is relative to the vault root. `:LINE` is 1-indexed and points at the best chunk's first line in the current on-disk file; omitted when the match is title-only on a stale file. `SCORE` is `rerank_blended` when reranker is active, else raw RRF (scales differ, don't compare across configurations).
+3. **Read the window.** `seeklink get PATH:LINE -l N` prints `N` lines starting at `LINE`. No DB lookup, no daemon round-trip — direct filesystem read with universal-newline translation. This is how you avoid slurping whole files after a search hit.
+4. **Query shape.** Raw CJK is fine (jieba handles segmentation). `[[alias]]` / exact-title queries get title-gated protection — if your query IS a note title or alias, results anchor on it. No need for wildcards; BM25 + vector + title fuse automatically.
+5. **Exit codes.** `0` on success (including "no results"). `1` on vault-resolution error, missing file (`get`), or unrecoverable config mismatch. No other codes used.
+6. **Structured output.** If you want JSON instead of the human text format, connect to the daemon's Unix socket at `~/.rhizome/seeklink.sock` directly (length-prefixed JSON protocol, see `seeklink/daemon.py`). Each daemon search response carries `path`, `title`, `content_preview`, `score`, `indegree`, `line_start`, `line_end` per result.
+
+See also `llms.txt` at the repo root for a compressed version of this contract.
 
 ## CLI reference
 
@@ -136,7 +157,7 @@ Options:
 
 Starts a Unix-socket daemon that keeps the embedding model (and reranker, if enabled) resident in memory. First query after startup takes ~2s (model warmup); subsequent queries return in ~10ms without reranker or ~2s with reranker.
 
-**You almost never run this directly.** When you run `seeklink search / index / status` without `--vault`, the CLI tries the daemon socket first and auto-spawns a daemon on cold machines. The daemon uses `SEEKLINK_VAULT` (or cwd) as its vault. It never auto-exits — kill it with `kill` or restart your machine.
+**You almost never run this directly.** `seeklink search` and `seeklink index` auto-spawn a daemon on cold machines when `--vault` is not passed. `seeklink status` is always cold-start (no model load). `seeklink get` is a direct filesystem read (no daemon). The daemon uses `SEEKLINK_VAULT` (or cwd) as its vault and never auto-exits — kill it with `kill` or restart your machine.
 
 Passing `--vault` always uses cold-start instead of the daemon, because the daemon binds to a single vault at startup. Multi-vault daemon support is tracked in TODOS.md.
 
@@ -202,7 +223,12 @@ Disable reranking entirely with: `export SEEKLINK_RERANKER_MODEL=""`
 
 ### Results carry line numbers
 
-Every `search` result returns `path:line_start-line_end` pointing at the best chunk within the current on-disk file. Agents can pipe that into `seeklink get` for a precise window read — no need to slurp entire files just to see context around a hit.
+Every `search` result is anchored to a specific line range in the current on-disk file. Two surfaces expose this:
+
+- **CLI text output** (`seeklink search ...`): each line is `SCORE  PATH:LINE_START  TITLE`, followed by an indented content preview. Feed `PATH:LINE_START` straight into `seeklink get` to read the window around the hit.
+- **Daemon JSON** (one request per search via the Unix socket): each result also carries `line_end` and `indegree` fields for callers that want the full span.
+
+Line numbers are mapped back through the frontmatter strip that happens at index time, so they match what you'd see in a text editor on disk.
 
 ## Frontmatter
 
