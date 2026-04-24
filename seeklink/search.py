@@ -373,19 +373,27 @@ def compute_lines_for_results(
 
     out: list[SearchResult] = []
     for r in results:
-        # Title-only match: file is the match, line 1 is the best default.
+        # Title-only match: file is the match, line 1 is the best default —
+        # BUT only if the file still exists on disk. If the file was
+        # deleted after indexing, treat it like any other missing file
+        # (keep line_start=line_end=0 so agents don't see a bogus
+        # `path:1` that won't resolve to anything useful).
         if r.chunk_id == 0:
-            out.append(SearchResult(
-                source_id=r.source_id,
-                chunk_id=r.chunk_id,
-                path=r.path,
-                title=r.title,
-                content=r.content,
-                score=r.score,
-                indegree=r.indegree,
-                line_start=1,
-                line_end=1,
-            ))
+            full_text = _read(r.path)
+            if full_text is None:
+                out.append(r)
+            else:
+                out.append(SearchResult(
+                    source_id=r.source_id,
+                    chunk_id=r.chunk_id,
+                    path=r.path,
+                    title=r.title,
+                    content=r.content,
+                    score=r.score,
+                    indegree=r.indegree,
+                    line_start=1,
+                    line_end=1,
+                ))
             continue
 
         chunk = chunks_by_id.get(r.chunk_id)

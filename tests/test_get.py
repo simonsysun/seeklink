@@ -124,10 +124,30 @@ class TestGetCommand:
         assert r.stdout.rstrip("\n") == "Line 1 of body"
 
     def test_path_escape_rejected(self, vault: Path):
-        """Security: paths that escape the vault must be rejected."""
-        r = _run_get(vault, ["../../etc/passwd"])
+        """Security: paths that escape the vault must be rejected by the
+        explicit escape check, not just accidentally by file-not-found.
+
+        We use a target path that `relative_to` will reject (../../..)
+        and verify the explicit "escapes" error message is emitted.
+        """
+        r = _run_get(vault, ["../../../../../../etc/passwd"])
         assert r.returncode == 1
-        # Accept either "path escapes" explicit rejection or "not found"
-        # (resolve() may normalize the path out of the vault, which then
-        # fails the relative_to check or the is_file check — both fine).
-        assert "escapes" in r.stderr or "not found" in r.stderr
+        assert "escapes" in r.stderr, (
+            f"Expected explicit escape rejection, got stderr={r.stderr!r}"
+        )
+
+    def test_trailing_newline_eof_accounting(self, vault: Path):
+        """split('\\n') on newline-terminated text has a trailing empty
+        element that does NOT correspond to a real line. Asking for the
+        line just past the last real line should emit the beyond-EOF
+        warning, not return a blank line."""
+        # plain.md is 5 logical lines, all ending with \n.
+        r = _run_get(vault, ["plain.md:6"])
+        assert r.returncode == 0
+        assert "beyond EOF" in r.stderr, (
+            f"Expected beyond-EOF warning for line 6 of 5-line file, "
+            f"got stderr={r.stderr!r} stdout={r.stdout!r}"
+        )
+        assert r.stdout == "", (
+            f"Expected empty stdout for beyond-EOF, got {r.stdout!r}"
+        )

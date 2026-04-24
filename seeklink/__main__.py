@@ -438,7 +438,12 @@ def _cmd_get(args: argparse.Namespace) -> None:
         print(f"Error: could not read {rel_path}: {e}", file=sys.stderr)
         sys.exit(1)
 
+    # Count logical lines. `split("\n")` on text ending with "\n" produces
+    # a trailing empty element that does NOT correspond to a real line —
+    # drop it so `file:LINE` beyond-EOF warnings fire correctly.
     lines = text.split("\n")
+    if lines and lines[-1] == "" and text.endswith("\n"):
+        lines = lines[:-1]
     n_lines = len(lines)
 
     # Slice decision matrix:

@@ -482,7 +482,14 @@ class TestPositionAwareBlending:
     def test_blending_formula_weights(
         self, db: Database, embedder: Embedder, vault: Path
     ):
-        """Spot-check the exact blending math at rank 1 vs rank 5 vs rank 15."""
+        """Spot-check the exact blending math at rank 1 and rank 2.
+
+        The test corpus has 4 ingested files, so top_k=4 covers the
+        alpha=0.75 branch (ranks 1-3). The alpha=0.60 (ranks 4-10) and
+        alpha=0.40 (ranks 11+) branches are validated indirectly by the
+        test_blending_preserves_rank_1 test and by integration on the
+        blind-test corpus.
+        """
         _ingest_corpus(db, embedder, vault)
 
         rerank_calls = {"count": 0, "passages": []}
@@ -539,3 +546,68 @@ class TestPositionAwareBlending:
             assert all(r.score < 0.2 for r in results), (
                 f"Expected RRF-scale scores, got {[r.score for r in results]}"
             )
+
+
+class TestLineRangeE2E:
+    """End-to-end: search() populates line_start/line_end from real chunks."""
+
+    def test_line_fields_populated_with_vault_root(
+        self, db: Database, embedder: Embedder, vault: Path
+    ):
+        """When vault_root is passed, results should come back with
+        line_start > 0 and line_end >= line_start."""
+        _ingest_corpus(db, embedder, vault)
+        results = search(
+            db, embedder, "machine learning",
+            top_k=3,
+            vault_root=vault,
+        )
+        assert len(results) > 0
+        for r in results:
+            # Every result should have a 1-indexed line span (even if small)
+            assert r.line_start >= 1, (
+                f"Expected line_start >= 1 for {r.path}, got {r.line_start}"
+            )
+            assert r.line_end >= r.line_start, (
+                f"Expected line_end >= line_start for {r.path}, "
+                f"got {r.line_start}..{r.line_end}"
+            )
+
+    def test_line_fields_zero_without_vault_root(
+        self, db: Database, embedder: Embedder, vault: Path
+    ):
+        """When vault_root is None (legacy call shape), line fields
+        remain at default 0 — backward compatible."""
+        _ingest_corpus(db, embedder, vault)
+        results = search(db, embedder, "machine learning", top_k=3)
+        if results:
+            # Default values on SearchResult dataclass
+            assert all(r.line_start == 0 for r in results)
+            assert all(r.line_end == 0 for r in results)
+
+    def test_title_only_missing_file_degrades_to_zero(
+        self, db: Database, embedder: Embedder, vault: Path
+    ):
+        """A title-only hit where the file is missing from disk should
+        not return a bogus line 1 — it should degrade to 0/0."""
+        _ingest_corpus(db, embedder, vault)
+
+        # Construct a title-only SearchResult (chunk_id=0) for a file
+        # that doesn't exist, then run through compute_lines_for_results.
+        from seeklink.search import compute_lines_for_results
+        fake = SearchResult(
+            source_id=999,
+            chunk_id=0,  # title-only marker
+            path="does-not-exist.md",
+            title="Fake",
+            content="Fake",
+            score=0.5,
+            indegree=0,
+        )
+        out = compute_lines_for_results(db, vault, [fake])
+        assert len(out) == 1
+        assert out[0].line_start == 0, (
+            "Title-only match with missing file must degrade to line_start=0, "
+            f"got {out[0].line_start}"
+        )
+        assert out[0].line_end == 0
