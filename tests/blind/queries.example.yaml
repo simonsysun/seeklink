@@ -1,0 +1,34 @@
+# Example queries for the blind test framework (see docs/blind-test.md).
+# Copy to queries.yaml and replace with real entries from your vault before running.
+
+- query: "记忆保持力"
+  intent: "long-term memory retention techniques"
+  expected_paths:
+    - "notes/fsrs-algorithm.md"
+    - "notes/spaced-repetition.md"
+  tags: [cjk, core-concept]
+  expansion:
+    - "间隔重复 遗忘曲线 FSRS"
+    - "how to retain memory long term"
+    - "通过间隔算法优化长期记忆保留率"
+
+- query: "Zettelkasten vs 卡片盒笔记"
+  intent: "compare methodologies in personal literature review"
+  expected_paths:
+    - "notes/zettelkasten.md"
+    - "notes/atomic-notes.md"
+  tags: [cjk-en-mixed, comparison]
+  expansion:
+    - "atomic notes permanent notes Luhmann"
+    - "卡片盒笔记法原理"
+
+- query: "agent memory systems"
+  intent: "architectural patterns for LLM agents with persistent state"
+  expected_paths:
+    - "notes/claude-memory-design.md"
+    - "logs/rhizome-dev/2026-W15.md"
+  tags: [english, technical]
+  expansion:
+    - "persistent context agents"
+    - "vector memory recall"
+    - "LLM agent architecture with long-term storage"

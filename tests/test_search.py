@@ -427,3 +427,277 @@ class TestTitleChannel:
             # ml-basics.md has title "Machine Learning" — should rank high
             top_paths = [r.path for r in results[:3]]
             assert "ml-basics.md" in top_paths
+
+
+class TestPositionAwareBlending:
+    """Test v0.3 Item 1 — rerank blending preserves CONFIDENT first-stage
+    wins while letting the reranker break razor-thin ties.
+
+    Before v0.3: reranker score fully replaced RRF score, so an exact-title
+    or exact-alias hit at RRF rank 1 could be demoted if the reranker gave
+    a longer adjacent document a higher content-relevance score.
+
+    v0.3 formula (confidence-aware):
+        norm_score = rrf_score / max_rrf_score_in_pool
+        alpha      = 0.60 (ranks 1-3), 0.50 (4-10), 0.40 (11+)
+        blended    = alpha * norm_score + (1 - alpha) * rerank_score
+
+    Empirical note: an earlier v0.3-wip used `1/rank` as the position
+    signal with alpha 0.75/0.60/0.40 (qmd's defaults). On seeklink's
+    4-channel RRF that over-weighted rank 1 when the first-stage gap
+    was tiny, locking in wrong answers. Using the normalized RRF score
+    auto-handles tie cases.
+    """
+
+    def test_blending_preserves_confident_rank_1(
+        self, db: Database, embedder: Embedder, vault: Path
+    ):
+        """A confident rank-1 hit (title channel fires, opening a real RRF
+        gap) stays at rank 1 under mild reranker disagreement.
+
+        Note: v0.3's confidence-aware blending intentionally DOES allow
+        a strongly-disagreeing reranker to flip rank 1 when the RRF gap
+        is razor-thin or the reranker is very confident. That's the fix
+        for the `红烧肉做法` class of regression. What we assert here is
+        the complementary case: when RRF is confident AND reranker only
+        mildly disagrees, rank 1 is preserved.
+        """
+        _ingest_corpus(db, embedder, vault)
+
+        class MildlyDisagreeingReranker:
+            """Gives rank 1 a below-average but non-zero score, so the
+            reranker's 'vote' does not overcome a confident rank-1 RRF
+            position."""
+            disabled = False
+
+            def rerank(self, query, passages):
+                n = len(passages)
+                if n == 0:
+                    return []
+                # Rank 1 gets 0.3 (mild 'meh'); others get 0.6.
+                # With alpha_1=0.60 and norm_score_1=1.0:
+                #   blended_1 = 0.60 * 1.0 + 0.40 * 0.3 = 0.72
+                # Competing rank-2/3 (norm_score ~0.8, rerank=0.6):
+                #   blended_2 = 0.60 * 0.8 + 0.40 * 0.6 = 0.72  (tie-ish)
+                # In practice ml-basics has a strong title-channel lead
+                # so its norm_score is close to 1.0 and it wins.
+                return [0.3 if i == 0 else 0.6 for i in range(n)]
+
+        results = search(
+            db, embedder, "Machine Learning",
+            reranker=MildlyDisagreeingReranker(),  # type: ignore[arg-type]
+            top_k=4,
+            rerank_k=4,
+        )
+        assert len(results) >= 1
+        # Title-channel-winning result should stay at rank 1
+        assert "ml-basics" in results[0].path, (
+            f"Expected ml-basics at rank 1 after blending, got "
+            f"{[r.path for r in results]}"
+        )
+
+    def test_gate_off_without_title_match(
+        self, db: Database, embedder: Embedder, vault: Path
+    ):
+        """When the query has no title/alias hit at all, blending must
+        be OFF — final scores equal the raw reranker scores, and the
+        reranker's ordering wins (pre-v0.3 behavior)."""
+        _ingest_corpus(db, embedder, vault)
+
+        rerank_seq = [0.1, 0.9, 0.4, 0.7]
+
+        class SeqReranker:
+            disabled = False
+
+            def rerank(self, query, passages):
+                return rerank_seq[: len(passages)]
+
+        # Query with no match against any title or alias in the fixture
+        # corpus (ml-basics / deep-learning / cooking / hub-note titles).
+        results = search(
+            db, embedder, "xyz-nonsense-no-title-match-qqq",
+            reranker=SeqReranker(),  # type: ignore[arg-type]
+            top_k=4,
+            rerank_k=4,
+        )
+        if results:
+            # Pure reranker path → each score equals its rerank score
+            # (not blended). The set of scores should equal the set of
+            # rerank scores used (ignoring order since we sort by score
+            # descending).
+            actual_scores = sorted((r.score for r in results), reverse=True)
+            expected_scores = sorted(rerank_seq[: len(results)], reverse=True)
+            for a, e in zip(actual_scores, expected_scores):
+                assert abs(a - e) < 1e-9, (
+                    f"Gate-off scores should equal rerank scores; "
+                    f"got {actual_scores}, expected {expected_scores}"
+                )
+
+    def test_gate_on_when_title_winner_in_pool(
+        self, db: Database, embedder: Embedder, vault: Path
+    ):
+        """When the title channel ranks a source at its rank 1 AND that
+        source is in the rerank candidate pool, blending activates.
+        Scores then show the blended math (not raw reranker).
+
+        This is the empirically-preferred "loose" gate semantics — if
+        title has a confident winner anywhere in the pool, lift its
+        protection across the candidate set so the title winner can
+        rise back to rank 1 even from pool position 2+ (the
+        Zettelkasten case on the blind-test corpus).
+        """
+        _ingest_corpus(db, embedder, vault)
+
+        class UniformReranker:
+            disabled = False
+
+            def rerank(self, query, passages):
+                return [0.5] * len(passages)
+
+        # "Machine Learning" fires the title channel hard on ml-basics.md
+        # which has that exact title. Gate should be ON.
+        results = search(
+            db, embedder, "Machine Learning",
+            reranker=UniformReranker(),  # type: ignore[arg-type]
+            top_k=4,
+            rerank_k=4,
+        )
+        if results:
+            # Rank 1 under blending: alpha_1=0.60, norm=1.0, rerank=0.5
+            #   blended = 0.60 * 1.0 + 0.40 * 0.5 = 0.80
+            # Under pure-reranker (gate off), it would be 0.5.
+            top_score = results[0].score
+            assert abs(top_score - 0.80) < 1e-6, (
+                f"Expected gate-on rank 1 blended score 0.80 for "
+                f"'Machine Learning' query (ml-basics.md has that title), "
+                f"got {top_score}"
+            )
+
+    def test_blending_formula_properties(
+        self, db: Database, embedder: Embedder, vault: Path
+    ):
+        """Check the invariants of the confidence-aware blending:
+
+        - With uniform rerank scores, rank 1 (norm_score=1.0) scores
+          highest; lower-ranked items score lower in proportion to
+          their RRF-score ratio.
+        - Scores are monotonically non-increasing with rank (sorted).
+        - Rank 1's blended score equals `alpha_1 + (1 - alpha_1) * rerank`
+          when norm_score=1.0 (rank 1 is always top-normalized).
+        """
+        _ingest_corpus(db, embedder, vault)
+
+        class SpyReranker:
+            disabled = False
+
+            def rerank(self, query, passages):
+                # All passages score 0.5 — neutral. Blended score should
+                # then be dominated by norm_score.
+                return [0.5] * len(passages)
+
+        results = search(
+            db, embedder, "learning",
+            reranker=SpyReranker(),  # type: ignore[arg-type]
+            top_k=4,
+            rerank_k=4,
+        )
+        scores = [r.score for r in results]
+        # With uniform rerank and monotone norm_score, scores should be
+        # sorted descending.
+        assert scores == sorted(scores, reverse=True)
+        # Rank 1 always has norm_score=1.0. alpha_1 = 0.60, rerank=0.5
+        # → blended = 0.60 * 1.0 + 0.40 * 0.5 = 0.80
+        if len(scores) >= 1:
+            assert abs(scores[0] - 0.80) < 1e-6, (
+                f"rank 1 expected 0.80, got {scores[0]}"
+            )
+
+    def test_disabled_reranker_falls_through(
+        self, db: Database, embedder: Embedder, vault: Path
+    ):
+        """When the reranker is disabled, blending must NOT activate —
+        results keep their raw RRF scores."""
+        _ingest_corpus(db, embedder, vault)
+
+        class DisabledReranker:
+            disabled = True
+
+            def rerank(self, query, passages):
+                raise AssertionError("disabled reranker should not be called")
+
+        # Should not raise (rerank() not called when disabled=True)
+        results = search(
+            db, embedder, "machine learning",
+            reranker=DisabledReranker(),  # type: ignore[arg-type]
+            top_k=4,
+        )
+        # Scores are small (RRF range ~0.01-0.06), not in the 0-1 blended range
+        if results:
+            assert all(r.score < 0.2 for r in results), (
+                f"Expected RRF-scale scores, got {[r.score for r in results]}"
+            )
+
+
+class TestLineRangeE2E:
+    """End-to-end: search() populates line_start/line_end from real chunks."""
+
+    def test_line_fields_populated_with_vault_root(
+        self, db: Database, embedder: Embedder, vault: Path
+    ):
+        """When vault_root is passed, results should come back with
+        line_start > 0 and line_end >= line_start."""
+        _ingest_corpus(db, embedder, vault)
+        results = search(
+            db, embedder, "machine learning",
+            top_k=3,
+            vault_root=vault,
+        )
+        assert len(results) > 0
+        for r in results:
+            # Every result should have a 1-indexed line span (even if small)
+            assert r.line_start >= 1, (
+                f"Expected line_start >= 1 for {r.path}, got {r.line_start}"
+            )
+            assert r.line_end >= r.line_start, (
+                f"Expected line_end >= line_start for {r.path}, "
+                f"got {r.line_start}..{r.line_end}"
+            )
+
+    def test_line_fields_zero_without_vault_root(
+        self, db: Database, embedder: Embedder, vault: Path
+    ):
+        """When vault_root is None (legacy call shape), line fields
+        remain at default 0 — backward compatible."""
+        _ingest_corpus(db, embedder, vault)
+        results = search(db, embedder, "machine learning", top_k=3)
+        if results:
+            # Default values on SearchResult dataclass
+            assert all(r.line_start == 0 for r in results)
+            assert all(r.line_end == 0 for r in results)
+
+    def test_title_only_missing_file_degrades_to_zero(
+        self, db: Database, embedder: Embedder, vault: Path
+    ):
+        """A title-only hit where the file is missing from disk should
+        not return a bogus line 1 — it should degrade to 0/0."""
+        _ingest_corpus(db, embedder, vault)
+
+        # Construct a title-only SearchResult (chunk_id=0) for a file
+        # that doesn't exist, then run through compute_lines_for_results.
+        from seeklink.search import compute_lines_for_results
+        fake = SearchResult(
+            source_id=999,
+            chunk_id=0,  # title-only marker
+            path="does-not-exist.md",
+            title="Fake",
+            content="Fake",
+            score=0.5,
+            indegree=0,
+        )
+        out = compute_lines_for_results(db, vault, [fake])
+        assert len(out) == 1
+        assert out[0].line_start == 0, (
+            "Title-only match with missing file must degrade to line_start=0, "
+            f"got {out[0].line_start}"
+        )
+        assert out[0].line_end == 0
