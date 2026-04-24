@@ -109,6 +109,29 @@ def main() -> None:
     status_p = sub.add_parser("status", help="Show index status")
     status_p.add_argument("--vault", type=Path, help="Vault path (default: cwd)")
 
+    # get — print a line-range slice of a vault file
+    get_p = sub.add_parser(
+        "get",
+        help="Print a line range of a vault file (agent-friendly window read)",
+    )
+    get_p.add_argument(
+        "path",
+        help=(
+            "Vault-relative path, optionally with ':LINE' suffix. "
+            "Examples: notes/fsrs.md, logs/2026-W15.md:42"
+        ),
+    )
+    get_p.add_argument(
+        "-l", "--lines",
+        type=int,
+        default=None,
+        help=(
+            "Number of lines to print starting at LINE (default: 100 when "
+            "LINE is given, else the whole file)."
+        ),
+    )
+    get_p.add_argument("--vault", type=Path, help="Vault path (default: cwd)")
+
     args = parser.parse_args()
 
     if args.command is None:
@@ -122,6 +145,8 @@ def main() -> None:
         _cmd_index(args)
     elif args.command == "status":
         _cmd_status(args)
+    elif args.command == "get":
+        _cmd_get(args)
     else:
         parser.print_help()
         sys.exit(1)
@@ -177,19 +202,28 @@ def _try_daemon(cmd: str, daemon_args: dict) -> dict | None:
 
 
 def _print_search_results(results: list) -> None:
-    """Print a uniform view across daemon-dict and cold-start-SearchResult shapes."""
+    """Print a uniform view across daemon-dict and cold-start-SearchResult shapes.
+
+    Displays `path:line` when the result has a valid line_start (> 0) so
+    agents can shell out to `seeklink get path:line -l N` for a precise
+    context window. Title-only matches and results without computed line
+    info fall back to `path`.
+    """
     for r in results:
         if isinstance(r, dict):
             score = r["score"]
             path = r["path"]
             title = r.get("title") or ""
             preview_src = r.get("content_preview", "")
+            line_start = r.get("line_start", 0)
         else:
             score = r.score
             path = r.path
             title = r.title or ""
             preview_src = r.content or ""
-        print(f"  {score:.4f}  {path}  {title}")
+            line_start = getattr(r, "line_start", 0)
+        path_disp = f"{path}:{line_start}" if line_start > 0 else path
+        print(f"  {score:.4f}  {path_disp}  {title}")
         if preview_src:
             preview = preview_src[:120].replace("\n", " ")
             print(f"           {preview}")
@@ -213,9 +247,16 @@ def _cmd_search(args: argparse.Namespace) -> None:
             _print_search_results(resp["result"])
             return
 
-    # Cold-start fallback (explicit --vault, or daemon unreachable)
+    # Cold-start fallback (explicit --vault, or daemon unreachable).
+    # Constructs a Reranker() and passes it to search() so the cold-start
+    # path produces the same rankings as the daemon path. Without this,
+    # the same query returned different results depending on whether the
+    # daemon was up — fixed in v0.3. Reranker self-disables on platforms
+    # without MLX (Linux, Intel macOS) or when SEEKLINK_RERANKER_MODEL=""
+    # so this import/construct is safe.
     from seeklink.app import init_app
     from seeklink.freshness import check_freshness
+    from seeklink.reranker import Reranker
     from seeklink.search import search as seeklink_search
 
     try:
@@ -224,12 +265,16 @@ def _cmd_search(args: argparse.Namespace) -> None:
         print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
 
+    reranker = Reranker()
+
     try:
         check_freshness(db, vault_root)
         search_kwargs = {
             "top_k": args.top_k,
             "tags": args.tags,
             "folder": args.folder,
+            "reranker": reranker,
+            "vault_root": vault_root,
         }
         if args.title_weight is not None:
             search_kwargs["title_weight"] = args.title_weight
@@ -339,6 +384,94 @@ def _cmd_status(args: argparse.Namespace) -> None:
         print(f"Reranker:    {expected_reranker}")
     finally:
         db.close()
+
+
+def _cmd_get(args: argparse.Namespace) -> None:
+    """Print a line range of a vault file (no DB lookup required).
+
+    Usage:
+        seeklink get PATH              # whole file
+        seeklink get PATH:LINE          # 100 lines starting at LINE (default)
+        seeklink get PATH:LINE -l N     # N lines starting at LINE
+        seeklink get PATH -l N          # first N lines
+
+    Resolves PATH against --vault (or SEEKLINK_VAULT, or cwd). Reads with
+    universal-newline translation so CRLF files print as \\n-terminated.
+    Exit 0 on success, 1 on missing file. Warnings to stderr for
+    out-of-range LINE.
+    """
+    _setup_logging()
+
+    # Parse `path:LINE` suffix
+    raw = args.path
+    from_line: int | None = None
+    if ":" in raw:
+        head, _, tail = raw.rpartition(":")
+        if tail.isdigit():
+            raw = head
+            from_line = int(tail)
+    rel_path = raw
+
+    # Resolve vault root
+    from seeklink.app import init_app as _ignored  # noqa: F401 — keep parity
+    vault_root_env = os.environ.get("SEEKLINK_VAULT")
+    vault_root = (args.vault or Path(vault_root_env) if vault_root_env else args.vault)
+    if vault_root is None:
+        vault_root = Path.cwd()
+    vault_root = vault_root.resolve()
+
+    abs_path = (vault_root / rel_path).resolve()
+    # Security: reject path escapes
+    try:
+        abs_path.relative_to(vault_root)
+    except ValueError:
+        print(f"Error: path escapes vault: {rel_path}", file=sys.stderr)
+        sys.exit(1)
+
+    if not abs_path.is_file():
+        print(f"Error: {rel_path} not found in {vault_root}", file=sys.stderr)
+        sys.exit(1)
+
+    try:
+        text = abs_path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError) as e:
+        print(f"Error: could not read {rel_path}: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    lines = text.split("\n")
+    n_lines = len(lines)
+
+    # Slice decision matrix:
+    # - No :LINE, no -l  → whole file
+    # - No :LINE, -l N   → first N lines
+    # - :LINE, no -l     → 100 lines starting at LINE
+    # - :LINE, -l N      → N lines starting at LINE
+    if from_line is None:
+        start_idx = 0
+        end_idx = n_lines if args.lines is None else min(args.lines, n_lines)
+    else:
+        if from_line < 1:
+            print(
+                f"Warning: LINE={from_line} < 1, clamping to 1",
+                file=sys.stderr,
+            )
+            from_line = 1
+        if from_line > n_lines:
+            print(
+                f"Warning: LINE={from_line} beyond EOF ({n_lines} lines); "
+                "empty output",
+                file=sys.stderr,
+            )
+            return
+        start_idx = from_line - 1
+        n = args.lines if args.lines is not None else 100
+        end_idx = min(start_idx + n, n_lines)
+
+    out = "\n".join(lines[start_idx:end_idx])
+    # Preserve trailing newline if the original file had one AND we're at EOF
+    if end_idx == n_lines and text.endswith("\n") and not out.endswith("\n"):
+        out += "\n"
+    sys.stdout.write(out)
 
 
 def _setup_logging() -> None:

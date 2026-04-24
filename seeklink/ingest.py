@@ -21,8 +21,11 @@ logger = logging.getLogger(__name__)
 # Non-hidden top-level dirs excluded from indexing (mirrors watcher._SKIP_DIRS)
 _SKIP_DIRS = {"todo", "archive"}
 
-# Regex for YAML frontmatter block (handles empty frontmatter too)
-_FRONTMATTER_RE = re.compile(r"\A---\s*\n(.*?)---\s*\n", re.DOTALL)
+# Regex for YAML frontmatter block (handles empty frontmatter too).
+# Public — search.py imports this to map body-relative chunk offsets back
+# to full-file line numbers when building search results.
+FRONTMATTER_RE = re.compile(r"\A---\s*\n(.*?)---\s*\n", re.DOTALL)
+_FRONTMATTER_RE = FRONTMATTER_RE  # backward-compat alias within this module
 
 
 def _utcnow() -> str:

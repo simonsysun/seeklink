@@ -6,10 +6,12 @@ import logging
 import math
 import sqlite3
 from dataclasses import dataclass
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from seeklink.db import Database
 from seeklink.embedder import Embedder
+from seeklink.ingest import FRONTMATTER_RE
 from seeklink.models import Chunk, Source
 
 if TYPE_CHECKING:
@@ -27,6 +29,11 @@ class SearchResult:
     content: str
     score: float
     indegree: int
+    # 1-indexed inclusive line range of the best chunk in the on-disk file.
+    # 0 means "not yet computed" or "not applicable" (e.g. title-only match).
+    # Populated by compute_lines_for_results() after the main ranking pass.
+    line_start: int = 0
+    line_end: int = 0
 
 
 def search(
@@ -45,6 +52,7 @@ def search(
     folder: str | None = None,
     reranker: "Reranker | None" = None,
     rerank_k: int = 20,
+    vault_root: Path | None = None,
 ) -> list[SearchResult]:
     """Search the knowledge base using four-channel RRF fusion.
 
@@ -212,27 +220,53 @@ def search(
     results.sort(key=lambda r: r.score, reverse=True)
     results = results[:candidate_k]
 
-    # Cross-encoder reranking — replaces first-stage RRF scores with
-    # cross-encoder relevance scores on the candidate pool. Reranker
-    # failures downgrade gracefully (rerank() returns None → keep
-    # first-stage ordering).
+    # Cross-encoder reranking — blends a position-based retrieval signal
+    # with the reranker's relevance score, weighted by the pre-rerank
+    # RRF rank. This protects confident first-stage wins (exact title
+    # or alias hits) from being demoted by a reranker that's
+    # content-focused. Formula adapted from qmd/src/store.ts:4230-4234.
+    #
+    # For each candidate at pre-rerank rank `r` (1-indexed after RRF sort):
+    #   rank_pos = 1 / r              (0-1, aligns scale with rerank score)
+    #   alpha = 0.75 if r <= 3
+    #         = 0.60 if r <= 10
+    #         = 0.40 otherwise
+    #   blended = alpha * rank_pos + (1 - alpha) * rerank_score
+    #
+    # Note: blending applies to ALL candidates in the pool (up to
+    # candidate_k = max(rerank_k, top_k)). If the caller passes a
+    # top_k > rerank_k, positions rerank_k+1..top_k also blend under
+    # alpha=0.40 (reranker-dominant), matching qmd's trust-the-reranker-
+    # more-at-the-tail intuition.
+    #
+    # Reranker failures downgrade gracefully (rerank() returns None →
+    # keep first-stage RRF ordering).
     if reranking_enabled and len(results) > 1:
         passages = [r.content for r in results]
         rerank_scores = reranker.rerank(query, passages)
         if rerank_scores is not None and len(rerank_scores) == len(results):
-            results = [
-                SearchResult(
+            blended: list[SearchResult] = []
+            for i, r in enumerate(results):
+                rrf_rank = i + 1  # 1-indexed rank after RRF fusion
+                rank_pos = 1.0 / rrf_rank
+                if rrf_rank <= 3:
+                    alpha = 0.75
+                elif rrf_rank <= 10:
+                    alpha = 0.60
+                else:
+                    alpha = 0.40
+                blended_score = alpha * rank_pos + (1.0 - alpha) * float(rerank_scores[i])
+                blended.append(SearchResult(
                     source_id=r.source_id,
                     chunk_id=r.chunk_id,
                     path=r.path,
                     title=r.title,
                     content=r.content,
-                    score=float(rerank_scores[i]),
+                    score=blended_score,
                     indegree=r.indegree,
-                )
-                for i, r in enumerate(results)
-            ]
-            results.sort(key=lambda r: r.score, reverse=True)
+                ))
+            blended.sort(key=lambda r: r.score, reverse=True)
+            results = blended
 
     results = results[:top_k]
 
@@ -251,7 +285,134 @@ def search(
             results.sort(key=lambda r: r.score, reverse=True)
             results = results[:top_k]
 
+    # v0.3 Item 2 — populate line_start/line_end on each result.
+    # Caller must pass vault_root for the mapping to work; if absent,
+    # line fields remain at their default of 0 (backward compatible).
+    if vault_root is not None:
+        results = compute_lines_for_results(db, vault_root, results)
+
     return results
+
+
+# ── Line-range retrieval helpers (v0.3 Item 2) ──────────────────────
+
+
+def body_offset_to_file_line(full_text: str, body_char_offset: int) -> int:
+    """Map a char offset in the frontmatter-stripped body back to a
+    1-indexed line number in the on-disk file.
+
+    Invariant: if the file has frontmatter, the frontmatter prefix
+    occupies lines 1..N of the file; the body starts at line N+1
+    (where N = newlines inside the frontmatter block, inclusive of
+    the opening/closing --- lines). If the file no longer has
+    frontmatter on disk (user deleted it after indexing), treat the
+    full file as body — that is the correct mapping for a
+    body-relative offset even then.
+
+    Args:
+        full_text: current on-disk file content (after `read_text`
+            universal-newline translation, so only `\n`).
+        body_char_offset: a 0-indexed character offset inside the
+            post-frontmatter body that ingest chunked against.
+    """
+    m = FRONTMATTER_RE.match(full_text)
+    if m:
+        frontmatter_len = m.end()
+        prefix_lines = full_text.count("\n", 0, frontmatter_len)
+    else:
+        frontmatter_len = 0
+        prefix_lines = 0
+
+    body_abs_offset = frontmatter_len + body_char_offset
+    lines_before = full_text.count("\n", frontmatter_len, body_abs_offset)
+    return prefix_lines + lines_before + 1
+
+
+def compute_lines_for_results(
+    db: Database,
+    vault_root: Path,
+    results: list[SearchResult],
+) -> list[SearchResult]:
+    """Return a new list of SearchResult with line_start/line_end filled in.
+
+    Reads each unique source file from disk once, maps the chunk's
+    stored char offsets back to 1-indexed inclusive line numbers.
+
+    Title-only matches (chunk_id == 0) get line_start=line_end=1 (the
+    file itself is the match). Missing files get (0, 0) and emit a
+    warning to the logger.
+
+    ChunkSpan.char_end is end-exclusive in seeklink's chunker (see
+    chunker.py:3), so line_end is computed from
+    `max(char_start, char_end - 1)` to get the 1-indexed inclusive
+    last line.
+    """
+    if not results:
+        return results
+
+    # Batch-fetch chunks by chunk_id so we avoid N per-row roundtrips.
+    chunk_ids = [r.chunk_id for r in results if r.chunk_id != 0]
+    chunks_by_id: dict[int, Chunk] = db.get_chunks_by_ids(chunk_ids) if chunk_ids else {}
+
+    # File read cache for the duration of this call (a single query
+    # typically surfaces 5-10 distinct paths).
+    file_cache: dict[str, str | None] = {}
+
+    def _read(path: str) -> str | None:
+        if path in file_cache:
+            return file_cache[path]
+        try:
+            abs_path = vault_root / path
+            text = abs_path.read_text(encoding="utf-8")
+            file_cache[path] = text
+            return text
+        except (OSError, UnicodeDecodeError) as e:
+            logger.warning("Could not read %s for line mapping: %s", path, e)
+            file_cache[path] = None
+            return None
+
+    out: list[SearchResult] = []
+    for r in results:
+        # Title-only match: file is the match, line 1 is the best default.
+        if r.chunk_id == 0:
+            out.append(SearchResult(
+                source_id=r.source_id,
+                chunk_id=r.chunk_id,
+                path=r.path,
+                title=r.title,
+                content=r.content,
+                score=r.score,
+                indegree=r.indegree,
+                line_start=1,
+                line_end=1,
+            ))
+            continue
+
+        chunk = chunks_by_id.get(r.chunk_id)
+        full_text = _read(r.path)
+        if chunk is None or full_text is None or chunk.char_start is None or chunk.char_end is None:
+            # Fall back to 0/0 — caller can check and avoid printing lines
+            out.append(r)
+            continue
+
+        line_start = body_offset_to_file_line(full_text, chunk.char_start)
+        # char_end is exclusive; map the last INCLUDED char to get inclusive line_end
+        end_inclusive = max(chunk.char_start, chunk.char_end - 1)
+        line_end = body_offset_to_file_line(full_text, end_inclusive)
+
+        out.append(SearchResult(
+            source_id=r.source_id,
+            chunk_id=r.chunk_id,
+            path=r.path,
+            title=r.title,
+            content=r.content,
+            score=r.score,
+            indegree=r.indegree,
+            line_start=line_start,
+            line_end=line_end,
+        ))
+
+    return out
 
 
 def _safe_fts(db: Database, query: str, limit: int) -> list[tuple[Chunk, float]]:

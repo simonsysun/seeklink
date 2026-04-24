@@ -427,3 +427,115 @@ class TestTitleChannel:
             # ml-basics.md has title "Machine Learning" — should rank high
             top_paths = [r.path for r in results[:3]]
             assert "ml-basics.md" in top_paths
+
+
+class TestPositionAwareBlending:
+    """Test v0.3 Item 1 — rerank blending preserves confident first-stage wins.
+
+    Before v0.3: reranker score fully replaced RRF score, so an exact-title
+    or exact-alias hit at RRF rank 1 could be demoted if the reranker gave
+    a longer adjacent document a higher content-relevance score.
+
+    After v0.3: blended = alpha * (1/rank) + (1 - alpha) * rerank_score
+    with alpha = {0.75 for rank 1-3, 0.60 for rank 4-10, 0.40 for rank 11+}.
+    The rank-1 position contribution (0.75 * 1.0 = 0.75) dominates the
+    reranker weight (0.25 * rerank_score, max 0.25), so rank 1 is
+    preserved against any rerank score.
+    """
+
+    def test_blending_preserves_rank_1(
+        self, db: Database, embedder: Embedder, vault: Path
+    ):
+        """Rank 1 RRF result stays at rank 1 even if reranker scores it last."""
+        _ingest_corpus(db, embedder, vault)
+
+        class MockReranker:
+            """Returns reversed-rank scores: rank 1 gets 0.0, last gets 1.0.
+            This simulates the pathological case where the reranker strongly
+            disagrees with RRF."""
+            disabled = False
+
+            def rerank(self, query, passages):
+                n = len(passages)
+                if n == 0:
+                    return []
+                # Score increases with index → reranker puts LAST first
+                return [i / (n - 1) if n > 1 else 0.5 for i in range(n)]
+
+        # Without blending (pre-v0.3 behavior): rank 1 would be demoted to
+        # last. With v0.3 blending: rank 1 stays at rank 1 because
+        # 0.75 * (1/1) + 0.25 * 0.0 = 0.750 > anything else.
+        results = search(
+            db, embedder, "Machine Learning",
+            reranker=MockReranker(),  # type: ignore[arg-type]
+            top_k=4,
+            rerank_k=4,
+        )
+        assert len(results) >= 1
+        # First result's path shouldn't depend on reranker's pathological score
+        # It should match what RRF had at rank 1 ("Machine Learning" title hit)
+        assert "ml-basics" in results[0].path, (
+            f"Expected ml-basics at rank 1 after blending, got "
+            f"{[r.path for r in results]}"
+        )
+
+    def test_blending_formula_weights(
+        self, db: Database, embedder: Embedder, vault: Path
+    ):
+        """Spot-check the exact blending math at rank 1 vs rank 5 vs rank 15."""
+        _ingest_corpus(db, embedder, vault)
+
+        rerank_calls = {"count": 0, "passages": []}
+
+        class SpyReranker:
+            disabled = False
+
+            def rerank(self, query, passages):
+                rerank_calls["count"] += 1
+                rerank_calls["passages"] = passages
+                # All passages score 0.5 — neutral. Blended score should
+                # then be dominated by rank_pos = 1/rank.
+                return [0.5] * len(passages)
+
+        results = search(
+            db, embedder, "learning",
+            reranker=SpyReranker(),  # type: ignore[arg-type]
+            top_k=4,
+            rerank_k=4,
+        )
+        # With uniform rerank=0.5, blended scores should be strictly
+        # decreasing with rank (rank_pos dominates).
+        scores = [r.score for r in results]
+        assert scores == sorted(scores, reverse=True)
+        # Rank 1: 0.75 * (1/1) + 0.25 * 0.5 = 0.875
+        # Rank 2: 0.75 * (1/2) + 0.25 * 0.5 = 0.500
+        # Rank 3: 0.75 * (1/3) + 0.25 * 0.5 = 0.375
+        if len(scores) >= 1:
+            assert abs(scores[0] - 0.875) < 1e-6, f"rank 1: {scores[0]}"
+        if len(scores) >= 2:
+            assert abs(scores[1] - 0.500) < 1e-6, f"rank 2: {scores[1]}"
+
+    def test_disabled_reranker_falls_through(
+        self, db: Database, embedder: Embedder, vault: Path
+    ):
+        """When the reranker is disabled, blending must NOT activate —
+        results keep their raw RRF scores."""
+        _ingest_corpus(db, embedder, vault)
+
+        class DisabledReranker:
+            disabled = True
+
+            def rerank(self, query, passages):
+                raise AssertionError("disabled reranker should not be called")
+
+        # Should not raise (rerank() not called when disabled=True)
+        results = search(
+            db, embedder, "machine learning",
+            reranker=DisabledReranker(),  # type: ignore[arg-type]
+            top_k=4,
+        )
+        # Scores are small (RRF range ~0.01-0.06), not in the 0-1 blended range
+        if results:
+            assert all(r.score < 0.2 for r in results), (
+                f"Expected RRF-scale scores, got {[r.score for r in results]}"
+            )

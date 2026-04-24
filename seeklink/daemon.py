@@ -197,6 +197,7 @@ def _handle_connection(
                 folder=args.get("folder"),
                 title_weight=args.get("title_weight", 1.5),
                 reranker=reranker,
+                vault_root=vault_root,
             )
             response = {
                 "ok": True,
@@ -208,6 +209,8 @@ def _handle_connection(
                         "content_preview": r.content[:200] if r.content else "",
                         "score": r.score,
                         "indegree": r.indegree,
+                        "line_start": r.line_start,
+                        "line_end": r.line_end,
                     }
                     for r in results
                 ],
