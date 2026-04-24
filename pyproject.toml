@@ -1,6 +1,6 @@
 [project]
 name = "seeklink"
-version = "0.3.0"
+version = "0.3.1"
 description = "Hybrid semantic search CLI for Obsidian-compatible markdown vaults. BM25 + vector + knowledge graph + title, fused via RRF. Native CJK. Fully local."
 readme = "README.md"
 license = "MIT"

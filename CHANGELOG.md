@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-04-23
+
+Docs-only patch. No code changes from 0.3.0; this release exists purely
+to refresh the README snapshot shown on the PyPI project page.
+
+### Fixed (documentation)
+- Quick-start ordering corrected: `seeklink index` must run before `seeklink search` (searching an un-indexed vault returns no results).
+- `seeklink status` is always cold-start (direct SQLite + freshness read); removed incorrect mentions of it auto-spawning the daemon.
+- `seeklink get` is a direct filesystem read; clarified it doesn't involve the daemon either.
+- Latency figures separated by configuration: warm reranker-on path is ~1-2s per query (not ~0.5s); ~10ms applies only to the reranker-disabled path.
+- CLI vs daemon output surfaces split: CLI prints `path:line_start`; daemon JSON additionally carries `line_end`.
+
+### Added (documentation)
+- README "For agents" section: minimum workflow, output contract, exit codes, query-shape hints, daemon JSON fallback.
+- `llms.txt` rewritten as an explicit agent contract (no prose filler; terse sections on workflow, output format, exit codes, failure modes).
+
 ## [0.3.0] - 2026-04-23
 
 ### Added
