@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import math
 import sqlite3
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
@@ -51,6 +51,13 @@ class SearchDiagnostics:
     resolved_rerank_k: int | None = None
     rerank_k_reason: str | None = None
     reranking_enabled: bool = False
+    candidate_count: int = 0
+    bm25_ranks: dict[int, int] = field(default_factory=dict)
+    vector_ranks: dict[int, int] = field(default_factory=dict)
+    title_ranks: dict[int, int] = field(default_factory=dict)
+    indegree_ranks: dict[int, int] = field(default_factory=dict)
+    first_stage_ranked_source_ids: list[int] = field(default_factory=list)
+    rerank_candidate_source_ids: list[int] = field(default_factory=list)
 
 
 def _contains_cjk(text: str) -> bool:
@@ -271,14 +278,21 @@ def search(
     # candidate pool (rerank_k) so the cross-encoder has meaningful room to
     # reorder. Without a reranker, cut directly to top_k.
     reranking_enabled = reranker is not None and not reranker.disabled
+    candidate_k = max(resolved_rerank_k, top_k) if reranking_enabled else top_k
+    first_stage_ranked = sorted(scores.keys(), key=lambda sid: scores[sid], reverse=True)
+    ranked = first_stage_ranked[:candidate_k]
     if diagnostics is not None:
         diagnostics.requested_rerank_k = rerank_k
         diagnostics.resolved_rerank_k = resolved_rerank_k if reranking_enabled else 0
         diagnostics.rerank_k_reason = rerank_k_reason if reranking_enabled else None
         diagnostics.reranking_enabled = reranking_enabled
-    candidate_k = max(resolved_rerank_k, top_k) if reranking_enabled else top_k
-    ranked = sorted(scores.keys(), key=lambda sid: scores[sid], reverse=True)
-    ranked = ranked[:candidate_k]
+        diagnostics.candidate_count = len(candidate_ids)
+        diagnostics.bm25_ranks = dict(bm25_ranks)
+        diagnostics.vector_ranks = dict(vec_ranks)
+        diagnostics.title_ranks = dict(title_ranks)
+        diagnostics.indegree_ranks = dict(indeg_ranks)
+        diagnostics.first_stage_ranked_source_ids = list(first_stage_ranked)
+        diagnostics.rerank_candidate_source_ids = list(ranked)
 
     # Pick best chunk for each source (prefer BM25 chunk, fall back to vec)
     best_chunks: dict[int, Chunk] = {}

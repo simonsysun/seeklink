@@ -113,6 +113,10 @@ For each `(query, config)` pair (recorded by the runner):
   (`5` or `20` for `auto`, `0` when reranking is disabled)
 - `rerank_k_reason` — why `auto` chose that budget (`title`,
   `cjk_technical`, `filter`, `default`, or `fixed`)
+- `first_stage` — channel diagnostics for config A: candidate count,
+  per-channel source counts, expected-path ranks in BM25 / vector / title /
+  indegree / fused RRF, and channel ranks for the returned hits. Use this to
+  decide whether a miss is a candidate-generation issue or a reranker issue.
 - `recall_at_10` — fraction of `expected_paths` in top-10
 - `mrr` — reciprocal rank of first expected hit in top-10 (0 if none)
 - `ndcg_at_10` — graded nDCG when `relevance:` labels exist, otherwise
@@ -164,6 +168,8 @@ Runner:
   behavior; lower values and `auto` are diagnostic latency / quality probes.
 - Records the per-query resolved reranker budget so `auto` sweeps can be
   audited without guessing which queries used 5 vs. 20 candidates.
+- Records first-stage channel diagnostics for config A so retrieval misses can
+  be debugged from the JSON output without one-off inspection scripts.
 - Closes the DB once, in a `finally` block.
 - Records per-query latency using `time.perf_counter()`. Model-load time
   is excluded by warmup.

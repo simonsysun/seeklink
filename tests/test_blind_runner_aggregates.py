@@ -86,6 +86,76 @@ class TestLoadQueries:
         assert row.ndcg_at_10 > row.mrr
 
 
+class TestFirstStagePayload:
+    def test_records_expected_and_hit_channel_ranks(self):
+        diagnostics = blind_run.SearchDiagnostics()
+        diagnostics.candidate_count = 3
+        diagnostics.bm25_ranks = {1: 2}
+        diagnostics.vector_ranks = {1: 5, 2: 1}
+        diagnostics.title_ranks = {2: 1}
+        diagnostics.indegree_ranks = {1: 1, 2: 2, 3: 3}
+        diagnostics.first_stage_ranked_source_ids = [2, 1, 3]
+        diagnostics.rerank_candidate_source_ids = [2, 1]
+
+        class Source:
+            def __init__(self, source_id: int):
+                self.id = source_id
+
+        class FakeDb:
+            def get_source_by_path(self, path: str):
+                return {
+                    "answer.md": Source(1),
+                    "missing.md": None,
+                }[path]
+
+        payload = blind_run._first_stage_payload(
+            db=FakeDb(),
+            diagnostics=diagnostics,
+            expected_paths=["answer.md", "missing.md"],
+            results=[
+                blind_run.SearchResult(
+                    source_id=2,
+                    chunk_id=20,
+                    path="hit.md",
+                    title="Hit",
+                    content="",
+                    score=1.0,
+                    indegree=0,
+                )
+            ],
+        )
+
+        assert payload["candidate_count"] == 3
+        assert payload["channel_source_counts"] == {
+            "bm25": 1,
+            "vector": 2,
+            "title": 1,
+            "indegree": 3,
+        }
+        assert payload["expected_path_ranks"] == {
+            "answer.md": {
+                "bm25": 2,
+                "vector": 5,
+                "title": None,
+                "indegree": 1,
+                "rrf": 2,
+                "rerank_candidate": 2,
+            },
+            "missing.md": None,
+        }
+        assert payload["hit_channel_ranks"] == [
+            {
+                "path": "hit.md",
+                "bm25": None,
+                "vector": 1,
+                "title": 1,
+                "indegree": 2,
+                "rrf": 1,
+                "rerank_candidate": 1,
+            }
+        ]
+
+
 def _row(
     *,
     query: str,

@@ -129,6 +129,7 @@ class ResultRow:
     rerank_k: int | str = 0
     resolved_rerank_k: int | None = None
     rerank_k_reason: str | None = None
+    first_stage: dict[str, object] = field(default_factory=dict)
     expansions_used: list[str] = field(default_factory=list)
 
 
@@ -167,6 +168,84 @@ def _extract(results: list[SearchResult]) -> tuple[
     )
 
 
+def _source_rank_payload(
+    source_id: int,
+    diagnostics: SearchDiagnostics,
+    *,
+    rrf_ranks: dict[int, int],
+    rerank_candidate_ranks: dict[int, int],
+) -> dict[str, int | None]:
+    return {
+        "bm25": diagnostics.bm25_ranks.get(source_id),
+        "vector": diagnostics.vector_ranks.get(source_id),
+        "title": diagnostics.title_ranks.get(source_id),
+        "indegree": diagnostics.indegree_ranks.get(source_id),
+        "rrf": rrf_ranks.get(source_id),
+        "rerank_candidate": rerank_candidate_ranks.get(source_id),
+    }
+
+
+def _first_stage_payload(
+    *,
+    db: object,
+    diagnostics: SearchDiagnostics,
+    expected_paths: list[str],
+    results: list[SearchResult],
+) -> dict[str, object]:
+    """Summarize first-stage channel ranks for blind-test debugging.
+
+    The production search output intentionally stays compact. The blind runner
+    needs more detail so ranking failures can be classified as candidate
+    generation, fusion, or reranking failures without ad hoc scripts.
+    """
+    rrf_ranks = {
+        sid: rank
+        for rank, sid in enumerate(diagnostics.first_stage_ranked_source_ids, start=1)
+    }
+    rerank_candidate_ranks = {
+        sid: rank
+        for rank, sid in enumerate(diagnostics.rerank_candidate_source_ids, start=1)
+    }
+
+    expected_path_ranks: dict[str, dict[str, int | None] | None] = {}
+    get_source_by_path = getattr(db, "get_source_by_path", None)
+    for path in expected_paths:
+        source = get_source_by_path(path) if get_source_by_path is not None else None
+        expected_path_ranks[path] = (
+            None
+            if source is None
+            else _source_rank_payload(
+                source.id,
+                diagnostics,
+                rrf_ranks=rrf_ranks,
+                rerank_candidate_ranks=rerank_candidate_ranks,
+            )
+        )
+
+    return {
+        "candidate_count": diagnostics.candidate_count,
+        "channel_source_counts": {
+            "bm25": len(diagnostics.bm25_ranks),
+            "vector": len(diagnostics.vector_ranks),
+            "title": len(diagnostics.title_ranks),
+            "indegree": len(diagnostics.indegree_ranks),
+        },
+        "expected_path_ranks": expected_path_ranks,
+        "hit_channel_ranks": [
+            {
+                "path": result.path,
+                **_source_rank_payload(
+                    result.source_id,
+                    diagnostics,
+                    rrf_ranks=rrf_ranks,
+                    rerank_candidate_ranks=rerank_candidate_ranks,
+                ),
+            }
+            for result in results
+        ],
+    }
+
+
 def _result_row(
     *,
     spec: QuerySpec,
@@ -180,6 +259,7 @@ def _result_row(
     rerank_k: int | str,
     resolved_rerank_k: int | None = None,
     rerank_k_reason: str | None = None,
+    first_stage: dict[str, object] | None = None,
     expansions_used: list[str] | None = None,
 ) -> ResultRow:
     """Build a ResultRow and compute all per-query metrics in one place."""
@@ -195,6 +275,7 @@ def _result_row(
         latency_ms=latency_ms,
         reranker_active=reranker_active,
         rerank_k=rerank_k if reranker_active else 0,
+        first_stage=dict(first_stage or {}),
         recall_at_10=recall_at_k(hits, spec.expected_paths),
         mrr=reciprocal_rank(hits, spec.expected_paths),
         precision_at_5=precision_at_k(hits, spec.expected_paths, k=5),
@@ -345,6 +426,12 @@ def run_config_a(spec: QuerySpec, state: RunnerState) -> ResultRow:
         rerank_k=state.active_rerank_k,
         resolved_rerank_k=diagnostics.resolved_rerank_k,
         rerank_k_reason=diagnostics.rerank_k_reason,
+        first_stage=_first_stage_payload(
+            db=state.db,
+            diagnostics=diagnostics,
+            expected_paths=spec.expected_paths,
+            results=results,
+        ),
     )
 
 

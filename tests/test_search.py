@@ -120,6 +120,14 @@ class TestAutoRerankK:
         assert diagnostics.requested_rerank_k == "auto"
         assert diagnostics.resolved_rerank_k == 5
         assert diagnostics.rerank_k_reason == "title"
+        assert diagnostics.candidate_count > 0
+        assert diagnostics.first_stage_ranked_source_ids
+        assert diagnostics.rerank_candidate_source_ids
+
+        ml = db.get_source_by_path("ml-basics.md")
+        assert ml is not None
+        assert diagnostics.title_ranks[ml.id] == 1
+        assert ml.id in diagnostics.first_stage_ranked_source_ids
 
 
 def _write_md(vault: Path, rel_path: str, content: str) -> Path:
