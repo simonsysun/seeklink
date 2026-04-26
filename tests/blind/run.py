@@ -33,7 +33,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from seeklink.app import init_app
 from seeklink.reranker import Reranker
-from seeklink.search import SearchResult, search
+from seeklink.search import RerankK, SearchResult, search
 
 try:
     from .metrics import (
@@ -64,6 +64,20 @@ class QuerySpec:
     expansion: list[str] | None
 
 
+def _parse_rerank_k(raw: str) -> RerankK:
+    if raw == "auto":
+        return raw
+    try:
+        value = int(raw)
+    except ValueError as e:
+        raise argparse.ArgumentTypeError(
+            "--rerank-k must be a positive integer or 'auto'"
+        ) from e
+    if value < 1:
+        raise argparse.ArgumentTypeError("--rerank-k must be >= 1")
+    return value
+
+
 @dataclass
 class ResultRow:
     """Everything the framework's acceptance criteria need at evaluation time.
@@ -88,7 +102,7 @@ class ResultRow:
     average_precision_at_10: float
     ndcg_at_10: float
     last_expected_rank: int | None
-    rerank_k: int = 0
+    rerank_k: int | str = 0
     expansions_used: list[str] = field(default_factory=list)
 
 
@@ -135,7 +149,7 @@ def _result_row(
     scores: list[float],
     latency_ms: float,
     reranker_active: bool,
-    rerank_k: int,
+    rerank_k: int | str,
     expansions_used: list[str] | None = None,
 ) -> ResultRow:
     """Build a ResultRow and compute all per-query metrics in one place."""
@@ -210,7 +224,7 @@ class RunnerState:
     db: object
     embedder: object
     reranker: Reranker | None
-    rerank_k: int
+    rerank_k: RerankK
     vault: Path
 
     @property
@@ -218,7 +232,7 @@ class RunnerState:
         return self.reranker is not None and not self.reranker.disabled
 
     @property
-    def active_rerank_k(self) -> int:
+    def active_rerank_k(self) -> int | str:
         return self.rerank_k if self.reranker_active else 0
 
     def close(self) -> None:
@@ -228,7 +242,7 @@ class RunnerState:
             pass
 
 
-def init_state(vault: Path, with_reranker: bool, rerank_k: int) -> RunnerState:
+def init_state(vault: Path, with_reranker: bool, rerank_k: RerankK) -> RunnerState:
     db, embedder, resolved_vault = init_app(vault)
     # Trigger lazy load up-front so the first measured query excludes
     # embedder model/cache startup, matching the resident daemon path.
@@ -404,11 +418,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument(
         "--rerank-k",
-        type=int,
+        type=_parse_rerank_k,
         default=20,
         help=(
             "Number of first-stage candidates passed to the reranker "
-            "(default: 20). Use with config A/C latency sweeps."
+            "or 'auto' for query-sensitive routing (default: 20). "
+            "Use with config A/C latency sweeps."
         ),
     )
     parser.add_argument(
@@ -425,9 +440,6 @@ def build_parser() -> argparse.ArgumentParser:
 def main() -> None:
     parser = build_parser()
     args = parser.parse_args()
-
-    if args.rerank_k < 1:
-        parser.error("--rerank-k must be >= 1")
 
     vault = args.vault.expanduser().resolve()
     specs = load_queries(args.queries)

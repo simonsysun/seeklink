@@ -75,7 +75,7 @@ No other codes.
 - Short queries that match a note title or alias get title-gated position protection so the exact hit anchors at rank 1.
 - Filters: `--tags T1 T2` (AND), `--folder PREFIX`. Multi-word filter values not supported.
 - `--title-weight F` override (default 1.5; raise to 3.0 for "find the definitive article", lower to 0.5 for "surface raw log moments").
-- Reranking controls: `--rerank-k N` changes how many first-stage candidates the cross-encoder scores (default 20); `--no-rerank` skips cross-encoder scoring for one query.
+- Reranking controls: `--rerank-k N` changes how many first-stage candidates the cross-encoder scores (default 20); `--rerank-k auto` chooses a 5- or 20-candidate budget from the query shape; `--no-rerank` skips cross-encoder scoring for one query.
 
 ### Common failure modes
 

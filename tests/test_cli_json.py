@@ -8,6 +8,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 import seeklink.__main__ as cli
 from seeklink.search import SearchResult
 
@@ -176,6 +178,42 @@ def test_search_json_no_rerank_sends_daemon_flag(capsys, monkeypatch):
     assert payload["results"] == []
 
 
+def test_search_json_auto_rerank_sends_daemon_value(capsys, monkeypatch):
+    def fake_try_daemon(cmd: str, daemon_args: dict) -> dict:
+        assert cmd == "search"
+        assert daemon_args == {
+            "query": "memory",
+            "top_k": 3,
+            "rerank_k": "auto",
+        }
+        return {
+            "ok": True,
+            "vault": "/tmp/vault",
+            "embedder": "test-embedder",
+            "reranker": "test-reranker",
+            "result": [],
+        }
+
+    monkeypatch.setattr(cli, "_try_daemon", fake_try_daemon)
+    args = argparse.Namespace(
+        query="memory",
+        vault=None,
+        tags=None,
+        folder=None,
+        top_k=3,
+        rerank_k="auto",
+        no_rerank=False,
+        title_weight=None,
+        json=True,
+    )
+
+    cli._cmd_search(args)
+
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["reranking"] == {"enabled": True, "rerank_k": "auto"}
+    assert payload["results"] == []
+
+
 def test_search_rejects_invalid_rerank_k(capsys):
     args = argparse.Namespace(
         query="memory",
@@ -196,4 +234,16 @@ def test_search_rejects_invalid_rerank_k(capsys):
     else:
         raise AssertionError("Expected _cmd_search to exit for invalid rerank_k")
 
-    assert "--rerank-k must be >= 1" in capsys.readouterr().err
+    assert "--rerank-k must be a positive integer or 'auto'" in capsys.readouterr().err
+
+
+def test_parse_rerank_k_accepts_auto_and_positive_integers():
+    assert cli._parse_rerank_k("auto") == "auto"
+    assert cli._parse_rerank_k("7") == 7
+
+
+def test_parse_rerank_k_rejects_invalid_values():
+    with pytest.raises(argparse.ArgumentTypeError):
+        cli._parse_rerank_k("0")
+    with pytest.raises(argparse.ArgumentTypeError):
+        cli._parse_rerank_k("fast")

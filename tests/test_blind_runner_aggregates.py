@@ -175,6 +175,26 @@ class TestRerankOptions:
         assert args.rerank_k == 7
         assert args.no_reranker is True
 
+    def test_parser_supports_auto_rerank_k(self):
+        parser = blind_run.build_parser()
+
+        args = parser.parse_args(
+            [
+                "--config",
+                "A",
+                "--queries",
+                "queries.yaml",
+                "--vault",
+                "vault",
+                "--out",
+                "out.json",
+                "--rerank-k",
+                "auto",
+            ]
+        )
+
+        assert args.rerank_k == "auto"
+
     def test_legacy_no_reranker_alias_still_works(self):
         parser = blind_run.build_parser()
 
@@ -230,3 +250,25 @@ class TestRerankOptions:
             "reranker": fake_reranker,
             "rerank_k": 7,
         }
+
+    def test_search_with_state_passes_auto_rerank_k(self, monkeypatch):
+        captured: dict = {}
+
+        class FakeReranker:
+            disabled = False
+
+        def fake_search(db, embedder, query, **kwargs):
+            captured["rerank_k"] = kwargs["rerank_k"]
+            return []
+
+        state = RunnerState(
+            db=object(),
+            embedder=object(),
+            reranker=FakeReranker(),  # type: ignore[arg-type]
+            rerank_k="auto",
+            vault=Path("/tmp/vault"),
+        )
+        monkeypatch.setattr(blind_run, "search", fake_search)
+
+        assert blind_run._search_with_state(state, "memory") == []
+        assert captured == {"rerank_k": "auto"}

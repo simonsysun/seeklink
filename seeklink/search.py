@@ -7,7 +7,7 @@ import math
 import sqlite3
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 from seeklink.db import Database
 from seeklink.embedder import Embedder
@@ -18,6 +18,44 @@ if TYPE_CHECKING:
     from seeklink.reranker import Reranker
 
 logger = logging.getLogger(__name__)
+
+RerankK = int | Literal["auto"]
+AUTO_RERANK_FAST_K = 5
+AUTO_RERANK_DEEP_K = 20
+
+
+def _contains_cjk(text: str) -> bool:
+    return any("\u3400" <= ch <= "\u9fff" for ch in text)
+
+
+def _resolve_rerank_k(
+    query: str,
+    rerank_k: RerankK,
+    *,
+    has_filter: bool,
+    title_ranks: dict[int, int],
+) -> int:
+    """Resolve a numeric rerank budget for one query.
+
+    The default CLI path still passes an integer. The explicit "auto" mode is
+    a conservative policy from the 22-query pilot: English and title/alias
+    lookups got most of the reranker benefit by reranking only the top 5, while
+    CJK / mixed queries without a title hit needed deeper candidates to recover
+    recall.
+    """
+    if isinstance(rerank_k, int):
+        return rerank_k
+
+    if rerank_k != "auto":
+        raise ValueError(f"unsupported rerank_k value: {rerank_k!r}")
+
+    if has_filter:
+        return AUTO_RERANK_DEEP_K
+    if title_ranks:
+        return AUTO_RERANK_FAST_K
+    if _contains_cjk(query):
+        return AUTO_RERANK_DEEP_K
+    return AUTO_RERANK_FAST_K
 
 
 @dataclass(frozen=True, slots=True)
@@ -51,7 +89,7 @@ def search(
     tags: list[str] | None = None,
     folder: str | None = None,
     reranker: "Reranker | None" = None,
-    rerank_k: int = 20,
+    rerank_k: RerankK = 20,
     vault_root: Path | None = None,
 ) -> list[SearchResult]:
     """Search the knowledge base using four-channel RRF fusion.
@@ -158,6 +196,13 @@ def search(
     vec_ranks = {k: v for k, v in vec_ranks.items() if k in candidate_ids}
     title_ranks = {k: v for k, v in title_ranks.items() if k in candidate_ids}
 
+    resolved_rerank_k = _resolve_rerank_k(
+        query,
+        rerank_k,
+        has_filter=has_filter,
+        title_ranks=title_ranks,
+    )
+
     # Channel 3: Indegree (rank filtered candidates by indegree descending)
     indeg_ranked = sorted(
         candidate_ids,
@@ -176,7 +221,7 @@ def search(
     # candidate pool (rerank_k) so the cross-encoder has meaningful room to
     # reorder. Without a reranker, cut directly to top_k.
     reranking_enabled = reranker is not None and not reranker.disabled
-    candidate_k = max(rerank_k, top_k) if reranking_enabled else top_k
+    candidate_k = max(resolved_rerank_k, top_k) if reranking_enabled else top_k
     ranked = sorted(scores.keys(), key=lambda sid: scores[sid], reverse=True)
     ranked = ranked[:candidate_k]
 
@@ -254,7 +299,7 @@ def search(
     #
     # Reranker failures downgrade gracefully (rerank() returns None →
     # keep first-stage RRF ordering).
-    rerank_n = min(rerank_k, len(results))
+    rerank_n = min(resolved_rerank_k, len(results))
     if reranking_enabled and rerank_n > 1:
         rerank_head = results[:rerank_n]
         rerank_tail = results[rerank_n:]

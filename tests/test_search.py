@@ -10,7 +10,13 @@ import pytest
 from seeklink.db import Database
 from seeklink.embedder import Embedder
 from seeklink.ingest import ingest_file
-from seeklink.search import SearchResult, _best_chunk_per_source, _rrf_fuse, search
+from seeklink.search import (
+    SearchResult,
+    _best_chunk_per_source,
+    _resolve_rerank_k,
+    _rrf_fuse,
+    search,
+)
 from seeklink.models import Chunk
 
 
@@ -36,6 +42,48 @@ def vault(tmp_path: Path) -> Path:
     v = tmp_path / "vault"
     v.mkdir()
     return v
+
+
+class TestAutoRerankK:
+    def test_numeric_value_is_used_as_is(self):
+        assert _resolve_rerank_k(
+            "记忆保持力",
+            7,
+            has_filter=False,
+            title_ranks={},
+        ) == 7
+
+    def test_title_match_uses_fast_budget(self):
+        assert _resolve_rerank_k(
+            "RRF",
+            "auto",
+            has_filter=False,
+            title_ranks={10: 1},
+        ) == 5
+
+    def test_cjk_without_title_match_uses_deep_budget(self):
+        assert _resolve_rerank_k(
+            "把文档切块放进向量库",
+            "auto",
+            has_filter=False,
+            title_ranks={},
+        ) == 20
+
+    def test_english_without_title_match_uses_fast_budget(self):
+        assert _resolve_rerank_k(
+            "agent memory architectures",
+            "auto",
+            has_filter=False,
+            title_ranks={},
+        ) == 5
+
+    def test_filters_use_deep_budget(self):
+        assert _resolve_rerank_k(
+            "memory",
+            "auto",
+            has_filter=True,
+            title_ranks={},
+        ) == 20
 
 
 def _write_md(vault: Path, rel_path: str, content: str) -> Path:

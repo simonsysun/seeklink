@@ -146,7 +146,8 @@ seeklink search "query" --vault PATH [options]
 
 Options:
   --top-k N          Number of results (default: 10)
-  --rerank-k N       Candidates to rerank with the cross-encoder (default: 20)
+  --rerank-k N|auto  Candidates to rerank with the cross-encoder (default: 20).
+                     Use auto for query-sensitive 5/20 candidate routing.
   --no-rerank        Skip cross-encoder reranking for this query
   --tags TAG [TAG]   Filter by tags (AND semantics)
   --folder PREFIX    Filter by folder (e.g. "notes/")
@@ -216,7 +217,7 @@ Many personal knowledge bases contain a mix of **titled articles** (permanent no
 
 ### Title-gated rerank blending (v0.3+)
 
-When the reranker is enabled, a cross-encoder (`Qwen3-Reranker-0.6B` on MLX, ~1-2s per query) re-scores the top-20 RRF candidates for precision. Use `--rerank-k N` to trade precision for latency on a single query, or `--no-rerank` to return raw RRF results without cross-encoder scoring. SeekLink applies **title-gated position blending** on top of reranked results:
+When the reranker is enabled, a cross-encoder (`Qwen3-Reranker-0.6B` on MLX, ~1-2s per query) re-scores the top-20 RRF candidates for precision. Use `--rerank-k N` to trade precision for latency on a single query, `--rerank-k auto` to let SeekLink pick a 5- or 20-candidate budget from the query shape, or `--no-rerank` to return raw RRF results without cross-encoder scoring. SeekLink applies **title-gated position blending** on top of reranked results:
 
 - **If the title channel's best match is in the candidate pool**, blend `alpha · normalized_rrf + (1 - alpha) · rerank_score` with `alpha = 0.60/0.50/0.40` by rank bucket. This protects exact title / alias hits from being demoted by a content-focused reranker.
 - **Otherwise** (no strong title signal), the reranker score is used directly — same as pre-v0.3 behavior. This lets the reranker correct poor first-stage ordering.

@@ -97,7 +97,7 @@ For each `(query, config)` pair (recorded by the runner):
 - `latency_ms` — wall-clock for the full query call chain (model load
   excluded — runner initializes once and warms up)
 - `rerank_k` — first-stage candidate count passed to the reranker (`0`
-  when reranking is disabled)
+  when reranking is disabled, or `"auto"` for query-sensitive routing)
 - `recall_at_10` — fraction of `expected_paths` in top-10
 - `mrr` — reciprocal rank of first expected hit in top-10 (0 if none)
 
@@ -134,6 +134,7 @@ python tests/blind/run.py --config A --no-rerank ...
 python tests/blind/run.py --config A --rerank-k 5  --out tests/blind/results/A_rerank5.json ...
 python tests/blind/run.py --config A --rerank-k 10 --out tests/blind/results/A_rerank10.json ...
 python tests/blind/run.py --config A --rerank-k 20 --out tests/blind/results/A_rerank20.json ...
+python tests/blind/run.py --config A --rerank-k auto --out .scratch/rerank-sweep/A_auto.json ...
 ```
 
 Runner:
@@ -143,7 +144,7 @@ Runner:
   reranker with dummy calls so the first measured latency isn't
   model/cache/tokenizer startup.
 - Passes `--rerank-k` through to `search()`. Default `20` matches product
-  behavior; lower values are diagnostic latency / quality probes.
+  behavior; lower values and `auto` are diagnostic latency / quality probes.
 - Closes the DB once, in a `finally` block.
 - Records per-query latency using `time.perf_counter()`. Model-load time
   is excluded by warmup.

@@ -38,6 +38,31 @@ _DEFAULT_EMBEDDER_MODEL = "jinaai/jina-embeddings-v2-base-zh"
 _DEFAULT_RERANKER_MODEL = "mlx-community/Qwen3-Reranker-0.6B-mxfp8"
 
 
+def _parse_rerank_k(raw: str) -> int | str:
+    if raw == "auto":
+        return raw
+    try:
+        value = int(raw)
+    except ValueError as e:
+        raise argparse.ArgumentTypeError(
+            "--rerank-k must be a positive integer or 'auto'"
+        ) from e
+    if value < 1:
+        raise argparse.ArgumentTypeError("--rerank-k must be >= 1")
+    return value
+
+
+def _validate_rerank_k(value: int | str) -> None:
+    if value == "auto":
+        return
+    if not isinstance(value, int) or value < 1:
+        print(
+            "Error: --rerank-k must be a positive integer or 'auto'",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+
 def _resolve_default_vault() -> Path:
     """Resolve the vault the CLI would use when `--vault` is not passed.
 
@@ -89,11 +114,11 @@ def main() -> None:
     search_p.add_argument("--top-k", type=int, default=10, help="Number of results")
     search_p.add_argument(
         "--rerank-k",
-        type=int,
+        type=_parse_rerank_k,
         default=20,
         help=(
             "Number of first-stage candidates to rerank with the cross-encoder "
-            "(default: 20)"
+            "or 'auto' for query-sensitive routing (default: 20)"
         ),
     )
     search_p.add_argument(
@@ -298,7 +323,7 @@ def _search_json_payload(
     query: str,
     vault: str | Path,
     top_k: int,
-    rerank_k: int,
+    rerank_k: int | str,
     reranking_enabled: bool,
     tags: list[str] | None,
     folder: str | None,
@@ -367,9 +392,7 @@ def _status_json_payload(
 def _cmd_search(args: argparse.Namespace) -> None:
     _setup_logging()
 
-    if args.rerank_k < 1:
-        print("Error: --rerank-k must be >= 1", file=sys.stderr)
-        sys.exit(1)
+    _validate_rerank_k(args.rerank_k)
 
     if _should_use_daemon(args):
         daemon_args: dict = {"query": args.query, "top_k": args.top_k}
