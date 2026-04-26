@@ -48,6 +48,11 @@ invocation.
     - "notes/fsrs-algorithm.md"
     - "notes/spaced-repetition.md"
     - "logs/2026-W15.md"
+  relevance:
+    "notes/fsrs-algorithm.md": 3
+    "notes/spaced-repetition.md": 3
+    "logs/2026-W15.md": 2
+    "notes/forgetting-curve.md": 1
   tags: [cjk, common]
   expansion:
     - "间隔重复 遗忘曲线 FSRS"
@@ -73,13 +78,17 @@ averages.
    memory. No synthetic queries.
 2. For each, list 2-5 `expected_paths` you'd be annoyed if not in top 10.
    Hard must-hit semantics — not "would be nice".
-3. **Skip queries where a substring of the query exactly matches a note
+3. Optionally add `relevance:` grades for nDCG: `3` = direct answer,
+   `2` = strong supporting context, `1` = related but insufficient.
+   `expected_paths` default to grade `3`; extra relevance labels do not
+   affect Recall@10 or MRR.
+4. **Skip queries where a substring of the query exactly matches a note
    title.** Those hit the title channel trivially and test nothing about
    expansion. Prefer queries where notes use different vocabulary than the
    query itself.
-4. Fill in `expansion:` with 2-3 hand-crafted alternates: lexical form,
+5. Fill in `expansion:` with 2-3 hand-crafted alternates: lexical form,
    semantic paraphrase, hypothetical answer sentence (HyDE style).
-5. Tag each query for slicing: `cjk`, `english`, `cjk-en-mixed`, `long`,
+6. Tag each query for slicing: `cjk`, `english`, `cjk-en-mixed`, `long`,
    `short`, `ambiguous`, `technical`, `common`.
 
 **Ground-truth stability**: commit `queries.yaml` alongside a vault-state
@@ -94,6 +103,8 @@ For each `(query, config)` pair (recorded by the runner):
 - `titles` — top-10 titles (for the human blind scorer)
 - `snippets` — top-10 content previews (for the human blind scorer)
 - `scores` — fused scores (not directly compared across configs)
+- `relevance` — graded labels used for nDCG (`expected_paths` default to
+  grade `3`)
 - `latency_ms` — wall-clock for the full query call chain (model load
   excluded — runner initializes once and warms up)
 - `rerank_k` — first-stage candidate count passed to the reranker (`0`
@@ -104,6 +115,8 @@ For each `(query, config)` pair (recorded by the runner):
   `cjk_technical`, `filter`, `default`, or `fixed`)
 - `recall_at_10` — fraction of `expected_paths` in top-10
 - `mrr` — reciprocal rank of first expected hit in top-10 (0 if none)
+- `ndcg_at_10` — graded nDCG when `relevance:` labels exist, otherwise
+  binary nDCG over `expected_paths`
 
 Aggregates:
 

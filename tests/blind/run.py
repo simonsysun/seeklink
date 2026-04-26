@@ -60,8 +60,31 @@ class QuerySpec:
     query: str
     intent: str | None
     expected_paths: list[str]
+    relevance: dict[str, float]
     tags: list[str]
     expansion: list[str] | None
+
+
+def _parse_relevance(raw: object, expected_paths: list[str]) -> dict[str, float]:
+    relevance = {path: 3.0 for path in expected_paths}
+    if raw is None:
+        return relevance
+    if not isinstance(raw, dict):
+        raise ValueError("relevance must be a mapping of path -> grade")
+
+    for path, grade in raw.items():
+        if not isinstance(path, str) or not path:
+            raise ValueError("relevance paths must be non-empty strings")
+        try:
+            numeric_grade = float(grade)
+        except (TypeError, ValueError) as e:
+            raise ValueError(
+                f"relevance grade for {path!r} must be numeric"
+            ) from e
+        if numeric_grade < 0:
+            raise ValueError(f"relevance grade for {path!r} must be >= 0")
+        relevance[path] = numeric_grade
+    return relevance
 
 
 def _parse_rerank_k(raw: str) -> RerankK:
@@ -94,6 +117,7 @@ class ResultRow:
     titles: list[str | None]
     snippets: list[str]
     scores: list[float]
+    relevance: dict[str, float]
     latency_ms: float
     reranker_active: bool
     recall_at_10: float
@@ -118,11 +142,13 @@ def load_queries(path: Path) -> list[QuerySpec]:
                 f"queries.yaml entry {i}: missing required field "
                 f"('query' and 'expected_paths' are mandatory)"
             )
+        expected_paths = list(r["expected_paths"])
         specs.append(
             QuerySpec(
                 query=r["query"],
                 intent=r.get("intent"),
-                expected_paths=list(r["expected_paths"]),
+                expected_paths=expected_paths,
+                relevance=_parse_relevance(r.get("relevance"), expected_paths),
                 tags=list(r.get("tags", [])),
                 expansion=list(r["expansion"]) if r.get("expansion") else None,
             )
@@ -165,6 +191,7 @@ def _result_row(
         titles=titles,
         snippets=snippets,
         scores=scores,
+        relevance=dict(spec.relevance),
         latency_ms=latency_ms,
         reranker_active=reranker_active,
         rerank_k=rerank_k if reranker_active else 0,
@@ -174,7 +201,9 @@ def _result_row(
         average_precision_at_10=average_precision_at_k(
             hits, spec.expected_paths, k=10
         ),
-        ndcg_at_10=ndcg_at_k(hits, spec.expected_paths, k=10),
+        ndcg_at_10=ndcg_at_k(
+            hits, spec.expected_paths, k=10, relevance=spec.relevance
+        ),
         last_expected_rank=last_expected_rank(hits, spec.expected_paths, k=10),
         resolved_rerank_k=resolved_rerank_k if reranker_active else 0,
         rerank_k_reason=rerank_k_reason if reranker_active else None,

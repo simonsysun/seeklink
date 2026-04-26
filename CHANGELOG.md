@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `seeklink search --rerank-k N` and `seeklink search --no-rerank` let callers trade precision for latency per query without changing the global reranker configuration.
 - `seeklink search --rerank-k auto` chooses a 5- or 20-candidate reranker budget from query shape, keeping exact title / alias, English, and ordinary CJK queries fast while giving filtered and CJK technical queries deeper reranking.
 - The blind-test runner now accepts `--rerank-k N`, `--rerank-k auto`, and `--no-rerank`, and records requested plus resolved reranking metadata in result JSON for latency / quality sweeps.
+- The blind-test runner now accepts optional graded `relevance:` labels in `queries.yaml`, using them for nDCG@10 while keeping `expected_paths` as hard Recall/MRR targets.
 
 ### Fixed
 - `seeklink search --rerank-k N` now limits the number of candidates passed to the cross-encoder even when `N` is lower than `--top-k`; the remaining results keep first-stage RRF order.

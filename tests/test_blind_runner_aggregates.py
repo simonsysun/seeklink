@@ -16,6 +16,76 @@ from tests.blind.run import (
 )
 
 
+class TestLoadQueries:
+    def test_load_queries_defaults_expected_paths_to_grade_three(self, tmp_path: Path):
+        path = tmp_path / "queries.yaml"
+        path.write_text(
+            """
+- query: memory
+  expected_paths:
+    - notes/answer.md
+  tags: [english]
+""",
+            encoding="utf-8",
+        )
+
+        specs = blind_run.load_queries(path)
+
+        assert specs[0].relevance == {"notes/answer.md": 3.0}
+
+    def test_load_queries_accepts_graded_relevance_labels(self, tmp_path: Path):
+        path = tmp_path / "queries.yaml"
+        path.write_text(
+            """
+- query: transformer retrieval
+  expected_paths:
+    - notes/attention.md
+  relevance:
+    notes/attention.md: 3
+    notes/agent-memory.md: 2
+    notes/rrf.md: 1
+  tags: [english]
+""",
+            encoding="utf-8",
+        )
+
+        specs = blind_run.load_queries(path)
+
+        assert specs[0].relevance == {
+            "notes/attention.md": 3.0,
+            "notes/agent-memory.md": 2.0,
+            "notes/rrf.md": 1.0,
+        }
+
+    def test_result_row_uses_graded_relevance_for_ndcg(self):
+        spec = blind_run.QuerySpec(
+            query="transformer retrieval",
+            intent=None,
+            expected_paths=["notes/answer.md"],
+            relevance={
+                "notes/answer.md": 3.0,
+                "notes/support.md": 2.0,
+            },
+            tags=["english"],
+            expansion=None,
+        )
+
+        row = blind_run._result_row(
+            spec=spec,
+            config="A",
+            hits=["notes/support.md", "notes/answer.md"],
+            titles=[None, None],
+            snippets=["", ""],
+            scores=[1.0, 0.5],
+            latency_ms=10.0,
+            reranker_active=True,
+            rerank_k=5,
+        )
+
+        assert row.mrr == pytest.approx(0.5)
+        assert row.ndcg_at_10 > row.mrr
+
+
 def _row(
     *,
     query: str,
@@ -35,6 +105,7 @@ def _row(
         titles=[],
         snippets=[],
         scores=[],
+        relevance={},
         latency_ms=latency,
         reranker_active=True,
         recall_at_10=recall,

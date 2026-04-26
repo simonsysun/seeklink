@@ -6,6 +6,10 @@
   expected_paths:
     - "notes/fsrs-algorithm.md"
     - "notes/spaced-repetition.md"
+  relevance:
+    "notes/fsrs-algorithm.md": 3
+    "notes/spaced-repetition.md": 3
+    "notes/forgetting-curve.md": 2
   tags: [cjk, core-concept]
   expansion:
     - "间隔重复 遗忘曲线 FSRS"
