@@ -22,6 +22,27 @@ logger = logging.getLogger(__name__)
 RerankK = int | Literal["auto"]
 AUTO_RERANK_FAST_K = 5
 AUTO_RERANK_DEEP_K = 20
+_CJK_TECHNICAL_RERANK_TERMS = (
+    "向量",
+    "嵌入",
+    "文档",
+    "切块",
+    "算法",
+    "搜索",
+    "检索",
+    "融合",
+    "模型",
+    "数据库",
+    "fsrs",
+    "bm25",
+    "rrf",
+    "rag",
+    "anki",
+    "hybrid",
+    "chunk",
+    "embedding",
+    "vector",
+)
 
 
 @dataclass(slots=True)
@@ -36,6 +57,11 @@ def _contains_cjk(text: str) -> bool:
     return any("\u3400" <= ch <= "\u9fff" for ch in text)
 
 
+def _contains_technical_rerank_term(text: str) -> bool:
+    folded = text.casefold()
+    return any(term in folded for term in _CJK_TECHNICAL_RERANK_TERMS)
+
+
 def _resolve_rerank_k_with_reason(
     query: str,
     rerank_k: RerankK,
@@ -46,10 +72,10 @@ def _resolve_rerank_k_with_reason(
     """Resolve a numeric rerank budget for one query.
 
     The default CLI path still passes an integer. The explicit "auto" mode is
-    a conservative policy from the 22-query pilot: English and title/alias
-    lookups got most of the reranker benefit by reranking only the top 5, while
-    CJK / mixed queries without a title hit needed deeper candidates to recover
-    recall.
+    a conservative policy from the 22-query pilot: English, title/alias, and
+    ordinary CJK lookups got most of the reranker benefit by reranking only the
+    top 5, while CJK / mixed technical queries needed deeper candidates to
+    recover recall.
     """
     if isinstance(rerank_k, int):
         return rerank_k, "fixed"
@@ -61,8 +87,8 @@ def _resolve_rerank_k_with_reason(
         return AUTO_RERANK_DEEP_K, "filter"
     if title_ranks:
         return AUTO_RERANK_FAST_K, "title"
-    if _contains_cjk(query):
-        return AUTO_RERANK_DEEP_K, "cjk"
+    if _contains_cjk(query) and _contains_technical_rerank_term(query):
+        return AUTO_RERANK_DEEP_K, "cjk_technical"
     return AUTO_RERANK_FAST_K, "default"
 
 

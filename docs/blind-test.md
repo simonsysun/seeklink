@@ -100,8 +100,8 @@ For each `(query, config)` pair (recorded by the runner):
   when reranking is disabled, or `"auto"` for query-sensitive routing)
 - `resolved_rerank_k` — actual numeric candidate budget used for this query
   (`5` or `20` for `auto`, `0` when reranking is disabled)
-- `rerank_k_reason` — why `auto` chose that budget (`title`, `cjk`,
-  `filter`, `default`, or `fixed`)
+- `rerank_k_reason` — why `auto` chose that budget (`title`,
+  `cjk_technical`, `filter`, `default`, or `fixed`)
 - `recall_at_10` — fraction of `expected_paths` in top-10
 - `mrr` — reciprocal rank of first expected hit in top-10 (0 if none)
 

@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `seeklink get PATH:LINE -C N` prints a grep-style context window around a search hit, returning `N` lines before and after the requested line while preserving direct filesystem reads and path-escape protection.
 - `seeklink search --json` and `seeklink status --json` emit stable machine-readable stdout for agents that should not scrape the human text format.
 - `seeklink search --rerank-k N` and `seeklink search --no-rerank` let callers trade precision for latency per query without changing the global reranker configuration.
-- `seeklink search --rerank-k auto` chooses a 5- or 20-candidate reranker budget from query shape, keeping exact title / alias and English queries fast while giving CJK and filtered queries deeper reranking.
+- `seeklink search --rerank-k auto` chooses a 5- or 20-candidate reranker budget from query shape, keeping exact title / alias, English, and ordinary CJK queries fast while giving filtered and CJK technical queries deeper reranking.
 - The blind-test runner now accepts `--rerank-k N`, `--rerank-k auto`, and `--no-rerank`, and records requested plus resolved reranking metadata in result JSON for latency / quality sweeps.
 
 ### Fixed

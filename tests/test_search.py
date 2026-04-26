@@ -62,7 +62,15 @@ class TestAutoRerankK:
             title_ranks={10: 1},
         ) == 5
 
-    def test_cjk_without_title_match_uses_deep_budget(self):
+    def test_cjk_without_title_match_uses_fast_budget(self):
+        assert _resolve_rerank_k(
+            "学完就忘怎么办",
+            "auto",
+            has_filter=False,
+            title_ranks={},
+        ) == 5
+
+    def test_cjk_technical_query_uses_deep_budget(self):
         assert _resolve_rerank_k(
             "把文档切块放进向量库",
             "auto",
