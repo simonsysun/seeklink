@@ -201,6 +201,11 @@ def _handle_connection(
             )
             response = {
                 "ok": True,
+                "vault": str(vault_root),
+                "embedder": embedder.MODEL_NAME,
+                "reranker": (
+                    "disabled" if reranker.disabled else reranker.MODEL_NAME
+                ),
                 "result": [
                     {
                         "source_id": r.source_id,

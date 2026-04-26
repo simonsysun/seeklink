@@ -22,6 +22,7 @@ output.
 from __future__ import annotations
 
 import argparse
+import json
 import logging
 import os
 import sys
@@ -96,6 +97,11 @@ def main() -> None:
             "lower toward 0.5 for 'surface raw log moments' queries."
         ),
     )
+    search_p.add_argument(
+        "--json",
+        action="store_true",
+        help="Emit a machine-readable JSON object instead of text output",
+    )
 
     # index
     index_p = sub.add_parser("index", help="Index notes")
@@ -105,6 +111,11 @@ def main() -> None:
     # status
     status_p = sub.add_parser("status", help="Show index status")
     status_p.add_argument("--vault", type=Path, help="Vault path (default: cwd)")
+    status_p.add_argument(
+        "--json",
+        action="store_true",
+        help="Emit a machine-readable JSON object instead of text output",
+    )
 
     # get — print a line-range slice of a vault file
     get_p = sub.add_parser(
@@ -237,6 +248,102 @@ def _print_search_results(results: list) -> None:
         print("No results.")
 
 
+def _emit_json(payload: dict) -> None:
+    sys.stdout.write(json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
+    sys.stdout.write("\n")
+
+
+def _search_result_to_json(result) -> dict:
+    if isinstance(result, dict):
+        content_preview = result.get("content_preview", "")
+        return {
+            "source_id": result.get("source_id"),
+            "path": result["path"],
+            "title": result.get("title") or "",
+            "content_preview": content_preview[:200] if content_preview else "",
+            "score": result["score"],
+            "indegree": result.get("indegree", 0),
+            "line_start": result.get("line_start", 0),
+            "line_end": result.get("line_end", 0),
+        }
+
+    return {
+        "source_id": result.source_id,
+        "path": result.path,
+        "title": result.title or "",
+        "content_preview": result.content[:200] if result.content else "",
+        "score": result.score,
+        "indegree": result.indegree,
+        "line_start": result.line_start,
+        "line_end": result.line_end,
+    }
+
+
+def _search_json_payload(
+    *,
+    query: str,
+    vault: str | Path,
+    top_k: int,
+    tags: list[str] | None,
+    folder: str | None,
+    embedder: str,
+    reranker: str,
+    results: list,
+) -> dict:
+    return {
+        "ok": True,
+        "json_schema_version": 1,
+        "query": query,
+        "vault": str(vault),
+        "top_k": top_k,
+        "filters": {
+            "tags": tags or [],
+            "folder": folder,
+        },
+        "models": {
+            "embedder": embedder,
+            "reranker": reranker,
+        },
+        "results": [_search_result_to_json(r) for r in results],
+    }
+
+
+def _status_json_payload(
+    *,
+    vault: str | Path,
+    stats: dict,
+    embedder: str,
+    reranker: str,
+    db_schema_version: int,
+    freshness_count: int,
+) -> dict:
+    return {
+        "ok": True,
+        "json_schema_version": 1,
+        "vault": str(vault),
+        "database": {
+            "schema_version": db_schema_version,
+            "wal_bytes": stats["wal_bytes"],
+        },
+        "stats": {
+            "notes_total": stats["notes_total"],
+            "notes_unprocessed": stats["notes_unprocessed"],
+            "chunks_total": stats["chunks_total"],
+            "links_total": stats["links_total"],
+            "suggestions_pending": stats["suggestions_pending"],
+        },
+        "freshness": {
+            "checked": True,
+            "fresh": freshness_count == 0,
+            "suspect_files": freshness_count,
+        },
+        "models": {
+            "embedder": embedder,
+            "reranker": reranker,
+        },
+    }
+
+
 def _cmd_search(args: argparse.Namespace) -> None:
     _setup_logging()
 
@@ -250,7 +357,22 @@ def _cmd_search(args: argparse.Namespace) -> None:
             daemon_args["title_weight"] = args.title_weight
         resp = _try_daemon("search", daemon_args)
         if resp is not None:
-            _print_search_results(resp["result"])
+            if getattr(args, "json", False):
+                expected_embedder, expected_reranker = _resolve_expected_models()
+                _emit_json(
+                    _search_json_payload(
+                        query=args.query,
+                        vault=resp.get("vault", _resolve_default_vault()),
+                        top_k=args.top_k,
+                        tags=args.tags,
+                        folder=args.folder,
+                        embedder=resp.get("embedder", expected_embedder),
+                        reranker=resp.get("reranker", expected_reranker),
+                        results=resp["result"],
+                    )
+                )
+            else:
+                _print_search_results(resp["result"])
             return
 
     # Cold-start fallback (explicit --vault, or daemon unreachable).
@@ -285,7 +407,22 @@ def _cmd_search(args: argparse.Namespace) -> None:
         if args.title_weight is not None:
             search_kwargs["title_weight"] = args.title_weight
         results = seeklink_search(db, embedder, args.query, **search_kwargs)
-        _print_search_results(results)
+        if getattr(args, "json", False):
+            reranker_name = "disabled" if reranker.disabled else reranker.MODEL_NAME
+            _emit_json(
+                _search_json_payload(
+                    query=args.query,
+                    vault=vault_root,
+                    top_k=args.top_k,
+                    tags=args.tags,
+                    folder=args.folder,
+                    embedder=embedder.MODEL_NAME,
+                    reranker=reranker_name,
+                    results=results,
+                )
+            )
+        else:
+            _print_search_results(results)
     finally:
         db.close()
 
@@ -375,19 +512,31 @@ def _cmd_status(args: argparse.Namespace) -> None:
         sys.exit(1)
 
     try:
-        check_freshness(db, vault_root)
+        freshness_count = check_freshness(db, vault_root)
         stats = db.get_stats()
-        print(f"Vault:       {vault_root}")
-        print(f"Notes:       {stats['notes_total']} ({stats['notes_unprocessed']} unprocessed)")
-        print(f"Chunks:      {stats['chunks_total']}")
-        print(f"Links:       {stats['links_total']}")
-        print(f"Suggestions: {stats['suggestions_pending']} pending")
         # Show which models the vault WOULD use. These are config values,
         # not load state — we don't import/instantiate the reranker here
         # to keep `status` off the mlx-lm import path.
         expected_embedder, expected_reranker = _resolve_expected_models()
-        print(f"Embedder:    {expected_embedder}")
-        print(f"Reranker:    {expected_reranker}")
+        if getattr(args, "json", False):
+            _emit_json(
+                _status_json_payload(
+                    vault=vault_root,
+                    stats=stats,
+                    embedder=expected_embedder,
+                    reranker=expected_reranker,
+                    db_schema_version=db.SCHEMA_VERSION,
+                    freshness_count=freshness_count,
+                )
+            )
+        else:
+            print(f"Vault:       {vault_root}")
+            print(f"Notes:       {stats['notes_total']} ({stats['notes_unprocessed']} unprocessed)")
+            print(f"Chunks:      {stats['chunks_total']}")
+            print(f"Links:       {stats['links_total']}")
+            print(f"Suggestions: {stats['suggestions_pending']} pending")
+            print(f"Embedder:    {expected_embedder}")
+            print(f"Reranker:    {expected_reranker}")
     finally:
         db.close()
 

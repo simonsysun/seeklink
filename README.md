@@ -133,7 +133,7 @@ SeekLink is designed to be shelled out to by LLM agents and RAG pipelines, not j
 3. **Read the window.** `seeklink get PATH:LINE -l N` prints `N` lines starting at `LINE`; `seeklink get PATH:LINE -C N` prints `N` lines before and after `LINE`. No DB lookup, no daemon round-trip — direct filesystem read with universal-newline translation. This is how you avoid slurping whole files after a search hit.
 4. **Query shape.** Raw CJK is fine (jieba handles segmentation). `[[alias]]` / exact-title queries get title-gated protection — if your query IS a note title or alias, results anchor on it. No need for wildcards; BM25 + vector + title fuse automatically.
 5. **Exit codes.** `0` on success (including "no results"). `1` on vault-resolution error, missing file (`get`), or unrecoverable config mismatch. No other codes used.
-6. **Structured output.** If you want JSON instead of the human text format, connect to the daemon's Unix socket at `~/.rhizome/seeklink.sock` directly (length-prefixed JSON protocol, see `seeklink/daemon.py`). Each daemon search response carries `path`, `title`, `content_preview`, `score`, `indegree`, `line_start`, `line_end` per result.
+6. **Structured output.** Use `seeklink search "query" --json` or `seeklink status --json` when an agent needs machine-readable stdout. Search JSON includes `path`, `title`, `content_preview`, `score`, `indegree`, `line_start`, and `line_end` per result. For hot loops, agents can still connect to the daemon's Unix socket at `~/.rhizome/seeklink.sock` directly (length-prefixed JSON protocol, see `seeklink/daemon.py`).
 
 See also `llms.txt` at the repo root for a compressed version of this contract.
 
@@ -148,6 +148,7 @@ Options:
   --top-k N          Number of results (default: 10)
   --tags TAG [TAG]   Filter by tags (AND semantics)
   --folder PREFIX    Filter by folder (e.g. "notes/")
+  --json             Emit machine-readable JSON instead of text output
   --title-weight F   Override title channel weight (default: 1.5)
                      Raise toward 3.0 for "find the article" queries;
                      lower toward 0.5 for "surface raw moments" queries.
@@ -177,10 +178,10 @@ With PATH:    index a single file.
 ### `seeklink status`
 
 ```
-seeklink status --vault PATH
+seeklink status --vault PATH [--json]
 ```
 
-Shows index stats and freshness warnings. If files have changed since last index, prints a warning to stderr.
+Shows index stats and freshness warnings. If files have changed since last index, prints a warning to stderr. `--json` keeps those warnings on stderr and writes one machine-readable object to stdout.
 
 ### `seeklink get`
 
@@ -227,7 +228,7 @@ Disable reranking entirely with: `export SEEKLINK_RERANKER_MODEL=""`
 Every `search` result is anchored to a specific line range in the current on-disk file. Two surfaces expose this:
 
 - **CLI text output** (`seeklink search ...`): each line is `SCORE  PATH:LINE_START  TITLE`, followed by an indented content preview. Feed `PATH:LINE_START` straight into `seeklink get` to read the window around the hit.
-- **Daemon JSON** (one request per search via the Unix socket): each result also carries `line_end` and `indegree` fields for callers that want the full span.
+- **CLI / daemon JSON** (`seeklink search --json` or one request via the Unix socket): each result also carries `line_end` and `indegree` fields for callers that want the full span.
 
 Line numbers are mapped back through the frontmatter strip that happens at index time, so they match what you'd see in a text editor on disk.
 
