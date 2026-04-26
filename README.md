@@ -130,7 +130,7 @@ SeekLink is designed to be shelled out to by LLM agents and RAG pipelines, not j
               <indented content preview, up to 120 chars, one line>
    ```
    `PATH` is relative to the vault root. `:LINE` is 1-indexed and points at the best chunk's first line in the current on-disk file; omitted when the match is title-only on a stale file. `SCORE` is `rerank_blended` when reranker is active, else raw RRF (scales differ, don't compare across configurations).
-3. **Read the window.** `seeklink get PATH:LINE -l N` prints `N` lines starting at `LINE`. No DB lookup, no daemon round-trip — direct filesystem read with universal-newline translation. This is how you avoid slurping whole files after a search hit.
+3. **Read the window.** `seeklink get PATH:LINE -l N` prints `N` lines starting at `LINE`; `seeklink get PATH:LINE -C N` prints `N` lines before and after `LINE`. No DB lookup, no daemon round-trip — direct filesystem read with universal-newline translation. This is how you avoid slurping whole files after a search hit.
 4. **Query shape.** Raw CJK is fine (jieba handles segmentation). `[[alias]]` / exact-title queries get title-gated protection — if your query IS a note title or alias, results anchor on it. No need for wildcards; BM25 + vector + title fuse automatically.
 5. **Exit codes.** `0` on success (including "no results"). `1` on vault-resolution error, missing file (`get`), or unrecoverable config mismatch. No other codes used.
 6. **Structured output.** If you want JSON instead of the human text format, connect to the daemon's Unix socket at `~/.rhizome/seeklink.sock` directly (length-prefixed JSON protocol, see `seeklink/daemon.py`). Each daemon search response carries `path`, `title`, `content_preview`, `score`, `indegree`, `line_start`, `line_end` per result.
@@ -187,15 +187,16 @@ Shows index stats and freshness warnings. If files have changed since last index
 Print a line range of a vault file directly to stdout. Designed for agents that have a search hit like `notes/fsrs.md:42` and want to read a precise window without fetching the whole file.
 
 ```
-seeklink get PATH[:LINE] [-l N] [--vault PATH]
+seeklink get PATH[:LINE] [-l N | -C N] [--vault PATH]
 
   seeklink get notes/fsrs.md              # entire file
   seeklink get notes/fsrs.md:120          # 100 lines starting at line 120
   seeklink get notes/fsrs.md:120 -l 40    # 40 lines starting at line 120
+  seeklink get notes/fsrs.md:120 -C 20    # 20 lines before and after line 120
   seeklink get notes/fsrs.md -l 50        # first 50 lines
 ```
 
-Line numbers match `search` output. CRLF files print with universal newlines. Path escapes (`../..`) are rejected.
+Line numbers match `search` output. `-C/--context` requires `PATH:LINE` and cannot be combined with `-l/--lines`. CRLF files print with universal newlines. Path escapes (`../..`) are rejected.
 
 ## How search works
 

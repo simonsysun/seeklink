@@ -85,6 +85,60 @@ class TestGetCommand:
         lines = r.stdout.rstrip("\n").split("\n")
         assert lines == ["line 10", "line 11", "line 12"]
 
+    def test_context_window(self, vault: Path):
+        r = _run_get(vault, ["long.md:10", "-C", "2"])
+        assert r.returncode == 0
+        lines = r.stdout.rstrip("\n").split("\n")
+        assert lines == ["line 8", "line 9", "line 10", "line 11", "line 12"]
+
+    def test_context_clamps_at_start(self, vault: Path):
+        r = _run_get(vault, ["long.md:2", "-C", "5"])
+        assert r.returncode == 0
+        lines = r.stdout.rstrip("\n").split("\n")
+        assert lines == [
+            "line 1",
+            "line 2",
+            "line 3",
+            "line 4",
+            "line 5",
+            "line 6",
+            "line 7",
+        ]
+
+    def test_context_clamps_at_eof(self, vault: Path):
+        r = _run_get(vault, ["long.md:49", "-C", "5"])
+        assert r.returncode == 0
+        lines = r.stdout.rstrip("\n").split("\n")
+        assert lines == [
+            "line 44",
+            "line 45",
+            "line 46",
+            "line 47",
+            "line 48",
+            "line 49",
+            "line 50",
+        ]
+
+    def test_context_zero_prints_hit_line_only(self, vault: Path):
+        r = _run_get(vault, ["long.md:10", "-C", "0"])
+        assert r.returncode == 0
+        assert r.stdout.rstrip("\n") == "line 10"
+
+    def test_context_requires_line_suffix(self, vault: Path):
+        r = _run_get(vault, ["long.md", "-C", "2"])
+        assert r.returncode == 1
+        assert "requires PATH:LINE" in r.stderr
+
+    def test_context_cannot_combine_with_lines(self, vault: Path):
+        r = _run_get(vault, ["long.md:10", "-C", "2", "-l", "3"])
+        assert r.returncode == 1
+        assert "cannot be combined" in r.stderr
+
+    def test_context_rejects_negative_value(self, vault: Path):
+        r = _run_get(vault, ["long.md:10", "-C", "-1"])
+        assert r.returncode == 1
+        assert "must be >= 0" in r.stderr
+
     def test_default_lines_is_100(self, vault: Path):
         """With :LINE but no -l, default to 100 lines."""
         r = _run_get(vault, ["long.md:5"])

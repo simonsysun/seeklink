@@ -37,6 +37,7 @@ seeklink status --vault PATH           # precheck; look for "Notes: N > 0"
 seeklink index  --vault PATH           # if needed (first run or after edits)
 seeklink search "QUERY" --vault PATH   # retrieval
 seeklink get    PATH:LINE -l N         # read window around a hit
+seeklink get    PATH:LINE -C N         # read N lines before/after a hit
 ```
 
 Set `SEEKLINK_VAULT=<path>` once to omit `--vault` on every call and route through the resident daemon (first call after boot: ~2s; warm: ~1-2s with reranker, ~10ms without).

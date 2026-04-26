@@ -127,6 +127,15 @@ def main() -> None:
             "LINE is given, else the whole file)."
         ),
     )
+    get_p.add_argument(
+        "-C", "--context",
+        type=int,
+        default=None,
+        help=(
+            "Print N lines before and after LINE, grep-style. Requires a "
+            "PATH:LINE argument and cannot be combined with --lines."
+        ),
+    )
     get_p.add_argument("--vault", type=Path, help="Vault path (default: cwd)")
 
     args = parser.parse_args()
@@ -390,6 +399,7 @@ def _cmd_get(args: argparse.Namespace) -> None:
         seeklink get PATH              # whole file
         seeklink get PATH:LINE          # 100 lines starting at LINE (default)
         seeklink get PATH:LINE -l N     # N lines starting at LINE
+        seeklink get PATH:LINE -C N     # N lines before and after LINE
         seeklink get PATH -l N          # first N lines
 
     Resolves PATH against --vault (or SEEKLINK_VAULT, or cwd). Reads with
@@ -408,6 +418,17 @@ def _cmd_get(args: argparse.Namespace) -> None:
             raw = head
             from_line = int(tail)
     rel_path = raw
+
+    if args.context is not None:
+        if args.context < 0:
+            print("Error: --context must be >= 0", file=sys.stderr)
+            sys.exit(1)
+        if args.lines is not None:
+            print("Error: --context cannot be combined with --lines", file=sys.stderr)
+            sys.exit(1)
+        if from_line is None:
+            print("Error: --context requires PATH:LINE", file=sys.stderr)
+            sys.exit(1)
 
     # Resolve vault root without initializing the DB or loading models.
     vault_root_env = os.environ.get("SEEKLINK_VAULT")
@@ -450,6 +471,7 @@ def _cmd_get(args: argparse.Namespace) -> None:
     # - No :LINE, -l N   → first N lines
     # - :LINE, no -l     → 100 lines starting at LINE
     # - :LINE, -l N      → N lines starting at LINE
+    # - :LINE, -C N      → N lines before and after LINE
     if from_line is None:
         start_idx = 0
         end_idx = n_lines if args.lines is None else min(args.lines, n_lines)
@@ -467,9 +489,14 @@ def _cmd_get(args: argparse.Namespace) -> None:
                 file=sys.stderr,
             )
             return
-        start_idx = from_line - 1
-        n = args.lines if args.lines is not None else 100
-        end_idx = min(start_idx + n, n_lines)
+        hit_idx = from_line - 1
+        if args.context is not None:
+            start_idx = max(0, hit_idx - args.context)
+            end_idx = min(hit_idx + args.context + 1, n_lines)
+        else:
+            start_idx = hit_idx
+            n = args.lines if args.lines is not None else 100
+            end_idx = min(start_idx + n, n_lines)
 
     out = "\n".join(lines[start_idx:end_idx])
     # Preserve trailing newline if the original file had one AND we're at EOF

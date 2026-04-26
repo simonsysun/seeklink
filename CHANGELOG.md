@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `seeklink get PATH:LINE -C N` prints a grep-style context window around a search hit, returning `N` lines before and after the requested line while preserving direct filesystem reads and path-escape protection.
+
 ## [0.3.2] - 2026-04-23
 
 Repository cleanup pass. No code changes affecting runtime behavior
