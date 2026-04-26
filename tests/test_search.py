@@ -11,6 +11,7 @@ from seeklink.db import Database
 from seeklink.embedder import Embedder
 from seeklink.ingest import ingest_file
 from seeklink.search import (
+    SearchDiagnostics,
     SearchResult,
     _best_chunk_per_source,
     _resolve_rerank_k,
@@ -84,6 +85,33 @@ class TestAutoRerankK:
             has_filter=True,
             title_ranks={},
         ) == 20
+
+    def test_search_populates_auto_rerank_diagnostics(
+        self, db: Database, embedder: Embedder, vault: Path
+    ):
+        _ingest_corpus(db, embedder, vault)
+
+        class FakeReranker:
+            disabled = False
+
+            def rerank(self, query: str, passages: list[str]) -> list[float]:
+                return [1.0 for _ in passages]
+
+        diagnostics = SearchDiagnostics()
+        results = search(
+            db,
+            embedder,
+            "Machine Learning",
+            reranker=FakeReranker(),  # type: ignore[arg-type]
+            rerank_k="auto",
+            diagnostics=diagnostics,
+        )
+
+        assert results
+        assert diagnostics.reranking_enabled is True
+        assert diagnostics.requested_rerank_k == "auto"
+        assert diagnostics.resolved_rerank_k == 5
+        assert diagnostics.rerank_k_reason == "title"
 
 
 def _write_md(vault: Path, rel_path: str, content: str) -> Path:

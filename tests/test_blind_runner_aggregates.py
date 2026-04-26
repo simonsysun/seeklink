@@ -7,7 +7,13 @@ from pathlib import Path
 import pytest
 
 from tests.blind import run as blind_run
-from tests.blind.run import ResultRow, RunnerState, aggregate_by_tag, aggregate_rows
+from tests.blind.run import (
+    ResultRow,
+    RunnerState,
+    aggregate_by_tag,
+    aggregate_rows,
+    resolved_rerank_k_counts,
+)
 
 
 def _row(
@@ -99,6 +105,45 @@ class TestAggregateRows:
         assert aggregate["mean_latency_ms"] == pytest.approx(200.0)
         assert aggregate["p50_latency_ms"] == pytest.approx(200.0)
         assert aggregate["p95_latency_ms"] == pytest.approx(300.0)
+
+    def test_resolved_rerank_k_counts(self):
+        rows = [
+            _row(
+                query="q1",
+                tags=[],
+                recall=1.0,
+                mrr=1.0,
+                ndcg=1.0,
+                p5=0.2,
+                ap=1.0,
+                latency=100.0,
+            ),
+            _row(
+                query="q2",
+                tags=[],
+                recall=1.0,
+                mrr=1.0,
+                ndcg=1.0,
+                p5=0.2,
+                ap=1.0,
+                latency=100.0,
+            ),
+            _row(
+                query="q3",
+                tags=[],
+                recall=1.0,
+                mrr=1.0,
+                ndcg=1.0,
+                p5=0.2,
+                ap=1.0,
+                latency=100.0,
+            ),
+        ]
+        rows[0].resolved_rerank_k = 5
+        rows[1].resolved_rerank_k = 20
+        rows[2].resolved_rerank_k = 5
+
+        assert resolved_rerank_k_counts(rows) == {"5": 2, "20": 1}
 
 
 class TestAggregateByTag:
@@ -272,3 +317,30 @@ class TestRerankOptions:
 
         assert blind_run._search_with_state(state, "memory") == []
         assert captured == {"rerank_k": "auto"}
+
+    def test_search_with_state_passes_diagnostics(self, monkeypatch):
+        captured: dict = {}
+
+        class FakeReranker:
+            disabled = False
+
+        def fake_search(db, embedder, query, **kwargs):
+            captured["diagnostics"] = kwargs["diagnostics"]
+            return []
+
+        diagnostics = blind_run.SearchDiagnostics()
+        state = RunnerState(
+            db=object(),
+            embedder=object(),
+            reranker=FakeReranker(),  # type: ignore[arg-type]
+            rerank_k="auto",
+            vault=Path("/tmp/vault"),
+        )
+        monkeypatch.setattr(blind_run, "search", fake_search)
+
+        assert blind_run._search_with_state(
+            state,
+            "memory",
+            diagnostics=diagnostics,
+        ) == []
+        assert captured == {"diagnostics": diagnostics}

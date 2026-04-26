@@ -24,17 +24,25 @@ AUTO_RERANK_FAST_K = 5
 AUTO_RERANK_DEEP_K = 20
 
 
+@dataclass(slots=True)
+class SearchDiagnostics:
+    requested_rerank_k: RerankK | None = None
+    resolved_rerank_k: int | None = None
+    rerank_k_reason: str | None = None
+    reranking_enabled: bool = False
+
+
 def _contains_cjk(text: str) -> bool:
     return any("\u3400" <= ch <= "\u9fff" for ch in text)
 
 
-def _resolve_rerank_k(
+def _resolve_rerank_k_with_reason(
     query: str,
     rerank_k: RerankK,
     *,
     has_filter: bool,
     title_ranks: dict[int, int],
-) -> int:
+) -> tuple[int, str]:
     """Resolve a numeric rerank budget for one query.
 
     The default CLI path still passes an integer. The explicit "auto" mode is
@@ -44,18 +52,33 @@ def _resolve_rerank_k(
     recall.
     """
     if isinstance(rerank_k, int):
-        return rerank_k
+        return rerank_k, "fixed"
 
     if rerank_k != "auto":
         raise ValueError(f"unsupported rerank_k value: {rerank_k!r}")
 
     if has_filter:
-        return AUTO_RERANK_DEEP_K
+        return AUTO_RERANK_DEEP_K, "filter"
     if title_ranks:
-        return AUTO_RERANK_FAST_K
+        return AUTO_RERANK_FAST_K, "title"
     if _contains_cjk(query):
-        return AUTO_RERANK_DEEP_K
-    return AUTO_RERANK_FAST_K
+        return AUTO_RERANK_DEEP_K, "cjk"
+    return AUTO_RERANK_FAST_K, "default"
+
+
+def _resolve_rerank_k(
+    query: str,
+    rerank_k: RerankK,
+    *,
+    has_filter: bool,
+    title_ranks: dict[int, int],
+) -> int:
+    return _resolve_rerank_k_with_reason(
+        query,
+        rerank_k,
+        has_filter=has_filter,
+        title_ranks=title_ranks,
+    )[0]
 
 
 @dataclass(frozen=True, slots=True)
@@ -91,6 +114,7 @@ def search(
     reranker: "Reranker | None" = None,
     rerank_k: RerankK = 20,
     vault_root: Path | None = None,
+    diagnostics: SearchDiagnostics | None = None,
 ) -> list[SearchResult]:
     """Search the knowledge base using four-channel RRF fusion.
 
@@ -196,7 +220,7 @@ def search(
     vec_ranks = {k: v for k, v in vec_ranks.items() if k in candidate_ids}
     title_ranks = {k: v for k, v in title_ranks.items() if k in candidate_ids}
 
-    resolved_rerank_k = _resolve_rerank_k(
+    resolved_rerank_k, rerank_k_reason = _resolve_rerank_k_with_reason(
         query,
         rerank_k,
         has_filter=has_filter,
@@ -221,6 +245,11 @@ def search(
     # candidate pool (rerank_k) so the cross-encoder has meaningful room to
     # reorder. Without a reranker, cut directly to top_k.
     reranking_enabled = reranker is not None and not reranker.disabled
+    if diagnostics is not None:
+        diagnostics.requested_rerank_k = rerank_k
+        diagnostics.resolved_rerank_k = resolved_rerank_k if reranking_enabled else 0
+        diagnostics.rerank_k_reason = rerank_k_reason if reranking_enabled else None
+        diagnostics.reranking_enabled = reranking_enabled
     candidate_k = max(resolved_rerank_k, top_k) if reranking_enabled else top_k
     ranked = sorted(scores.keys(), key=lambda sid: scores[sid], reverse=True)
     ranked = ranked[:candidate_k]

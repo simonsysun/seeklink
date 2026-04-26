@@ -98,6 +98,10 @@ For each `(query, config)` pair (recorded by the runner):
   excluded — runner initializes once and warms up)
 - `rerank_k` — first-stage candidate count passed to the reranker (`0`
   when reranking is disabled, or `"auto"` for query-sensitive routing)
+- `resolved_rerank_k` — actual numeric candidate budget used for this query
+  (`5` or `20` for `auto`, `0` when reranking is disabled)
+- `rerank_k_reason` — why `auto` chose that budget (`title`, `cjk`,
+  `filter`, `default`, or `fixed`)
 - `recall_at_10` — fraction of `expected_paths` in top-10
 - `mrr` — reciprocal rank of first expected hit in top-10 (0 if none)
 
@@ -145,6 +149,8 @@ Runner:
   model/cache/tokenizer startup.
 - Passes `--rerank-k` through to `search()`. Default `20` matches product
   behavior; lower values and `auto` are diagnostic latency / quality probes.
+- Records the per-query resolved reranker budget so `auto` sweeps can be
+  audited without guessing which queries used 5 vs. 20 candidates.
 - Closes the DB once, in a `finally` block.
 - Records per-query latency using `time.perf_counter()`. Model-load time
   is excluded by warmup.

@@ -33,7 +33,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from seeklink.app import init_app
 from seeklink.reranker import Reranker
-from seeklink.search import RerankK, SearchResult, search
+from seeklink.search import RerankK, SearchDiagnostics, SearchResult, search
 
 try:
     from .metrics import (
@@ -103,6 +103,8 @@ class ResultRow:
     ndcg_at_10: float
     last_expected_rank: int | None
     rerank_k: int | str = 0
+    resolved_rerank_k: int | None = None
+    rerank_k_reason: str | None = None
     expansions_used: list[str] = field(default_factory=list)
 
 
@@ -150,6 +152,8 @@ def _result_row(
     latency_ms: float,
     reranker_active: bool,
     rerank_k: int | str,
+    resolved_rerank_k: int | None = None,
+    rerank_k_reason: str | None = None,
     expansions_used: list[str] | None = None,
 ) -> ResultRow:
     """Build a ResultRow and compute all per-query metrics in one place."""
@@ -172,6 +176,8 @@ def _result_row(
         ),
         ndcg_at_10=ndcg_at_k(hits, spec.expected_paths, k=10),
         last_expected_rank=last_expected_rank(hits, spec.expected_paths, k=10),
+        resolved_rerank_k=resolved_rerank_k if reranker_active else 0,
+        rerank_k_reason=rerank_k_reason if reranker_active else None,
         expansions_used=list(expansions_used or []),
     )
 
@@ -275,7 +281,11 @@ def init_state(vault: Path, with_reranker: bool, rerank_k: RerankK) -> RunnerSta
     )
 
 
-def _search_with_state(state: RunnerState, query: str) -> list[SearchResult]:
+def _search_with_state(
+    state: RunnerState,
+    query: str,
+    diagnostics: SearchDiagnostics | None = None,
+) -> list[SearchResult]:
     return search(
         state.db,  # type: ignore[arg-type]
         state.embedder,  # type: ignore[arg-type]
@@ -283,13 +293,15 @@ def _search_with_state(state: RunnerState, query: str) -> list[SearchResult]:
         top_k=10,
         reranker=state.reranker,
         rerank_k=state.rerank_k,
+        diagnostics=diagnostics,
     )
 
 
 def run_config_a(spec: QuerySpec, state: RunnerState) -> ResultRow:
     """Baseline: product behavior = search + reranker (matches daemon path)."""
+    diagnostics = SearchDiagnostics()
     t0 = time.perf_counter()
-    results = _search_with_state(state, spec.query)
+    results = _search_with_state(state, spec.query, diagnostics=diagnostics)
     latency_ms = (time.perf_counter() - t0) * 1000.0
     hits, titles, snippets, scores = _extract(results)
     return _result_row(
@@ -302,6 +314,8 @@ def run_config_a(spec: QuerySpec, state: RunnerState) -> ResultRow:
         latency_ms=latency_ms,
         reranker_active=state.reranker_active,
         rerank_k=state.active_rerank_k,
+        resolved_rerank_k=diagnostics.resolved_rerank_k,
+        rerank_k_reason=diagnostics.rerank_k_reason,
     )
 
 
@@ -394,6 +408,16 @@ def aggregate_rows(rows: list[ResultRow]) -> dict[str, float | int]:
     return aggregate
 
 
+def resolved_rerank_k_counts(rows: list[ResultRow]) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for row in rows:
+        if row.resolved_rerank_k is None:
+            continue
+        key = str(row.resolved_rerank_k)
+        counts[key] = counts.get(key, 0) + 1
+    return dict(sorted(counts.items(), key=lambda item: int(item[0])))
+
+
 def aggregate_by_tag(rows: list[ResultRow]) -> dict[str, dict[str, float | int]]:
     """Aggregate metrics for each QuerySpec tag.
 
@@ -471,7 +495,8 @@ def main() -> None:
                 f"{row.config} {rerank_label} {spec.query!r:<40} "
                 f"recall@10={row.recall_at_10:.2f} "
                 f"mrr={row.mrr:.2f} ndcg@10={row.ndcg_at_10:.2f} "
-                f"lat={row.latency_ms:.0f}ms",
+                f"lat={row.latency_ms:.0f}ms "
+                f"resolved_k={row.resolved_rerank_k}",
                 file=sys.stderr,
             )
 
@@ -490,6 +515,7 @@ def main() -> None:
                     "reranking": {
                         "enabled": state.reranker_active,
                         "rerank_k": state.active_rerank_k,
+                        "resolved_k_counts": resolved_rerank_k_counts(records),
                     },
                     "aggregate": aggregate,
                     "by_tag": by_tag,
