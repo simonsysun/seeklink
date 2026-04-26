@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import socket
+import importlib
 from pathlib import Path
 
 from seeklink.daemon import _handle_connection
@@ -44,3 +45,57 @@ def test_shutdown_command_sends_ack_and_requests_shutdown():
 
     assert response == {"ok": True, "result": {"status": "shutting_down"}}
     assert shutdown_requested == [True]
+
+
+def test_search_no_rerank_passes_none_to_search(monkeypatch):
+    client, server = socket.socketpair()
+    captured: dict = {}
+
+    class FakeEmbedder:
+        MODEL_NAME = "test-embedder"
+
+    class FakeReranker:
+        disabled = False
+        MODEL_NAME = "test-reranker"
+
+    def fake_search(db, embedder, query, **kwargs):
+        captured["query"] = query
+        captured["reranker"] = kwargs["reranker"]
+        captured["rerank_k"] = kwargs["rerank_k"]
+        return []
+
+    search_module = importlib.import_module("seeklink.search")
+    monkeypatch.setattr(search_module, "search", fake_search)
+
+    try:
+        _send_request(
+            client,
+            {
+                "cmd": "search",
+                "args": {
+                    "query": "memory",
+                    "top_k": 3,
+                    "rerank_k": 7,
+                    "no_rerank": True,
+                },
+            },
+        )
+        _handle_connection(
+            server,
+            db=object(),
+            embedder=FakeEmbedder(),
+            reranker=FakeReranker(),
+            vault_root=Path("/tmp/vault"),
+        )
+        response = _recv_response(client)
+    finally:
+        client.close()
+        server.close()
+
+    assert response["ok"] is True
+    assert response["result"] == []
+    assert captured == {
+        "query": "memory",
+        "reranker": None,
+        "rerank_k": 7,
+    }

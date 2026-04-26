@@ -18,6 +18,7 @@ def test_search_json_daemon_response(capsys, monkeypatch):
         assert daemon_args == {
             "query": "记忆保持力",
             "top_k": 1,
+            "rerank_k": 20,
             "tags": ["learning"],
             "folder": "notes",
         }
@@ -47,6 +48,8 @@ def test_search_json_daemon_response(capsys, monkeypatch):
         tags=["learning"],
         folder="notes",
         top_k=1,
+        rerank_k=20,
+        no_rerank=False,
         title_weight=None,
         json=True,
     )
@@ -59,6 +62,7 @@ def test_search_json_daemon_response(capsys, monkeypatch):
     assert payload["json_schema_version"] == 1
     assert payload["query"] == "记忆保持力"
     assert payload["vault"] == "/tmp/vault"
+    assert payload["reranking"] == {"enabled": False, "rerank_k": 0}
     assert payload["filters"] == {"tags": ["learning"], "folder": "notes"}
     assert payload["models"] == {
         "embedder": "test-embedder",
@@ -133,3 +137,63 @@ def test_status_json_subprocess(tmp_path: Path):
     }
     assert payload["models"]["embedder"] == "jinaai/jina-embeddings-v2-base-zh"
     assert payload["models"]["reranker"] == "mlx-community/Qwen3-Reranker-0.6B-mxfp8"
+
+
+def test_search_json_no_rerank_sends_daemon_flag(capsys, monkeypatch):
+    def fake_try_daemon(cmd: str, daemon_args: dict) -> dict:
+        assert cmd == "search"
+        assert daemon_args == {
+            "query": "memory",
+            "top_k": 3,
+            "rerank_k": 7,
+            "no_rerank": True,
+        }
+        return {
+            "ok": True,
+            "vault": "/tmp/vault",
+            "embedder": "test-embedder",
+            "reranker": "test-reranker",
+            "result": [],
+        }
+
+    monkeypatch.setattr(cli, "_try_daemon", fake_try_daemon)
+    args = argparse.Namespace(
+        query="memory",
+        vault=None,
+        tags=None,
+        folder=None,
+        top_k=3,
+        rerank_k=7,
+        no_rerank=True,
+        title_weight=None,
+        json=True,
+    )
+
+    cli._cmd_search(args)
+
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["reranking"] == {"enabled": False, "rerank_k": 0}
+    assert payload["results"] == []
+
+
+def test_search_rejects_invalid_rerank_k(capsys):
+    args = argparse.Namespace(
+        query="memory",
+        vault=None,
+        tags=None,
+        folder=None,
+        top_k=3,
+        rerank_k=0,
+        no_rerank=False,
+        title_weight=None,
+        json=False,
+    )
+
+    try:
+        cli._cmd_search(args)
+    except SystemExit as e:
+        assert e.code == 1
+    else:
+        raise AssertionError("Expected _cmd_search to exit for invalid rerank_k")
+
+    assert "--rerank-k must be >= 1" in capsys.readouterr().err

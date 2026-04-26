@@ -14,8 +14,6 @@ chunks. Possible reductions:
   sequentially).
 - Passage truncation (cap at ~200 tokens for reranking, use full text only
   for final display).
-- Configurable `rerank_k` via a CLI flag so callers can trade precision
-  for latency per query.
 
 ### Additional CLI subcommands
 Helpers exist inside `seeklink/app.py` but are not exposed on the CLI:

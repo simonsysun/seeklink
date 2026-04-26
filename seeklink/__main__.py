@@ -88,6 +88,20 @@ def main() -> None:
     search_p.add_argument("--folder", help="Filter by folder prefix")
     search_p.add_argument("--top-k", type=int, default=10, help="Number of results")
     search_p.add_argument(
+        "--rerank-k",
+        type=int,
+        default=20,
+        help=(
+            "Number of first-stage candidates to rerank with the cross-encoder "
+            "(default: 20)"
+        ),
+    )
+    search_p.add_argument(
+        "--no-rerank",
+        action="store_true",
+        help="Skip cross-encoder reranking for this query",
+    )
+    search_p.add_argument(
         "--title-weight",
         type=float,
         default=None,
@@ -191,9 +205,9 @@ def _try_daemon(cmd: str, daemon_args: dict) -> dict | None:
     """Call the daemon; return response dict on success, None on failure.
 
     Passes the caller's expected vault and model config so
-    `cli_client.call()` can refuse to reuse a daemon that is bound to
-    a different vault or was started with a different embedder/reranker
-    (e.g. a stale daemon still running under an older
+    `cli_client.call()` can restart a daemon that is bound to a different
+    vault or was started with a different embedder/reranker (e.g. a stale
+    daemon still running under an older
     ``SEEKLINK_VAULT`` / ``SEEKLINK_EMBEDDER_MODEL`` /
     ``SEEKLINK_RERANKER_MODEL``). Without these guards, a stale daemon
     could silently serve the wrong DB or return queries embedded with a
@@ -284,6 +298,8 @@ def _search_json_payload(
     query: str,
     vault: str | Path,
     top_k: int,
+    rerank_k: int,
+    reranking_enabled: bool,
     tags: list[str] | None,
     folder: str | None,
     embedder: str,
@@ -296,6 +312,10 @@ def _search_json_payload(
         "query": query,
         "vault": str(vault),
         "top_k": top_k,
+        "reranking": {
+            "enabled": reranking_enabled,
+            "rerank_k": rerank_k if reranking_enabled else 0,
+        },
         "filters": {
             "tags": tags or [],
             "folder": folder,
@@ -347,8 +367,15 @@ def _status_json_payload(
 def _cmd_search(args: argparse.Namespace) -> None:
     _setup_logging()
 
+    if args.rerank_k < 1:
+        print("Error: --rerank-k must be >= 1", file=sys.stderr)
+        sys.exit(1)
+
     if _should_use_daemon(args):
         daemon_args: dict = {"query": args.query, "top_k": args.top_k}
+        daemon_args["rerank_k"] = args.rerank_k
+        if args.no_rerank:
+            daemon_args["no_rerank"] = True
         if args.tags is not None:
             daemon_args["tags"] = args.tags
         if args.folder is not None:
@@ -364,6 +391,9 @@ def _cmd_search(args: argparse.Namespace) -> None:
                         query=args.query,
                         vault=resp.get("vault", _resolve_default_vault()),
                         top_k=args.top_k,
+                        rerank_k=args.rerank_k,
+                        reranking_enabled=not args.no_rerank
+                        and resp.get("reranker") != "disabled",
                         tags=args.tags,
                         folder=args.folder,
                         embedder=resp.get("embedder", expected_embedder),
@@ -376,12 +406,10 @@ def _cmd_search(args: argparse.Namespace) -> None:
             return
 
     # Cold-start fallback (explicit --vault, or daemon unreachable).
-    # Constructs a Reranker() and passes it to search() so the cold-start
-    # path produces the same rankings as the daemon path. Without this,
-    # the same query returned different results depending on whether the
-    # daemon was up — fixed in v0.3. Reranker self-disables on platforms
-    # without MLX (Linux, Intel macOS) or when SEEKLINK_RERANKER_MODEL=""
-    # so this import/construct is safe.
+    # Constructs a Reranker() unless --no-rerank is requested so the
+    # cold-start path produces the same default rankings as the daemon path.
+    # Reranker self-disables on platforms without MLX (Linux, Intel macOS)
+    # or when SEEKLINK_RERANKER_MODEL="" so construction is safe.
     from seeklink.app import init_app
     from seeklink.freshness import check_freshness
     from seeklink.reranker import Reranker
@@ -393,7 +421,7 @@ def _cmd_search(args: argparse.Namespace) -> None:
         print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
 
-    reranker = Reranker()
+    reranker = None if args.no_rerank else Reranker()
 
     try:
         check_freshness(db, vault_root)
@@ -402,18 +430,24 @@ def _cmd_search(args: argparse.Namespace) -> None:
             "tags": args.tags,
             "folder": args.folder,
             "reranker": reranker,
+            "rerank_k": args.rerank_k,
             "vault_root": vault_root,
         }
         if args.title_weight is not None:
             search_kwargs["title_weight"] = args.title_weight
         results = seeklink_search(db, embedder, args.query, **search_kwargs)
         if getattr(args, "json", False):
-            reranker_name = "disabled" if reranker.disabled else reranker.MODEL_NAME
+            if reranker is None:
+                _, reranker_name = _resolve_expected_models()
+            else:
+                reranker_name = "disabled" if reranker.disabled else reranker.MODEL_NAME
             _emit_json(
                 _search_json_payload(
                     query=args.query,
                     vault=vault_root,
                     top_k=args.top_k,
+                    rerank_k=args.rerank_k,
+                    reranking_enabled=reranker is not None and not reranker.disabled,
                     tags=args.tags,
                     folder=args.folder,
                     embedder=embedder.MODEL_NAME,

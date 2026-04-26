@@ -146,6 +146,8 @@ seeklink search "query" --vault PATH [options]
 
 Options:
   --top-k N          Number of results (default: 10)
+  --rerank-k N       Candidates to rerank with the cross-encoder (default: 20)
+  --no-rerank        Skip cross-encoder reranking for this query
   --tags TAG [TAG]   Filter by tags (AND semantics)
   --folder PREFIX    Filter by folder (e.g. "notes/")
   --json             Emit machine-readable JSON instead of text output
@@ -214,14 +216,14 @@ Many personal knowledge bases contain a mix of **titled articles** (permanent no
 
 ### Title-gated rerank blending (v0.3+)
 
-When the reranker is enabled, a cross-encoder (`Qwen3-Reranker-0.6B` on MLX, ~1-2s per query) re-scores the top-20 RRF candidates for precision. SeekLink applies **title-gated position blending** on top of this:
+When the reranker is enabled, a cross-encoder (`Qwen3-Reranker-0.6B` on MLX, ~1-2s per query) re-scores the top-20 RRF candidates for precision. Use `--rerank-k N` to trade precision for latency on a single query, or `--no-rerank` to return raw RRF results without cross-encoder scoring. SeekLink applies **title-gated position blending** on top of reranked results:
 
 - **If the title channel's best match is in the candidate pool**, blend `alpha · normalized_rrf + (1 - alpha) · rerank_score` with `alpha = 0.60/0.50/0.40` by rank bucket. This protects exact title / alias hits from being demoted by a content-focused reranker.
 - **Otherwise** (no strong title signal), the reranker score is used directly — same as pre-v0.3 behavior. This lets the reranker correct poor first-stage ordering.
 
 On the bundled 22-query pilot (see `tests/blind/`), mean MRR moved from 0.932 to 0.977 vs pure-reranker-override with no per-query regressions. Sample size is a pilot, not a statistically powered benchmark — contributions of larger labeled corpora are welcome.
 
-Disable reranking entirely with: `export SEEKLINK_RERANKER_MODEL=""`
+Disable reranking for one query with `--no-rerank`, or entirely with: `export SEEKLINK_RERANKER_MODEL=""`
 
 ### Results carry line numbers
 

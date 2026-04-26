@@ -636,6 +636,33 @@ class TestPositionAwareBlending:
                 f"Expected RRF-scale scores, got {[r.score for r in results]}"
             )
 
+    def test_rerank_k_limits_candidate_count(
+        self, db: Database, embedder: Embedder, vault: Path
+    ):
+        """rerank_k controls how many first-stage candidates the reranker sees."""
+        _ingest_corpus(db, embedder, vault)
+
+        class CountingReranker:
+            disabled = False
+            seen = 0
+
+            def rerank(self, query, passages):
+                self.seen = len(passages)
+                return [0.5] * len(passages)
+
+        reranker = CountingReranker()
+        results = search(
+            db,
+            embedder,
+            "learning",
+            reranker=reranker,  # type: ignore[arg-type]
+            top_k=1,
+            rerank_k=3,
+        )
+
+        assert len(results) == 1
+        assert reranker.seen == 3
+
 
 class TestLineRangeE2E:
     """End-to-end: search() populates line_start/line_end from real chunks."""
