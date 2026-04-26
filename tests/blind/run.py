@@ -1,4 +1,4 @@
-"""Blind test runner for query expansion evaluation (v2, post-review).
+"""Blind test runner for query expansion evaluation.
 
 Usage:
     python tests/blind/run.py --config A --queries tests/blind/queries.yaml \\

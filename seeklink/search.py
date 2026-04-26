@@ -321,7 +321,7 @@ def search(
             results.sort(key=lambda r: r.score, reverse=True)
             results = results[:top_k]
 
-    # v0.3 Item 2 — populate line_start/line_end on each result.
+    # Populate line_start/line_end on each result.
     # Caller must pass vault_root for the mapping to work; if absent,
     # line fields remain at their default of 0 (backward compatible).
     if vault_root is not None:
@@ -330,7 +330,7 @@ def search(
     return results
 
 
-# ── Line-range retrieval helpers (v0.3 Item 2) ──────────────────────
+# ── Line-range retrieval helpers ───────────────────────────────────
 
 
 def body_offset_to_file_line(full_text: str, body_char_offset: int) -> int:

@@ -56,9 +56,8 @@ def bfs_neighbors(
     """BFS outgoing and incoming neighbors up to `depth` hops from center.
 
     Returns (outgoing_list, incoming_list) where each entry is a dict
-    with path / title / indegree / depth. Used by the graph command
-    (currently exposed only as an internal helper — CLI wiring is
-    deferred; see vault log for the production-loop backlinks plan).
+    with path / title / indegree / depth. Currently exposed only as an
+    internal helper; CLI wiring is deferred in TODOS.md.
     """
     outgoing_results: list[tuple[int, int]] = []
     visited_out: set[int] = {center_id}
@@ -118,7 +117,7 @@ def write_related_link(file_path: Path, target_stem: str) -> None:
 
     Idempotent: skips if [[target]] already present in the Related section.
     Creates the ## Related section at end of file if it doesn't exist.
-    Preserved from server.py for future suggest_links CLI support.
+    Internal helper for future suggest-links CLI support.
     """
     content = file_path.read_text(encoding="utf-8")
     link_line = f"- [[{target_stem}]]"

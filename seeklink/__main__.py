@@ -409,11 +409,13 @@ def _cmd_get(args: argparse.Namespace) -> None:
             from_line = int(tail)
     rel_path = raw
 
-    # Resolve vault root
-    from seeklink.app import init_app as _ignored  # noqa: F401 — keep parity
+    # Resolve vault root without initializing the DB or loading models.
     vault_root_env = os.environ.get("SEEKLINK_VAULT")
-    vault_root = (args.vault or Path(vault_root_env) if vault_root_env else args.vault)
-    if vault_root is None:
+    if args.vault is not None:
+        vault_root = args.vault
+    elif vault_root_env:
+        vault_root = Path(vault_root_env)
+    else:
         vault_root = Path.cwd()
     vault_root = vault_root.resolve()
 

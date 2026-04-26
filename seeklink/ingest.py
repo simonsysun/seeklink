@@ -18,7 +18,7 @@ from seeklink.models import Source
 
 logger = logging.getLogger(__name__)
 
-# Non-hidden top-level dirs excluded from indexing (mirrors watcher._SKIP_DIRS)
+# Non-hidden top-level dirs excluded from indexing (mirrors freshness._SKIP_DIRS)
 _SKIP_DIRS = {"todo", "archive"}
 
 # Regex for YAML frontmatter block (handles empty frontmatter too).
@@ -162,8 +162,7 @@ def ingest_vault(
 
     After processing all existing files, walks DB entries and removes any
     whose path no longer exists on disk. This handles files that were
-    deleted or moved outside the rhizome CLI (where no explicit
-    ``seeklink index`` call would have fired).
+    deleted or moved outside an explicit ``seeklink index`` run.
     """
     if embedder is None:
         embedder = Embedder()
