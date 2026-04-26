@@ -230,6 +230,19 @@ class RunnerState:
 
 def init_state(vault: Path, with_reranker: bool, rerank_k: int) -> RunnerState:
     db, embedder, resolved_vault = init_app(vault)
+    # Trigger lazy load up-front so the first measured query excludes
+    # embedder model/cache startup, matching the resident daemon path.
+    try:
+        embedder.embed_query("warmup")
+    except Exception:
+        pass
+    # Trigger jieba/FTS tokenizer setup before the measured query loop.
+    try:
+        db.search_fts("warmup", limit=1)
+        db.search_fts_sources("warmup", limit=1)
+    except Exception:
+        pass
+
     reranker: Reranker | None = None
     if with_reranker:
         reranker = Reranker()

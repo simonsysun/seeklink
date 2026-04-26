@@ -639,7 +639,7 @@ class TestPositionAwareBlending:
     def test_rerank_k_limits_candidate_count(
         self, db: Database, embedder: Embedder, vault: Path
     ):
-        """rerank_k controls how many first-stage candidates the reranker sees."""
+        """rerank_k controls candidates even when top_k is larger."""
         _ingest_corpus(db, embedder, vault)
 
         class CountingReranker:
@@ -656,11 +656,11 @@ class TestPositionAwareBlending:
             embedder,
             "learning",
             reranker=reranker,  # type: ignore[arg-type]
-            top_k=1,
+            top_k=4,
             rerank_k=3,
         )
 
-        assert len(results) == 1
+        assert len(results) == 4
         assert reranker.seen == 3
 
 

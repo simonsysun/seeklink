@@ -138,9 +138,10 @@ python tests/blind/run.py --config A --rerank-k 20 --out tests/blind/results/A_r
 
 Runner:
 
-- Initializes `init_app(vault)` and `Reranker()` exactly **once** per
-  invocation (before the query loop). Warms the reranker with a dummy
-  call so the first measured latency isn't the model load.
+- Initializes `init_app(vault)` exactly **once** per invocation (before the
+  query loop). Warms the embedder, FTS tokenizer, and when enabled the
+  reranker with dummy calls so the first measured latency isn't
+  model/cache/tokenizer startup.
 - Passes `--rerank-k` through to `search()`. Default `20` matches product
   behavior; lower values are diagnostic latency / quality probes.
 - Closes the DB once, in a `finally` block.

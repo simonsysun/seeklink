@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The blind-test runner now accepts `--rerank-k N` and `--no-rerank`, and records reranking metadata in result JSON for latency / quality sweeps.
 
 ### Fixed
+- `seeklink search --rerank-k N` now limits the number of candidates passed to the cross-encoder even when `N` is lower than `--top-k`; the remaining results keep first-stage RRF order.
 - `seeklink search` and `seeklink index` now auto-restart a stale daemon when its vault, embedder, or reranker config no longer matches the caller, avoiding repeated cold-start fallbacks after switching vaults or model settings.
 
 ## [0.3.2] - 2026-04-23

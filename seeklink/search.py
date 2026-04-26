@@ -254,10 +254,13 @@ def search(
     #
     # Reranker failures downgrade gracefully (rerank() returns None →
     # keep first-stage RRF ordering).
-    if reranking_enabled and len(results) > 1:
-        passages = [r.content for r in results]
+    rerank_n = min(rerank_k, len(results))
+    if reranking_enabled and rerank_n > 1:
+        rerank_head = results[:rerank_n]
+        rerank_tail = results[rerank_n:]
+        passages = [r.content for r in rerank_head]
         rerank_scores = reranker.rerank(query, passages)
-        if rerank_scores is not None and len(rerank_scores) == len(results):
+        if rerank_scores is not None and len(rerank_scores) == len(rerank_head):
             # Title-channel rank 1 is the strongest "this source was
             # confidently identified by title/alias" signal. If that
             # source is anywhere in the candidate pool, apply position
@@ -268,15 +271,15 @@ def search(
                 if rank == 1:
                     title_rank_1_sid = sid
                     break
-            candidate_sids = {r.source_id for r in results}
+            candidate_sids = {r.source_id for r in rerank_head}
             apply_blend = (
                 title_rank_1_sid is not None
                 and title_rank_1_sid in candidate_sids
             )
 
-            max_rrf = results[0].score if results[0].score > 0 else 1.0
+            max_rrf = rerank_head[0].score if rerank_head[0].score > 0 else 1.0
             blended: list[SearchResult] = []
-            for i, r in enumerate(results):
+            for i, r in enumerate(rerank_head):
                 rerank_s = float(rerank_scores[i])
                 if apply_blend:
                     norm_score = r.score / max_rrf
@@ -302,7 +305,10 @@ def search(
                     indegree=r.indegree,
                 ))
             blended.sort(key=lambda r: r.score, reverse=True)
-            results = blended
+            # If rerank_k < top_k, rerank only the head and append the
+            # untouched first-stage tail. This gives callers a real latency
+            # knob without losing the requested number of output rows.
+            results = blended + rerank_tail
 
     results = results[:top_k]
 
