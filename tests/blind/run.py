@@ -27,9 +27,32 @@ from pathlib import Path
 
 import yaml
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 from seeklink.app import init_app
 from seeklink.reranker import Reranker
 from seeklink.search import SearchResult, search
+
+try:
+    from .metrics import (
+        average_precision_at_k,
+        last_expected_rank,
+        ndcg_at_k,
+        precision_at_k,
+        recall_at_k,
+        reciprocal_rank,
+    )
+except ImportError:  # pragma: no cover - supports `python tests/blind/run.py`
+    from metrics import (
+        average_precision_at_k,
+        last_expected_rank,
+        ndcg_at_k,
+        precision_at_k,
+        recall_at_k,
+        reciprocal_rank,
+    )
 
 
 @dataclass(frozen=True, slots=True)
@@ -52,6 +75,7 @@ class ResultRow:
     """
     query: str
     config: str
+    tags: list[str]
     hits: list[str]
     titles: list[str | None]
     snippets: list[str]
@@ -60,6 +84,10 @@ class ResultRow:
     reranker_active: bool
     recall_at_10: float
     mrr: float
+    precision_at_5: float
+    average_precision_at_10: float
+    ndcg_at_10: float
+    last_expected_rank: int | None
     expansions_used: list[str] = field(default_factory=list)
 
 
@@ -85,21 +113,6 @@ def load_queries(path: Path) -> list[QuerySpec]:
     return specs
 
 
-def recall_at_k(hits: list[str], expected: list[str], k: int = 10) -> float:
-    if not expected:
-        return 0.0
-    top = set(hits[:k])
-    return len(top & set(expected)) / len(expected)
-
-
-def mrr(hits: list[str], expected: list[str], k: int = 10) -> float:
-    expected_set = set(expected)
-    for i, path in enumerate(hits[:k], start=1):
-        if path in expected_set:
-            return 1.0 / i
-    return 0.0
-
-
 def _extract(results: list[SearchResult]) -> tuple[
     list[str], list[str | None], list[str], list[float]
 ]:
@@ -108,6 +121,41 @@ def _extract(results: list[SearchResult]) -> tuple[
         [r.title for r in results],
         [(r.content or "")[:200] for r in results],
         [r.score for r in results],
+    )
+
+
+def _result_row(
+    *,
+    spec: QuerySpec,
+    config: str,
+    hits: list[str],
+    titles: list[str | None],
+    snippets: list[str],
+    scores: list[float],
+    latency_ms: float,
+    reranker_active: bool,
+    expansions_used: list[str] | None = None,
+) -> ResultRow:
+    """Build a ResultRow and compute all per-query metrics in one place."""
+    return ResultRow(
+        query=spec.query,
+        config=config,
+        tags=list(spec.tags),
+        hits=hits,
+        titles=titles,
+        snippets=snippets,
+        scores=scores,
+        latency_ms=latency_ms,
+        reranker_active=reranker_active,
+        recall_at_10=recall_at_k(hits, spec.expected_paths),
+        mrr=reciprocal_rank(hits, spec.expected_paths),
+        precision_at_5=precision_at_k(hits, spec.expected_paths, k=5),
+        average_precision_at_10=average_precision_at_k(
+            hits, spec.expected_paths, k=10
+        ),
+        ndcg_at_10=ndcg_at_k(hits, spec.expected_paths, k=10),
+        last_expected_rank=last_expected_rank(hits, spec.expected_paths, k=10),
+        expansions_used=list(expansions_used or []),
     )
 
 
@@ -198,8 +246,8 @@ def run_config_a(spec: QuerySpec, state: RunnerState) -> ResultRow:
     results = _search_with_state(state, spec.query)
     latency_ms = (time.perf_counter() - t0) * 1000.0
     hits, titles, snippets, scores = _extract(results)
-    return ResultRow(
-        query=spec.query,
+    return _result_row(
+        spec=spec,
         config="A",
         hits=hits,
         titles=titles,
@@ -207,8 +255,6 @@ def run_config_a(spec: QuerySpec, state: RunnerState) -> ResultRow:
         scores=scores,
         latency_ms=latency_ms,
         reranker_active=state.reranker is not None and not state.reranker.disabled,
-        recall_at_10=recall_at_k(hits, spec.expected_paths),
-        mrr=mrr(hits, spec.expected_paths),
     )
 
 
@@ -247,8 +293,8 @@ def run_config_c(spec: QuerySpec, state: RunnerState) -> ResultRow:
     fused = _rrf_fuse_paths(per_q)
     latency_ms = (time.perf_counter() - t0) * 1000.0
     hits, titles, snippets, scores = _extract(fused)
-    return ResultRow(
-        query=spec.query,
+    return _result_row(
+        spec=spec,
         config="C",
         hits=hits,
         titles=titles,
@@ -256,13 +302,64 @@ def run_config_c(spec: QuerySpec, state: RunnerState) -> ResultRow:
         scores=scores,
         latency_ms=latency_ms,
         reranker_active=state.reranker is not None and not state.reranker.disabled,
-        recall_at_10=recall_at_k(hits, spec.expected_paths),
-        mrr=mrr(hits, spec.expected_paths),
         expansions_used=list(spec.expansion),
     )
 
 
 CONFIG_RUNNERS = {"A": run_config_a, "B": run_config_b, "C": run_config_c}
+
+
+_AGGREGATE_FIELDS = (
+    "recall_at_10",
+    "mrr",
+    "precision_at_5",
+    "average_precision_at_10",
+    "ndcg_at_10",
+    "latency_ms",
+)
+
+
+def _percentile(values: list[float], quantile: float) -> float:
+    """Return a sorted-pick percentile suitable for small blind-test runs."""
+    if not values:
+        return 0.0
+    if quantile <= 0:
+        return sorted(values)[0]
+    if quantile >= 1:
+        return sorted(values)[-1]
+    ordered = sorted(values)
+    index = int(quantile * len(ordered))
+    index = min(index, len(ordered) - 1)
+    return ordered[index]
+
+
+def aggregate_rows(rows: list[ResultRow]) -> dict[str, float | int]:
+    """Aggregate metrics across result rows."""
+    aggregate: dict[str, float | int] = {"n_queries": len(rows)}
+    for field_name in _AGGREGATE_FIELDS:
+        values = [float(getattr(row, field_name)) for row in rows]
+        aggregate[f"mean_{field_name}"] = sum(values) / len(values) if values else 0.0
+
+    latencies = [row.latency_ms for row in rows]
+    aggregate["p50_latency_ms"] = _percentile(latencies, 0.50)
+    aggregate["p95_latency_ms"] = _percentile(latencies, 0.95)
+    return aggregate
+
+
+def aggregate_by_tag(rows: list[ResultRow]) -> dict[str, dict[str, float | int]]:
+    """Aggregate metrics for each QuerySpec tag.
+
+    A query can belong to multiple tags, so per-tag counts intentionally do
+    not sum to total query count.
+    """
+    grouped: dict[str, list[ResultRow]] = {}
+    for row in rows:
+        for tag in row.tags:
+            grouped.setdefault(tag, []).append(row)
+    return {
+        tag: aggregate_rows(tag_rows)
+        for tag, tag_rows in sorted(grouped.items())
+    }
 
 
 def main() -> None:
@@ -298,18 +395,14 @@ def main() -> None:
             records.append(row)
             print(
                 f"{row.config} {spec.query!r:<40} "
-                f"recall@10={row.recall_at_10:.2f} mrr={row.mrr:.2f} "
+                f"recall@10={row.recall_at_10:.2f} "
+                f"mrr={row.mrr:.2f} ndcg@10={row.ndcg_at_10:.2f} "
                 f"lat={row.latency_ms:.0f}ms",
                 file=sys.stderr,
             )
 
-        def _agg(field_name: str) -> float:
-            vals = [getattr(r, field_name) for r in records]
-            return sum(vals) / len(vals) if vals else 0.0
-
-        # Simple p95 (sorted-pick) — good enough for 20-30 queries.
-        latencies = sorted(r.latency_ms for r in records)
-        p95 = latencies[int(0.95 * len(latencies))] if latencies else 0.0
+        aggregate = aggregate_rows(records)
+        by_tag = aggregate_by_tag(records)
 
         args.out.parent.mkdir(parents=True, exist_ok=True)
         with args.out.open("w", encoding="utf-8") as f:
@@ -320,12 +413,8 @@ def main() -> None:
                     "vault": str(vault),
                     "n_queries": len(records),
                     "with_reranker": state.reranker is not None and not state.reranker.disabled,
-                    "aggregate": {
-                        "mean_recall_at_10": _agg("recall_at_10"),
-                        "mean_mrr": _agg("mrr"),
-                        "mean_latency_ms": _agg("latency_ms"),
-                        "p95_latency_ms": p95,
-                    },
+                    "aggregate": aggregate,
+                    "by_tag": by_tag,
                     "results": [asdict(r) for r in records],
                 },
                 f,
@@ -334,10 +423,12 @@ def main() -> None:
             )
         print(
             f"\nconfig={args.config} n={len(records)} "
-            f"mean_recall@10={_agg('recall_at_10'):.3f} "
-            f"mean_mrr={_agg('mrr'):.3f} "
-            f"mean_lat={_agg('latency_ms'):.0f}ms "
-            f"p95_lat={p95:.0f}ms "
+            f"mean_recall@10={aggregate['mean_recall_at_10']:.3f} "
+            f"mean_mrr={aggregate['mean_mrr']:.3f} "
+            f"mean_ndcg@10={aggregate['mean_ndcg_at_10']:.3f} "
+            f"mean_lat={aggregate['mean_latency_ms']:.0f}ms "
+            f"p50_lat={aggregate['p50_latency_ms']:.0f}ms "
+            f"p95_lat={aggregate['p95_latency_ms']:.0f}ms "
             f"→ {args.out}",
             file=sys.stderr,
         )
