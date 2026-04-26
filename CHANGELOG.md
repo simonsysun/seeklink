@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `seeklink get PATH:LINE -C N` prints a grep-style context window around a search hit, returning `N` lines before and after the requested line while preserving direct filesystem reads and path-escape protection.
 - `seeklink search --json` and `seeklink status --json` emit stable machine-readable stdout for agents that should not scrape the human text format.
 - `seeklink search --rerank-k N` and `seeklink search --no-rerank` let callers trade precision for latency per query without changing the global reranker configuration.
+- The blind-test runner now accepts `--rerank-k N` and `--no-rerank`, and records reranking metadata in result JSON for latency / quality sweeps.
 
 ### Fixed
 - `seeklink search` and `seeklink index` now auto-restart a stale daemon when its vault, embedder, or reranker config no longer matches the caller, avoiding repeated cold-start fallbacks after switching vaults or model settings.

@@ -88,6 +88,7 @@ class ResultRow:
     average_precision_at_10: float
     ndcg_at_10: float
     last_expected_rank: int | None
+    rerank_k: int = 0
     expansions_used: list[str] = field(default_factory=list)
 
 
@@ -134,6 +135,7 @@ def _result_row(
     scores: list[float],
     latency_ms: float,
     reranker_active: bool,
+    rerank_k: int,
     expansions_used: list[str] | None = None,
 ) -> ResultRow:
     """Build a ResultRow and compute all per-query metrics in one place."""
@@ -147,6 +149,7 @@ def _result_row(
         scores=scores,
         latency_ms=latency_ms,
         reranker_active=reranker_active,
+        rerank_k=rerank_k if reranker_active else 0,
         recall_at_10=recall_at_k(hits, spec.expected_paths),
         mrr=reciprocal_rank(hits, spec.expected_paths),
         precision_at_5=precision_at_k(hits, spec.expected_paths, k=5),
@@ -207,7 +210,16 @@ class RunnerState:
     db: object
     embedder: object
     reranker: Reranker | None
+    rerank_k: int
     vault: Path
+
+    @property
+    def reranker_active(self) -> bool:
+        return self.reranker is not None and not self.reranker.disabled
+
+    @property
+    def active_rerank_k(self) -> int:
+        return self.rerank_k if self.reranker_active else 0
 
     def close(self) -> None:
         try:
@@ -216,7 +228,7 @@ class RunnerState:
             pass
 
 
-def init_state(vault: Path, with_reranker: bool) -> RunnerState:
+def init_state(vault: Path, with_reranker: bool, rerank_k: int) -> RunnerState:
     db, embedder, resolved_vault = init_app(vault)
     reranker: Reranker | None = None
     if with_reranker:
@@ -227,7 +239,13 @@ def init_state(vault: Path, with_reranker: bool) -> RunnerState:
             reranker.rerank("warmup", ["warmup passage"])
         except Exception:
             pass
-    return RunnerState(db=db, embedder=embedder, reranker=reranker, vault=resolved_vault)
+    return RunnerState(
+        db=db,
+        embedder=embedder,
+        reranker=reranker,
+        rerank_k=rerank_k,
+        vault=resolved_vault,
+    )
 
 
 def _search_with_state(state: RunnerState, query: str) -> list[SearchResult]:
@@ -237,6 +255,7 @@ def _search_with_state(state: RunnerState, query: str) -> list[SearchResult]:
         query,
         top_k=10,
         reranker=state.reranker,
+        rerank_k=state.rerank_k,
     )
 
 
@@ -254,7 +273,8 @@ def run_config_a(spec: QuerySpec, state: RunnerState) -> ResultRow:
         snippets=snippets,
         scores=scores,
         latency_ms=latency_ms,
-        reranker_active=state.reranker is not None and not state.reranker.disabled,
+        reranker_active=state.reranker_active,
+        rerank_k=state.active_rerank_k,
     )
 
 
@@ -301,7 +321,8 @@ def run_config_c(spec: QuerySpec, state: RunnerState) -> ResultRow:
         snippets=snippets,
         scores=scores,
         latency_ms=latency_ms,
-        reranker_active=state.reranker is not None and not state.reranker.disabled,
+        reranker_active=state.reranker_active,
+        rerank_k=state.active_rerank_k,
         expansions_used=list(spec.expansion),
     )
 
@@ -362,27 +383,55 @@ def aggregate_by_tag(rows: list[ResultRow]) -> dict[str, dict[str, float | int]]
     }
 
 
-def main() -> None:
+def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", choices=["A", "B", "C"], required=True)
     parser.add_argument("--queries", type=Path, required=True)
     parser.add_argument("--vault", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument(
+        "--rerank-k",
+        type=int,
+        default=20,
+        help=(
+            "Number of first-stage candidates passed to the reranker "
+            "(default: 20). Use with config A/C latency sweeps."
+        ),
+    )
+    parser.add_argument(
+        "--no-rerank",
         "--no-reranker",
+        dest="no_reranker",
         action="store_true",
         help="Run without reranker. Useful for isolating blending effects. "
              "Do NOT use for the official baseline — product path has reranker on.",
     )
+    return parser
+
+
+def main() -> None:
+    parser = build_parser()
     args = parser.parse_args()
+
+    if args.rerank_k < 1:
+        parser.error("--rerank-k must be >= 1")
 
     vault = args.vault.expanduser().resolve()
     specs = load_queries(args.queries)
     runner = CONFIG_RUNNERS[args.config]
 
-    state = init_state(vault, with_reranker=not args.no_reranker)
+    state = init_state(
+        vault,
+        with_reranker=not args.no_reranker,
+        rerank_k=args.rerank_k,
+    )
     try:
         records: list[ResultRow] = []
+        rerank_label = (
+            f"rerank_k={state.active_rerank_k}"
+            if state.reranker_active
+            else "rerank=off"
+        )
         for spec in specs:
             try:
                 row = runner(spec, state)
@@ -394,7 +443,7 @@ def main() -> None:
                 continue
             records.append(row)
             print(
-                f"{row.config} {spec.query!r:<40} "
+                f"{row.config} {rerank_label} {spec.query!r:<40} "
                 f"recall@10={row.recall_at_10:.2f} "
                 f"mrr={row.mrr:.2f} ndcg@10={row.ndcg_at_10:.2f} "
                 f"lat={row.latency_ms:.0f}ms",
@@ -412,7 +461,11 @@ def main() -> None:
                     "queries_file": str(args.queries),
                     "vault": str(vault),
                     "n_queries": len(records),
-                    "with_reranker": state.reranker is not None and not state.reranker.disabled,
+                    "with_reranker": state.reranker_active,
+                    "reranking": {
+                        "enabled": state.reranker_active,
+                        "rerank_k": state.active_rerank_k,
+                    },
                     "aggregate": aggregate,
                     "by_tag": by_tag,
                     "results": [asdict(r) for r in records],

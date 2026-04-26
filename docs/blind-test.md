@@ -96,6 +96,8 @@ For each `(query, config)` pair (recorded by the runner):
 - `scores` — fused scores (not directly compared across configs)
 - `latency_ms` — wall-clock for the full query call chain (model load
   excluded — runner initializes once and warms up)
+- `rerank_k` — first-stage candidate count passed to the reranker (`0`
+  when reranking is disabled)
 - `recall_at_10` — fraction of `expected_paths` in top-10
 - `mrr` — reciprocal rank of first expected hit in top-10 (0 if none)
 
@@ -126,7 +128,12 @@ python tests/blind/run.py --config B ...
 python tests/blind/run.py --config C ...
 
 # Diagnostic: baseline without reranker (NOT the official baseline)
-python tests/blind/run.py --config A --no-reranker ...
+python tests/blind/run.py --config A --no-rerank ...
+
+# Diagnostic: latency / quality sweep for reranker budget
+python tests/blind/run.py --config A --rerank-k 5  --out tests/blind/results/A_rerank5.json ...
+python tests/blind/run.py --config A --rerank-k 10 --out tests/blind/results/A_rerank10.json ...
+python tests/blind/run.py --config A --rerank-k 20 --out tests/blind/results/A_rerank20.json ...
 ```
 
 Runner:
@@ -134,6 +141,8 @@ Runner:
 - Initializes `init_app(vault)` and `Reranker()` exactly **once** per
   invocation (before the query loop). Warms the reranker with a dummy
   call so the first measured latency isn't the model load.
+- Passes `--rerank-k` through to `search()`. Default `20` matches product
+  behavior; lower values are diagnostic latency / quality probes.
 - Closes the DB once, in a `finally` block.
 - Records per-query latency using `time.perf_counter()`. Model-load time
   is excluded by warmup.

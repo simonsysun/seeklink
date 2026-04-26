@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
-from tests.blind.run import ResultRow, aggregate_by_tag, aggregate_rows
+from tests.blind import run as blind_run
+from tests.blind.run import ResultRow, RunnerState, aggregate_by_tag, aggregate_rows
 
 
 def _row(
@@ -147,3 +150,83 @@ class TestAggregateByTag:
         ]
 
         assert aggregate_by_tag(rows) == {}
+
+
+class TestRerankOptions:
+    def test_parser_supports_rerank_k_and_no_rerank_alias(self):
+        parser = blind_run.build_parser()
+
+        args = parser.parse_args(
+            [
+                "--config",
+                "A",
+                "--queries",
+                "queries.yaml",
+                "--vault",
+                "vault",
+                "--out",
+                "out.json",
+                "--rerank-k",
+                "7",
+                "--no-rerank",
+            ]
+        )
+
+        assert args.rerank_k == 7
+        assert args.no_reranker is True
+
+    def test_legacy_no_reranker_alias_still_works(self):
+        parser = blind_run.build_parser()
+
+        args = parser.parse_args(
+            [
+                "--config",
+                "A",
+                "--queries",
+                "queries.yaml",
+                "--vault",
+                "vault",
+                "--out",
+                "out.json",
+                "--no-reranker",
+            ]
+        )
+
+        assert args.no_reranker is True
+
+    def test_search_with_state_passes_rerank_k(self, monkeypatch):
+        captured: dict = {}
+
+        class FakeReranker:
+            disabled = False
+
+        def fake_search(db, embedder, query, **kwargs):
+            captured["db"] = db
+            captured["embedder"] = embedder
+            captured["query"] = query
+            captured["top_k"] = kwargs["top_k"]
+            captured["reranker"] = kwargs["reranker"]
+            captured["rerank_k"] = kwargs["rerank_k"]
+            return []
+
+        fake_db = object()
+        fake_embedder = object()
+        fake_reranker = FakeReranker()
+        state = RunnerState(
+            db=fake_db,
+            embedder=fake_embedder,
+            reranker=fake_reranker,  # type: ignore[arg-type]
+            rerank_k=7,
+            vault=Path("/tmp/vault"),
+        )
+        monkeypatch.setattr(blind_run, "search", fake_search)
+
+        assert blind_run._search_with_state(state, "memory") == []
+        assert captured == {
+            "db": fake_db,
+            "embedder": fake_embedder,
+            "query": "memory",
+            "top_k": 10,
+            "reranker": fake_reranker,
+            "rerank_k": 7,
+        }
