@@ -42,7 +42,7 @@ seeklink get    PATH:LINE -l N         # read window around a hit
 seeklink get    PATH:LINE -C N         # read N lines before/after a hit
 ```
 
-Set `SEEKLINK_VAULT=<path>` once to omit `--vault` on every call and route through the resident daemon (first call after boot: ~2s; warm: ~1-2s with reranker, ~10ms without).
+Set `SEEKLINK_VAULT=<path>` once to omit `--vault` on every call and route through the resident daemon (first call after boot: ~2s; warm: ~1-2s with reranker, ~10ms without). If that env/model config changes, `search` and `index` auto-restart a stale daemon instead of silently serving the old vault.
 
 ### Output contract
 
@@ -79,5 +79,5 @@ No other codes.
 ### Common failure modes
 
 - Empty results on a fresh vault → index not built yet. Run `seeklink index --vault PATH`.
-- Daemon won't auto-spawn → `--vault` was passed (cold-start mandatory in that case), or another daemon is bound to a different vault. Run `status` to see `vault` / `embedder` / `reranker` and respawn if needed.
+- Daemon won't auto-spawn → `--vault` was passed, which intentionally forces cold-start. Without `--vault`, `search` / `index` should auto-spawn and auto-restart stale daemons when `vault` / `embedder` / `reranker` no longer match.
 - Line numbers look wrong → file was edited after indexing. Re-index. `status` prints a freshness warning on cold-start.

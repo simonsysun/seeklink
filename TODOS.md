@@ -48,14 +48,6 @@ indexed files have drifted on disk. The daemon path does not propagate
 those warnings back to clients. Adding a `warnings` field to the daemon
 JSON response would let `cli_client` surface them in the same shape.
 
-### Daemon auto-respawn on config mismatch
-`cli_client.call()` refuses to reuse a daemon bound to a different vault
-or started with a different embedder / reranker (correctness), but falls
-back to cold-start on every subsequent CLI call after a switch until the
-user manually kills the stale daemon. Add a `shutdown` command to the
-daemon protocol so the client can shut down and respawn on mismatch,
-keeping the auto-spawn workflow intact across vault / model switches.
-
 ### Multi-vault daemon support
 The daemon binds to a single socket (`~/.rhizome/seeklink.sock`) regardless
 of vault. For multiple vaults to run concurrent daemons, hash the vault

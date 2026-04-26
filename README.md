@@ -117,7 +117,7 @@ seeklink search "machine learning"
 # Warm reranker-disabled path: ~10ms per query.
 ```
 
-The daemon stays resident across terminal sessions until you `kill` it or restart. `seeklink search` and `seeklink index` auto-spawn it when missing; `seeklink status` is always cold-start (it only reads SQLite stats, no model load) and `seeklink get` is a direct filesystem read (no daemon involved either).
+The daemon stays resident across terminal sessions until you `kill` it, restart, or switch the default vault/model config. `seeklink search` and `seeklink index` auto-spawn it when missing and auto-restart it if a stale daemon is bound to the wrong vault or model settings; `seeklink status` is always cold-start (it only reads SQLite stats, no model load) and `seeklink get` is a direct filesystem read (no daemon involved either).
 
 ## For agents
 
@@ -158,7 +158,7 @@ Options:
 
 Starts a Unix-socket daemon that keeps the embedding model (and reranker, if enabled) resident in memory. First query after startup takes ~2s for model warmup; warm queries return in ~1-2s with the reranker on (default) or ~10ms with `SEEKLINK_RERANKER_MODEL=""`.
 
-**You almost never run this directly.** `seeklink search` and `seeklink index` auto-spawn a daemon on cold machines when `--vault` is not passed. `seeklink status` is always cold-start (no model load). `seeklink get` is a direct filesystem read (no daemon). The daemon uses `SEEKLINK_VAULT` (or cwd) as its vault and never auto-exits — kill it with `kill` or restart your machine.
+**You almost never run this directly.** `seeklink search` and `seeklink index` auto-spawn a daemon on cold machines when `--vault` is not passed. If an existing daemon was started for a different vault or model config, the CLI shuts it down and starts a matching one. `seeklink status` is always cold-start (no model load). `seeklink get` is a direct filesystem read (no daemon). The daemon uses `SEEKLINK_VAULT` (or cwd) as its vault.
 
 Passing `--vault` always uses cold-start instead of the daemon, because the daemon binds to a single vault at startup.
 

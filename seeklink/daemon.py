@@ -11,7 +11,7 @@ many bytes of UTF-8 JSON, processes the request, and writes a
 length-prefixed JSON response before closing the connection.
 
 Request schema:
-    {"cmd": "search" | "status" | "index", "args": {...}}
+    {"cmd": "search" | "status" | "index" | "shutdown", "args": {...}}
 
 Response schema:
     {"ok": true,  "result": ...}   on success
@@ -27,7 +27,7 @@ import signal
 import socket
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 logger = logging.getLogger(__name__)
 
@@ -133,7 +133,16 @@ def run_daemon(vault_path: Path | None = None) -> int:
             except OSError:
                 break  # socket closed during shutdown
             try:
-                _handle_connection(conn, db, embedder, reranker, vault_root)
+                _handle_connection(
+                    conn,
+                    db,
+                    embedder,
+                    reranker,
+                    vault_root,
+                    request_shutdown=lambda: shutdown_requested.__setitem__(
+                        "flag", True
+                    ),
+                )
             except Exception:
                 logger.exception("Error handling connection")
             finally:
@@ -166,6 +175,7 @@ def _handle_connection(
     embedder: Any,
     reranker: Any,
     vault_root: Path,
+    request_shutdown: Callable[[], None] | None = None,
 ) -> None:
     """Handle a single client connection: read request, execute, send response."""
     from seeklink.ingest import ingest_file, ingest_vault
@@ -183,6 +193,7 @@ def _handle_connection(
 
     cmd = req.get("cmd")
     args = req.get("args") or {}
+    should_shutdown = False
 
     try:
         if cmd == "search":
@@ -257,11 +268,17 @@ def _handle_connection(
                 stats = ingest_vault(db, vault_root, embedder)
                 response = {"ok": True, "result": stats}
 
+        elif cmd == "shutdown":
+            response = {"ok": True, "result": {"status": "shutting_down"}}
+            should_shutdown = True
+
         else:
             _send_error(conn, f"unknown command: {cmd}")
             return
 
         _send_framed(conn, json.dumps(response).encode("utf-8"))
+        if should_shutdown and request_shutdown is not None:
+            request_shutdown()
 
     except Exception as e:
         logger.exception("Command %r failed", cmd)
