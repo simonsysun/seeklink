@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import logging
 import math
+import re
 import sqlite3
+from collections import OrderedDict
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
@@ -55,6 +57,7 @@ class SearchDiagnostics:
     bm25_ranks: dict[int, int] = field(default_factory=dict)
     vector_ranks: dict[int, int] = field(default_factory=dict)
     title_ranks: dict[int, int] = field(default_factory=dict)
+    metadata_ranks: dict[int, int] = field(default_factory=dict)
     indegree_ranks: dict[int, int] = field(default_factory=dict)
     first_stage_ranked_source_ids: list[int] = field(default_factory=list)
     rerank_candidate_source_ids: list[int] = field(default_factory=list)
@@ -146,6 +149,10 @@ def search(
     folder: str | None = None,
     reranker: "Reranker | None" = None,
     rerank_k: RerankK = 20,
+    metadata_expansion: bool = False,
+    metadata_weight: float = 1.0,
+    metadata_max_sources: int = 8,
+    metadata_neighbor_min_rank: int = 4,
     vault_root: Path | None = None,
     diagnostics: SearchDiagnostics | None = None,
 ) -> list[SearchResult]:
@@ -168,6 +175,10 @@ def search(
     - tags: only include sources with ALL specified tags
     - folder: only include sources whose path starts with this prefix
     - path_prefix: alias for folder (legacy)
+
+    metadata_expansion is an off-by-default evaluation hook. It uses conservative
+    title/alias token fallback to add local metadata candidates before the single
+    rerank pass. It is not wired into the public CLI default.
     """
     if not query.strip() or top_k <= 0:
         return []
@@ -216,10 +227,11 @@ def search(
     )
     title_ranks = {sid: i + 1 for i, sid in enumerate(title_ranked)}
 
-    # Candidate pool: union of all channel source IDs
+    # Candidate pool: union of all product channels. Metadata expansion, when
+    # enabled, is added only after filters and base ranks are known.
     candidate_ids = set(bm25_ranks.keys()) | set(vec_ranks.keys()) | set(title_ranks.keys())
     if not candidate_ids:
-        return []
+        candidate_ids = set()
 
     # Batch-fetch sources
     sources = db.get_sources_by_ids(list(candidate_ids))
@@ -230,7 +242,7 @@ def search(
             sid for sid in candidate_ids
             if sid in sources and sources[sid].path.startswith(effective_prefix)
         }
-        if not candidate_ids:
+        if not candidate_ids and not metadata_expansion:
             return []
 
     # Post-filter: tags (source must have ALL specified tags)
@@ -245,7 +257,7 @@ def search(
         if tagged_ids is None:
             tagged_ids = set()
         candidate_ids &= tagged_ids
-        if not candidate_ids:
+        if not candidate_ids and not metadata_expansion:
             return []
 
     # Apply filter to per-channel ranks
@@ -260,6 +272,51 @@ def search(
         title_ranks=title_ranks,
     )
 
+    # Base indegree and RRF ranks before optional metadata candidate injection.
+    indeg_ranked = sorted(
+        candidate_ids,
+        key=lambda sid: sources[sid].indegree if sid in sources else 0,
+        reverse=True,
+    )
+    indeg_ranks = {sid: i + 1 for i, sid in enumerate(indeg_ranked)}
+    base_scores = _rrf_fuse(
+        [bm25_ranks, vec_ranks, indeg_ranks, title_ranks],
+        weights=[bm25_weight, vec_weight, indegree_weight, title_weight],
+    )
+    base_rank_by_source_id = {
+        sid: rank
+        for rank, sid in enumerate(
+            sorted(base_scores, key=lambda sid: base_scores[sid], reverse=True),
+            start=1,
+        )
+    }
+
+    metadata_ranks: dict[int, int] = {}
+    if metadata_expansion:
+        metadata_ids = _metadata_candidate_source_ids(
+            db,
+            query,
+            base_rank_by_source_id=base_rank_by_source_id,
+            limit=metadata_max_sources,
+            neighbor_min_base_rank=metadata_neighbor_min_rank,
+        )
+        if metadata_ids:
+            metadata_sources = db.get_sources_by_ids(metadata_ids)
+            for source_id in metadata_ids:
+                source = metadata_sources.get(source_id)
+                if source is None:
+                    continue
+                if effective_prefix and not source.path.startswith(effective_prefix):
+                    continue
+                if tags and not all(tag in db.get_tags(source_id) for tag in tags):
+                    continue
+                candidate_ids.add(source_id)
+                sources[source_id] = source
+                metadata_ranks[source_id] = len(metadata_ranks) + 1
+
+    if not candidate_ids:
+        return []
+
     # Channel 3: Indegree (rank filtered candidates by indegree descending)
     indeg_ranked = sorted(
         candidate_ids,
@@ -269,9 +326,14 @@ def search(
     indeg_ranks = {sid: i + 1 for i, sid in enumerate(indeg_ranked)}
 
     # RRF fusion (4 channels)
+    channel_ranks = [bm25_ranks, vec_ranks, indeg_ranks, title_ranks]
+    channel_weights = [bm25_weight, vec_weight, indegree_weight, title_weight]
+    if metadata_ranks:
+        channel_ranks.append(metadata_ranks)
+        channel_weights.append(metadata_weight)
     scores = _rrf_fuse(
-        [bm25_ranks, vec_ranks, indeg_ranks, title_ranks],
-        weights=[bm25_weight, vec_weight, indegree_weight, title_weight],
+        channel_ranks,
+        weights=channel_weights,
     )
 
     # Sort by score descending. When a reranker is provided, fetch a larger
@@ -290,6 +352,7 @@ def search(
         diagnostics.bm25_ranks = dict(bm25_ranks)
         diagnostics.vector_ranks = dict(vec_ranks)
         diagnostics.title_ranks = dict(title_ranks)
+        diagnostics.metadata_ranks = dict(metadata_ranks)
         diagnostics.indegree_ranks = dict(indeg_ranks)
         diagnostics.first_stage_ranked_source_ids = list(first_stage_ranked)
         diagnostics.rerank_candidate_source_ids = list(ranked)
@@ -386,10 +449,11 @@ def search(
                     title_rank_1_sid = sid
                     break
             candidate_sids = {r.source_id for r in rerank_head}
+            metadata_candidate_sids = set(metadata_ranks)
             apply_blend = (
                 title_rank_1_sid is not None
                 and title_rank_1_sid in candidate_sids
-            )
+            ) or bool(metadata_candidate_sids & candidate_sids)
 
             max_rrf = rerank_head[0].score if rerank_head[0].score > 0 else 1.0
             blended: list[SearchResult] = []
@@ -597,6 +661,65 @@ def _safe_embed(embedder: Embedder, query: str) -> bytes | None:
     except Exception:
         logger.warning("Embedding failed for query %r", query, exc_info=True)
         return None
+
+
+def _metadata_query_terms(query: str) -> list[str]:
+    tokens = [
+        token
+        for token in re.findall(r"[A-Za-z0-9]+", query.casefold())
+        if len(token) >= 3
+    ]
+    terms: OrderedDict[str, None] = OrderedDict()
+    for left, right in zip(tokens, tokens[1:]):
+        terms.setdefault(f"{left} {right}", None)
+    for token in tokens:
+        terms.setdefault(token, None)
+    if not tokens and len(query.strip()) >= 3:
+        terms.setdefault(query.strip(), None)
+    return list(terms)
+
+
+def _metadata_source_seeds(db: Database, query: str, limit: int) -> list[int]:
+    """Return source IDs from conservative title/alias token fallback.
+
+    A full source-level FTS match is already handled by the title channel. This
+    helper only activates when the full query misses source title/alias FTS, then
+    tries adjacent English bigrams followed by individual meaningful terms. It
+    returns the first term's matches only to avoid broad late tokens such as
+    "memory" flooding candidates.
+    """
+    if db.search_fts_sources(query, limit=limit):
+        return []
+
+    for term in _metadata_query_terms(query):
+        rows = db.search_fts_sources(term, limit=limit)
+        if rows:
+            return [source_id for source_id, _ in rows]
+    return []
+
+
+def _metadata_candidate_source_ids(
+    db: Database,
+    query: str,
+    *,
+    base_rank_by_source_id: dict[int, int],
+    limit: int,
+    neighbor_min_base_rank: int,
+) -> list[int]:
+    seeds = _metadata_source_seeds(db, query, limit=limit)
+    out: OrderedDict[int, None] = OrderedDict()
+    for source_id in seeds:
+        out.setdefault(source_id, None)
+        if base_rank_by_source_id.get(source_id, 9999) < neighbor_min_base_rank:
+            continue
+        for link in db.get_links_from(source_id):
+            if link.target_note_id is not None:
+                out.setdefault(link.target_note_id, None)
+        for link in db.get_links_to(source_id):
+            out.setdefault(link.source_note_id, None)
+        if len(out) >= limit:
+            break
+    return list(out)[:limit]
 
 
 def _best_chunk_per_source(

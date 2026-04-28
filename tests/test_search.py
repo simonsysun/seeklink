@@ -521,6 +521,47 @@ class TestTitleChannel:
             assert "ml-basics.md" in top_paths
 
 
+class TestMetadataExpansion:
+    def test_title_alias_fallback_injects_linked_metadata_candidate(
+        self, db: Database, embedder: Embedder, vault: Path
+    ):
+        _write_md(
+            vault,
+            "atomic-notes.md",
+            "# Atomic notes\n\nAtomic notes make one self-contained claim.",
+        )
+        _write_md(
+            vault,
+            "zettelkasten.md",
+            "---\naliases: [slip-box]\n---\n"
+            "# Zettelkasten\n\nA linked note system. See [[atomic-notes]].",
+        )
+        _write_md(
+            vault,
+            "memory.md",
+            "# Memory\n\nA distractor about memory systems.",
+        )
+        ingest_file(db, vault / "atomic-notes.md", vault, embedder)
+        ingest_file(db, vault / "zettelkasten.md", vault, embedder)
+        ingest_file(db, vault / "memory.md", vault, embedder)
+
+        diagnostics = SearchDiagnostics()
+        results = search(
+            db,
+            embedder,
+            "second brain slip box",
+            top_k=5,
+            metadata_expansion=True,
+            metadata_max_sources=4,
+            metadata_neighbor_min_rank=1,
+            diagnostics=diagnostics,
+        )
+
+        paths = [result.path for result in results]
+        assert "atomic-notes.md" in paths
+        assert diagnostics.metadata_ranks
+
+
 class TestPositionAwareBlending:
     """Test title-gated rerank blending (v0.3) preserves confident
     first-stage wins while letting the reranker override when no title

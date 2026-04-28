@@ -179,6 +179,7 @@ def _source_rank_payload(
         "bm25": diagnostics.bm25_ranks.get(source_id),
         "vector": diagnostics.vector_ranks.get(source_id),
         "title": diagnostics.title_ranks.get(source_id),
+        "metadata": diagnostics.metadata_ranks.get(source_id),
         "indegree": diagnostics.indegree_ranks.get(source_id),
         "rrf": rrf_ranks.get(source_id),
         "rerank_candidate": rerank_candidate_ranks.get(source_id),
@@ -228,6 +229,7 @@ def _first_stage_payload(
             "bm25": len(diagnostics.bm25_ranks),
             "vector": len(diagnostics.vector_ranks),
             "title": len(diagnostics.title_ranks),
+            "metadata": len(diagnostics.metadata_ranks),
             "indegree": len(diagnostics.indegree_ranks),
         },
         "expected_path_ranks": expected_path_ranks,
@@ -341,6 +343,7 @@ class RunnerState:
     embedder: object
     reranker: Reranker | None
     rerank_k: RerankK
+    metadata_expansion: bool
     vault: Path
 
     @property
@@ -358,7 +361,12 @@ class RunnerState:
             pass
 
 
-def init_state(vault: Path, with_reranker: bool, rerank_k: RerankK) -> RunnerState:
+def init_state(
+    vault: Path,
+    with_reranker: bool,
+    rerank_k: RerankK,
+    metadata_expansion: bool,
+) -> RunnerState:
     db, embedder, resolved_vault = init_app(vault)
     # Trigger lazy load up-front so the first measured query excludes
     # embedder model/cache startup, matching the resident daemon path.
@@ -387,6 +395,7 @@ def init_state(vault: Path, with_reranker: bool, rerank_k: RerankK) -> RunnerSta
         embedder=embedder,
         reranker=reranker,
         rerank_k=rerank_k,
+        metadata_expansion=metadata_expansion,
         vault=resolved_vault,
     )
 
@@ -403,6 +412,7 @@ def _search_with_state(
         top_k=10,
         reranker=state.reranker,
         rerank_k=state.rerank_k,
+        metadata_expansion=state.metadata_expansion,
         diagnostics=diagnostics,
     )
 
@@ -574,6 +584,14 @@ def build_parser() -> argparse.ArgumentParser:
         help="Run without reranker. Useful for isolating blending effects. "
              "Do NOT use for the official baseline — product path has reranker on.",
     )
+    parser.add_argument(
+        "--metadata-expansion",
+        action="store_true",
+        help=(
+            "Experimental: add local title/alias metadata candidates before "
+            "the single rerank pass. Off by default; use only for quality sweeps."
+        ),
+    )
     return parser
 
 
@@ -589,6 +607,7 @@ def main() -> None:
         vault,
         with_reranker=not args.no_reranker,
         rerank_k=args.rerank_k,
+        metadata_expansion=args.metadata_expansion,
     )
     try:
         records: list[ResultRow] = []
@@ -632,6 +651,7 @@ def main() -> None:
                         "enabled": state.reranker_active,
                         "rerank_k": state.active_rerank_k,
                         "resolved_k_counts": resolved_rerank_k_counts(records),
+                        "metadata_expansion": state.metadata_expansion,
                     },
                     "aggregate": aggregate,
                     "by_tag": by_tag,

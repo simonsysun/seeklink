@@ -93,6 +93,7 @@ class TestFirstStagePayload:
         diagnostics.bm25_ranks = {1: 2}
         diagnostics.vector_ranks = {1: 5, 2: 1}
         diagnostics.title_ranks = {2: 1}
+        diagnostics.metadata_ranks = {1: 1}
         diagnostics.indegree_ranks = {1: 1, 2: 2, 3: 3}
         diagnostics.first_stage_ranked_source_ids = [2, 1, 3]
         diagnostics.rerank_candidate_source_ids = [2, 1]
@@ -130,6 +131,7 @@ class TestFirstStagePayload:
             "bm25": 1,
             "vector": 2,
             "title": 1,
+            "metadata": 1,
             "indegree": 3,
         }
         assert payload["expected_path_ranks"] == {
@@ -137,6 +139,7 @@ class TestFirstStagePayload:
                 "bm25": 2,
                 "vector": 5,
                 "title": None,
+                "metadata": 1,
                 "indegree": 1,
                 "rrf": 2,
                 "rerank_candidate": 2,
@@ -149,6 +152,7 @@ class TestFirstStagePayload:
                 "bm25": None,
                 "vector": 1,
                 "title": 1,
+                "metadata": None,
                 "indegree": 2,
                 "rrf": 1,
                 "rerank_candidate": 1,
@@ -400,6 +404,25 @@ class TestRerankOptions:
 
         assert args.no_reranker is True
 
+    def test_parser_supports_metadata_expansion(self):
+        parser = blind_run.build_parser()
+
+        args = parser.parse_args(
+            [
+                "--config",
+                "A",
+                "--queries",
+                "queries.yaml",
+                "--vault",
+                "vault",
+                "--out",
+                "out.json",
+                "--metadata-expansion",
+            ]
+        )
+
+        assert args.metadata_expansion is True
+
     def test_search_with_state_passes_rerank_k(self, monkeypatch):
         captured: dict = {}
 
@@ -413,6 +436,7 @@ class TestRerankOptions:
             captured["top_k"] = kwargs["top_k"]
             captured["reranker"] = kwargs["reranker"]
             captured["rerank_k"] = kwargs["rerank_k"]
+            captured["metadata_expansion"] = kwargs["metadata_expansion"]
             return []
 
         fake_db = object()
@@ -423,6 +447,7 @@ class TestRerankOptions:
             embedder=fake_embedder,
             reranker=fake_reranker,  # type: ignore[arg-type]
             rerank_k=7,
+            metadata_expansion=False,
             vault=Path("/tmp/vault"),
         )
         monkeypatch.setattr(blind_run, "search", fake_search)
@@ -435,6 +460,7 @@ class TestRerankOptions:
             "top_k": 10,
             "reranker": fake_reranker,
             "rerank_k": 7,
+            "metadata_expansion": False,
         }
 
     def test_search_with_state_passes_auto_rerank_k(self, monkeypatch):
@@ -445,6 +471,7 @@ class TestRerankOptions:
 
         def fake_search(db, embedder, query, **kwargs):
             captured["rerank_k"] = kwargs["rerank_k"]
+            captured["metadata_expansion"] = kwargs["metadata_expansion"]
             return []
 
         state = RunnerState(
@@ -452,12 +479,13 @@ class TestRerankOptions:
             embedder=object(),
             reranker=FakeReranker(),  # type: ignore[arg-type]
             rerank_k="auto",
+            metadata_expansion=True,
             vault=Path("/tmp/vault"),
         )
         monkeypatch.setattr(blind_run, "search", fake_search)
 
         assert blind_run._search_with_state(state, "memory") == []
-        assert captured == {"rerank_k": "auto"}
+        assert captured == {"rerank_k": "auto", "metadata_expansion": True}
 
     def test_search_with_state_passes_diagnostics(self, monkeypatch):
         captured: dict = {}
@@ -475,6 +503,7 @@ class TestRerankOptions:
             embedder=object(),
             reranker=FakeReranker(),  # type: ignore[arg-type]
             rerank_k="auto",
+            metadata_expansion=False,
             vault=Path("/tmp/vault"),
         )
         monkeypatch.setattr(blind_run, "search", fake_search)
