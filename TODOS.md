@@ -6,14 +6,14 @@ ship if and when they become worth the cost.
 ## Search quality and features
 
 ### Cross-encoder performance optimization
-The MLX reranker (`Qwen3-Reranker-0.6B`) runs at ~60 ms per pair on M3-class
-Apple Silicon, totaling ~1.2–2.7 s for 20 candidates on realistic vault
-chunks. Possible reductions:
+The MLX reranker (`Qwen3-Reranker-0.6B`) is still the main warm-query
+latency cost on realistic vault chunks. Passage text is now capped before
+reranking; remaining possible reductions:
 
-- Batch inference (process all pairs in one forward pass instead of
-  sequentially).
-- Passage truncation (cap at ~200 tokens for reranking, use full text only
-  for final display).
+- Hardware-specific batching or sequence-classification reranker probes.
+  Gate on real blind-test latency because MLX batch throughput depends on
+  prompt length and padding.
+- Better query routing so only ambiguous queries pay the full rerank budget.
 
 ### Additional CLI subcommands
 Helpers exist inside `seeklink/app.py` but are not exposed on the CLI:

@@ -8,8 +8,10 @@ accurate than bi-encoder vector similarity (which encodes query and
 passage independently), at the cost of ~60ms per pair.
 
 Implementation uses MLX (Apple's native ML framework) which runs on
-Metal GPU, achieving ~1.2s for 20 pairs on M3 Air. The model uses a
-yes/no prompt format per Qwen3-Reranker's official usage guide:
+Metal GPU. Candidate passages are capped before scoring so the reranker
+does not spend most of its time on long chunks whose opening text is
+already enough for relevance judgments. The model uses a yes/no prompt
+format per Qwen3-Reranker's official usage guide:
 the model outputs logits for 'yes' and 'no' tokens, and we convert
 the yes-probability to a relevance score.
 
@@ -31,6 +33,7 @@ _DEFAULT_MODEL = "mlx-community/Qwen3-Reranker-0.6B-mxfp8"
 _DEFAULT_INSTRUCTION = (
     "Given a web search query, retrieve relevant passages that answer the query."
 )
+_MAX_PASSAGE_TOKENS = 200
 
 
 class Reranker:
@@ -75,10 +78,39 @@ class Reranker:
                 )
                 self._disabled = True
 
+    def _token_list(self, text: str) -> list[int]:
+        """Tokenize text into a flat Python list."""
+        tokens = self._tokenizer.encode(text, return_tensors=None)
+        if not isinstance(tokens, list):
+            tokens = tokens.tolist()
+        if tokens and isinstance(tokens[0], list):
+            tokens = tokens[0]
+        return list(tokens)
+
+    def _truncate_passage(self, passage: str) -> str:
+        """Cap passage text used by the reranker; display text remains full."""
+        tokens = self._token_list(passage)
+        if len(tokens) <= _MAX_PASSAGE_TOKENS:
+            return passage
+
+        head = tokens[:_MAX_PASSAGE_TOKENS]
+        decode = getattr(self._tokenizer, "decode", None)
+        if decode is not None:
+            try:
+                return decode(head, skip_special_tokens=True)
+            except TypeError:
+                return decode(head)
+            except Exception:
+                logger.debug("Reranker passage decode failed; using char fallback")
+
+        # Conservative fallback for unusual tokenizers without decode().
+        return passage[:1200]
+
     def _score_one(self, query: str, passage: str) -> float:
         """Score a single (query, passage) pair. Returns 0-1 probability."""
         import mlx.core as mx
 
+        passage = self._truncate_passage(passage)
         prompt = (
             f"Instruct: {_DEFAULT_INSTRUCTION}\n"
             f"Query: {query}\n"
@@ -90,14 +122,8 @@ class Reranker:
         )
         text += "<think>\n"
 
-        tokens = self._tokenizer.encode(text, return_tensors=None)
-        if isinstance(tokens, list):
-            input_ids = mx.array([tokens])
-        else:
-            input_ids = mx.array(tokens)
-            if input_ids.ndim == 1:
-                input_ids = input_ids[None]
-
+        tokens = self._token_list(text)
+        input_ids = mx.array([tokens])
         logits = self._model(input_ids)
         last_logits = logits[0, -1, :]
         mx.eval(last_logits)
