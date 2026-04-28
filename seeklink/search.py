@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import logging
 import math
 import re
@@ -45,6 +46,23 @@ _CJK_TECHNICAL_RERANK_TERMS = (
     "embedding",
     "vector",
 )
+_METADATA_COMPANION_STOPWORDS = frozenset({
+    "and",
+    "are",
+    "but",
+    "does",
+    "for",
+    "from",
+    "how",
+    "into",
+    "not",
+    "the",
+    "what",
+    "when",
+    "where",
+    "why",
+    "with",
+})
 
 
 @dataclass(slots=True)
@@ -679,6 +697,56 @@ def _metadata_query_terms(query: str) -> list[str]:
     return list(terms)
 
 
+def _metadata_source_tokens(source: Source) -> set[str]:
+    raw_aliases: object
+    try:
+        raw_aliases = json.loads(source.aliases)
+    except (TypeError, ValueError):
+        raw_aliases = source.aliases
+    alias_text = (
+        " ".join(raw_aliases) if isinstance(raw_aliases, list) else str(raw_aliases)
+    )
+    text = " ".join(part for part in (source.title, alias_text, source.path) if part)
+    tokens = set(re.findall(r"[a-z0-9]+", text.casefold()))
+    expanded = set(tokens)
+    for token in tokens:
+        if token.endswith("s") and len(token) > 3:
+            expanded.add(token[:-1])
+    return expanded
+
+
+def _filter_ambiguous_metadata_rows(
+    db: Database,
+    rows: list[tuple[int, float]],
+    *,
+    term: str,
+    query_tokens: list[str],
+) -> list[tuple[int, float]]:
+    """Drop broad single-token metadata hits unless another query token agrees."""
+    if " " in term or len(rows) <= 1 or len(query_tokens) < 3:
+        return rows
+
+    companion_tokens: set[str] = set()
+    for token in query_tokens:
+        if token == term or token in _METADATA_COMPANION_STOPWORDS:
+            continue
+        companion_tokens.add(token)
+        if token.endswith("s") and len(token) > 3:
+            companion_tokens.add(token[:-1])
+    if not companion_tokens:
+        return rows
+
+    sources = db.get_sources_by_ids([source_id for source_id, _ in rows])
+    filtered: list[tuple[int, float]] = []
+    for source_id, score in rows:
+        source = sources.get(source_id)
+        if source is None:
+            continue
+        if _metadata_source_tokens(source) & companion_tokens:
+            filtered.append((source_id, score))
+    return filtered
+
+
 def _metadata_source_seeds(db: Database, query: str, limit: int) -> list[int]:
     """Return source IDs from conservative title/alias token fallback.
 
@@ -691,8 +759,19 @@ def _metadata_source_seeds(db: Database, query: str, limit: int) -> list[int]:
     if db.search_fts_sources(query, limit=limit):
         return []
 
+    query_tokens = [
+        token
+        for token in re.findall(r"[A-Za-z0-9]+", query.casefold())
+        if len(token) >= 3
+    ]
     for term in _metadata_query_terms(query):
         rows = db.search_fts_sources(term, limit=limit)
+        rows = _filter_ambiguous_metadata_rows(
+            db,
+            rows,
+            term=term,
+            query_tokens=query_tokens,
+        )
         if rows:
             return [source_id for source_id, _ in rows]
     return []

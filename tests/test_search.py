@@ -561,6 +561,39 @@ class TestMetadataExpansion:
         assert "atomic-notes.md" in paths
         assert diagnostics.metadata_ranks
 
+    def test_ambiguous_single_token_metadata_hit_needs_companion_match(
+        self, db: Database, embedder: Embedder, vault: Path
+    ):
+        _write_md(
+            vault,
+            "agent-memory.md",
+            "---\naliases: [agent-memory]\n---\n"
+            "# Agent memory patterns\n\nCoding agents use retrieval as memory.",
+        )
+        _write_md(
+            vault,
+            "memory-consolidation.md",
+            "# Memory consolidation\n\nSleep helps biological memory stabilize.",
+        )
+        ingest_file(db, vault / "agent-memory.md", vault, embedder)
+        ingest_file(db, vault / "memory-consolidation.md", vault, embedder)
+
+        diagnostics = SearchDiagnostics()
+        search(
+            db,
+            embedder,
+            "long term memory for coding agents",
+            top_k=5,
+            metadata_expansion=True,
+            diagnostics=diagnostics,
+        )
+
+        agent = db.get_source_by_path("agent-memory.md")
+        biology = db.get_source_by_path("memory-consolidation.md")
+        assert agent is not None and biology is not None
+        assert agent.id in diagnostics.metadata_ranks
+        assert biology.id not in diagnostics.metadata_ranks
+
 
 class TestPositionAwareBlending:
     """Test title-gated rerank blending (v0.3) preserves confident
