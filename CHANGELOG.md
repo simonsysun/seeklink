@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Full-vault indexing now embeds chunks in length-sorted batches instead of one file at a time, improving first-run indexing throughput on real Markdown vaults while preserving single-file indexing behavior and the existing SQLite schema.
 - The MLX reranker now caps each passage to the first 200 tokens before scoring, reducing warm-query latency on long chunks while preserving the full result preview and `seeklink get` output.
+- `seeklink search` now defaults to `--rerank-k auto`, using a smaller reranker budget for ordinary lookups while preserving deeper reranking for filtered and technical CJK queries.
 
 ### Fixed
 - `seeklink search --rerank-k N` now limits the number of candidates passed to the cross-encoder even when `N` is lower than `--top-k`; the remaining results keep first-stage RRF order.

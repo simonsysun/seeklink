@@ -208,7 +208,7 @@ def _handle_connection(
                 folder=args.get("folder"),
                 title_weight=args.get("title_weight", 1.5),
                 reranker=None if args.get("no_rerank") else reranker,
-                rerank_k=args.get("rerank_k", 20),
+                rerank_k=args.get("rerank_k", "auto"),
                 vault_root=vault_root,
             )
             response = {

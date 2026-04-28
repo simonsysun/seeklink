@@ -385,6 +385,24 @@ class TestRerankOptions:
 
         assert args.rerank_k == "auto"
 
+    def test_parser_defaults_to_auto_rerank_k(self):
+        parser = blind_run.build_parser()
+
+        args = parser.parse_args(
+            [
+                "--config",
+                "A",
+                "--queries",
+                "queries.yaml",
+                "--vault",
+                "vault",
+                "--out",
+                "out.json",
+            ]
+        )
+
+        assert args.rerank_k == "auto"
+
     def test_legacy_no_reranker_alias_still_works(self):
         parser = blind_run.build_parser()
 

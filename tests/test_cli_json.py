@@ -84,6 +84,19 @@ def test_search_json_daemon_response(capsys, monkeypatch):
     ]
 
 
+def test_search_parser_defaults_to_auto_rerank_k(monkeypatch):
+    captured: dict = {}
+
+    def fake_cmd_search(args):
+        captured["rerank_k"] = args.rerank_k
+
+    monkeypatch.setattr(sys, "argv", ["seeklink", "search", "memory"])
+    monkeypatch.setattr(cli, "_cmd_search", fake_cmd_search)
+    cli.main()
+
+    assert captured == {"rerank_k": "auto"}
+
+
 def test_search_result_to_json_truncates_preview():
     result = SearchResult(
         source_id=1,

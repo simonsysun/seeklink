@@ -99,11 +99,10 @@ def _resolve_rerank_k_with_reason(
 ) -> tuple[int, str]:
     """Resolve a numeric rerank budget for one query.
 
-    The default CLI path still passes an integer. The explicit "auto" mode is
-    a conservative policy from the 22-query pilot: English, title/alias, and
-    ordinary CJK lookups got most of the reranker benefit by reranking only the
-    top 5, while CJK / mixed technical queries needed deeper candidates to
-    recover recall.
+    The default CLI path uses "auto", a conservative policy from the 22-query
+    pilot: English, title/alias, and ordinary CJK lookups got most of the
+    reranker benefit by reranking only the top 5, while CJK / mixed technical
+    queries needed deeper candidates to recover recall.
     """
     if isinstance(rerank_k, int):
         return rerank_k, "fixed"
@@ -166,7 +165,7 @@ def search(
     tags: list[str] | None = None,
     folder: str | None = None,
     reranker: "Reranker | None" = None,
-    rerank_k: RerankK = 20,
+    rerank_k: RerankK = "auto",
     metadata_expansion: bool = False,
     metadata_weight: float = 1.0,
     metadata_max_sources: int = 8,

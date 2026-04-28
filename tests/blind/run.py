@@ -569,10 +569,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--rerank-k",
         type=_parse_rerank_k,
-        default=20,
+        default="auto",
         help=(
             "Number of first-stage candidates passed to the reranker "
-            "or 'auto' for query-sensitive routing (default: 20). "
+            "or 'auto' for query-sensitive routing (default: auto). "
             "Use with config A/C latency sweeps."
         ),
     )

@@ -115,10 +115,10 @@ def main() -> None:
     search_p.add_argument(
         "--rerank-k",
         type=_parse_rerank_k,
-        default=20,
+        default="auto",
         help=(
             "Number of first-stage candidates to rerank with the cross-encoder "
-            "or 'auto' for query-sensitive routing (default: 20)"
+            "or 'auto' for query-sensitive routing (default: auto)"
         ),
     )
     search_p.add_argument(

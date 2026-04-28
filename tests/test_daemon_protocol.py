@@ -154,3 +154,50 @@ def test_search_auto_rerank_k_passes_through(monkeypatch):
         "reranker": fake_reranker,
         "rerank_k": "auto",
     }
+
+
+def test_search_defaults_to_auto_rerank_k(monkeypatch):
+    client, server = socket.socketpair()
+    captured: dict = {}
+
+    class FakeEmbedder:
+        MODEL_NAME = "test-embedder"
+
+    class FakeReranker:
+        disabled = False
+        MODEL_NAME = "test-reranker"
+
+    def fake_search(db, embedder, query, **kwargs):
+        captured["query"] = query
+        captured["rerank_k"] = kwargs["rerank_k"]
+        return []
+
+    search_module = importlib.import_module("seeklink.search")
+    monkeypatch.setattr(search_module, "search", fake_search)
+
+    try:
+        _send_request(
+            client,
+            {
+                "cmd": "search",
+                "args": {"query": "memory"},
+            },
+        )
+        _handle_connection(
+            server,
+            db=object(),
+            embedder=FakeEmbedder(),
+            reranker=FakeReranker(),
+            vault_root=Path("/tmp/vault"),
+        )
+        response = _recv_response(client)
+    finally:
+        client.close()
+        server.close()
+
+    assert response["ok"] is True
+    assert response["result"] == []
+    assert captured == {
+        "query": "memory",
+        "rerank_k": "auto",
+    }
