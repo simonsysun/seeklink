@@ -6,11 +6,12 @@ import hashlib
 import json
 import logging
 import re
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
 
-from seeklink.chunker import chunk_markdown
+from seeklink.chunker import ChunkSpan, chunk_markdown
 from seeklink.db import Database
 from seeklink.embedder import Embedder
 from seeklink.link_parser import extract_wiki_links
@@ -20,12 +21,35 @@ logger = logging.getLogger(__name__)
 
 # Non-hidden top-level dirs excluded from indexing (mirrors freshness._SKIP_DIRS)
 _SKIP_DIRS = {"todo", "archive"}
+_EMBED_BATCH_SIZE = 32
 
 # Regex for YAML frontmatter block (handles empty frontmatter too).
 # Public — search.py imports this to map body-relative chunk offsets back
 # to full-file line numbers when building search results.
 FRONTMATTER_RE = re.compile(r"\A---\s*\n(.*?)---\s*\n", re.DOTALL)
 _FRONTMATTER_RE = FRONTMATTER_RE  # backward-compat alias within this module
+
+
+@dataclass(slots=True)
+class _PreparedFile:
+    path: Path
+    rel_path: str
+    content_hash: str
+    existing: Source | None
+    title: str
+    chunks: list[ChunkSpan]
+    targets: list[str]
+    tags: list[str]
+    aliases: list[str]
+    aliases_json: str
+    unchanged: bool = False
+
+
+@dataclass(frozen=True, slots=True)
+class _ChunkEmbeddingItem:
+    file_index: int
+    chunk_index: int
+    text: str
 
 
 def _utcnow() -> str:
@@ -169,6 +193,7 @@ def ingest_vault(
 
     stats = {"ingested": 0, "unchanged": 0, "skipped": 0, "errors": 0, "pruned": 0}
     seen_paths: set[str] = set()
+    prepared_files: list[_PreparedFile] = []
 
     for md_path in sorted(vault_root.rglob("*.md")):
         try:
@@ -179,21 +204,51 @@ def ingest_vault(
             continue
         rel_path = str(rel)
         seen_paths.add(rel_path)
-        existing = db.get_source_by_path(rel_path)
 
         try:
-            result = ingest_file(db, md_path, vault_root, embedder)
+            prepared = _prepare_file(db, md_path, vault_root)
         except Exception:
-            logger.exception("Error ingesting %s", md_path)
+            logger.exception("Error preparing %s", md_path)
             stats["errors"] += 1
             continue
 
-        if result is None:
+        if prepared is None:
             stats["skipped"] += 1
-        elif existing is not None and existing.content_hash == result.content_hash and existing.status == "indexed":
+        elif prepared.unchanged:
             stats["unchanged"] += 1
         else:
-            stats["ingested"] += 1
+            prepared_files.append(prepared)
+
+    embeddings_by_file, embed_errors = _embed_prepared_files(
+        prepared_files,
+        embedder,
+        batch_size=_EMBED_BATCH_SIZE,
+    )
+
+    for i, prepared in enumerate(prepared_files):
+        if i in embed_errors:
+            error = embed_errors[i]
+            logger.error(
+                "Error embedding %s: %s",
+                prepared.path,
+                error,
+                exc_info=(type(error), error, error.__traceback__),
+            )
+            stats["errors"] += 1
+            continue
+
+        try:
+            _write_prepared_file(
+                db,
+                prepared,
+                embeddings_by_file.get(i, []),
+            )
+        except Exception:
+            logger.exception("Error ingesting %s", prepared.path)
+            stats["errors"] += 1
+            continue
+
+        stats["ingested"] += 1
 
     # Prune DB entries for files that no longer exist on disk
     for src in db.list_sources():
@@ -203,6 +258,206 @@ def ingest_vault(
             logger.info("Pruned stale entry: %s", src.path)
 
     return stats
+
+
+def _prepare_file(
+    db: Database,
+    path: Path,
+    vault_root: Path,
+) -> _PreparedFile | None:
+    """Read and parse a markdown file before batch embedding."""
+    if path.suffix.lower() != ".md":
+        return None
+
+    try:
+        content = path.read_text(encoding="utf-8")
+    except (UnicodeDecodeError, OSError) as e:
+        logger.warning("Skipping %s: %s", path, e)
+        return None
+
+    content_hash = hashlib.sha256(content.encode("utf-8")).hexdigest()
+    rel_path = str(path.relative_to(vault_root))
+
+    existing = db.get_source_by_path(rel_path)
+    if (
+        existing is not None
+        and existing.content_hash == content_hash
+        and existing.status == "indexed"
+    ):
+        db.update_source(existing.id, indexed_at=_utcnow())
+        return _PreparedFile(
+            path=path,
+            rel_path=rel_path,
+            content_hash=content_hash,
+            existing=existing,
+            title=existing.title or path.stem,
+            chunks=[],
+            targets=[],
+            tags=[],
+            aliases=[],
+            aliases_json=existing.aliases,
+            unchanged=True,
+        )
+
+    tags, aliases, body = _parse_frontmatter(content)
+    title = _extract_title(body, path)
+    chunks = chunk_markdown(body)
+    targets = extract_wiki_links(body)
+    aliases_json = json.dumps(aliases, ensure_ascii=False)
+
+    return _PreparedFile(
+        path=path,
+        rel_path=rel_path,
+        content_hash=content_hash,
+        existing=existing,
+        title=title,
+        chunks=chunks,
+        targets=targets,
+        tags=tags,
+        aliases=aliases,
+        aliases_json=aliases_json,
+    )
+
+
+def _embed_prepared_files(
+    prepared_files: list[_PreparedFile],
+    embedder: Embedder,
+    *,
+    batch_size: int,
+) -> tuple[dict[int, list[bytes]], dict[int, Exception]]:
+    """Embed all prepared chunks in length-sorted batches.
+
+    Sorting by text length avoids mixing very short and very long chunks in the
+    same ONNX batch, which otherwise wastes time on padding. Results are mapped
+    back to the original file/chunk positions before writing.
+    """
+    items: list[_ChunkEmbeddingItem] = []
+    for file_index, prepared in enumerate(prepared_files):
+        for chunk_index, chunk in enumerate(prepared.chunks):
+            items.append(
+                _ChunkEmbeddingItem(
+                    file_index=file_index,
+                    chunk_index=chunk_index,
+                    text=chunk.text,
+                )
+            )
+
+    items.sort(key=lambda item: len(item.text))
+    embeddings_by_file: dict[int, list[bytes | None]] = {
+        file_index: [None] * len(prepared.chunks)
+        for file_index, prepared in enumerate(prepared_files)
+    }
+    errors: dict[int, Exception] = {}
+
+    def embed_items(batch: list[_ChunkEmbeddingItem]) -> None:
+        if not batch:
+            return
+        try:
+            embeddings = embedder.embed_documents([item.text for item in batch])
+            if len(embeddings) != len(batch):
+                raise RuntimeError(
+                    f"Embedder returned {len(embeddings)} embeddings "
+                    f"for {len(batch)} chunks"
+                )
+        except Exception as e:
+            if len(batch) == 1:
+                errors.setdefault(batch[0].file_index, e)
+                return
+            mid = len(batch) // 2
+            embed_items(batch[:mid])
+            embed_items(batch[mid:])
+            return
+
+        for item, embedding in zip(batch, embeddings):
+            embeddings_by_file[item.file_index][item.chunk_index] = embedding
+
+    for start in range(0, len(items), batch_size):
+        embed_items(items[start : start + batch_size])
+
+    out: dict[int, list[bytes]] = {}
+    for file_index, embeddings in embeddings_by_file.items():
+        if file_index in errors:
+            continue
+        if any(embedding is None for embedding in embeddings):
+            errors.setdefault(
+                file_index,
+                RuntimeError(
+                    f"missing embeddings for {prepared_files[file_index].rel_path}"
+                ),
+            )
+            continue
+        out[file_index] = [
+            embedding for embedding in embeddings if embedding is not None
+        ]
+
+    return out, errors
+
+
+def _write_prepared_file(
+    db: Database,
+    prepared: _PreparedFile,
+    embeddings: list[bytes],
+) -> Source | None:
+    """Persist one prepared file after embeddings have been computed."""
+    if len(embeddings) != len(prepared.chunks):
+        raise RuntimeError(
+            f"Embedding count mismatch for {prepared.rel_path}: "
+            f"{len(embeddings)} embeddings for {len(prepared.chunks)} chunks"
+        )
+
+    with db.transaction():
+        if prepared.existing is not None:
+            db.delete_chunks_by_source(prepared.existing.id)
+            db.delete_links_by_source(prepared.existing.id)
+            db.delete_tags_by_source(prepared.existing.id)
+            source = prepared.existing
+        else:
+            source = db.add_source(
+                uid=str(uuid4()),
+                path=prepared.rel_path,
+                content_hash=prepared.content_hash,
+            )
+
+        for i, (chunk_span, emb) in enumerate(zip(prepared.chunks, embeddings)):
+            db_chunk = db.add_chunk(
+                source_id=source.id,
+                content=chunk_span.text,
+                chunk_index=i,
+                char_start=chunk_span.char_start,
+                char_end=chunk_span.char_end,
+                token_count=chunk_span.token_count,
+            )
+            db.upsert_vec(db_chunk.id, emb)
+
+        for target in prepared.targets:
+            target_source = _find_source_by_target(db, target)
+            db.add_wiki_link(
+                source_note_id=source.id,
+                target_path=target,
+                target_note_id=target_source.id if target_source else None,
+            )
+
+        if prepared.tags:
+            db.add_tags(source.id, prepared.tags)
+
+        stem = prepared.path.stem
+        rel_no_ext = prepared.rel_path.removesuffix(".md")
+        db.resolve_forward_refs(stem, source.id)
+        if rel_no_ext != stem:
+            db.resolve_forward_refs(rel_no_ext, source.id)
+        for alias in prepared.aliases:
+            db.resolve_forward_refs(alias, source.id)
+
+        db.update_source(
+            source.id,
+            title=prepared.title,
+            content_hash=prepared.content_hash,
+            status="indexed",
+            indexed_at=_utcnow(),
+            aliases=prepared.aliases_json,
+        )
+
+    return db.get_source(source.id)
 
 
 def _parse_frontmatter(content: str) -> tuple[list[str], list[str], str]:

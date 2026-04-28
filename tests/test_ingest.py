@@ -43,6 +43,18 @@ def _write_md(vault: Path, rel_path: str, content: str) -> Path:
     return p
 
 
+class FakeBatchEmbedder:
+    def __init__(self, *, fail_on: str | None = None):
+        self.calls: list[list[str]] = []
+        self.fail_on = fail_on
+
+    def embed_documents(self, texts: list[str]) -> list[bytes]:
+        self.calls.append(list(texts))
+        if self.fail_on and any(self.fail_on in text for text in texts):
+            raise RuntimeError("fake embed failure")
+        return [b"\0" * (768 * 4) for _ in texts]
+
+
 class TestIngestFile:
     def test_new_file_indexed(self, db: Database, embedder: Embedder, vault: Path):
         path = _write_md(vault, "note.md", "# My Note\n\nSome content here.")
@@ -232,6 +244,48 @@ class TestIngestVault:
 
         stats = ingest_vault(db, vault, embedder)
         assert stats["ingested"] == 1  # only note.md
+
+    def test_batches_embeddings_across_files(self, db: Database, vault: Path):
+        fake = FakeBatchEmbedder()
+        for i in range(40):
+            _write_md(vault, f"note-{i:02d}.md", f"# Note {i}\n\nBatch content {i}.")
+
+        stats = ingest_vault(db, vault, fake)  # type: ignore[arg-type]
+
+        assert stats["ingested"] == 40
+        assert stats["errors"] == 0
+        call_sizes = [len(call) for call in fake.calls]
+        assert len(call_sizes) == 2
+        assert max(call_sizes) <= 32
+        assert sum(call_sizes) == 40
+
+    def test_batch_vault_resolves_forward_refs(self, db: Database, vault: Path):
+        fake = FakeBatchEmbedder()
+        _write_md(vault, "a.md", "# A\n\nSee [[b]].")
+        _write_md(vault, "b.md", "# B\n\nTarget note.")
+
+        stats = ingest_vault(db, vault, fake)  # type: ignore[arg-type]
+
+        assert stats["ingested"] == 2
+        source = db.get_source_by_path("a.md")
+        assert source is not None
+        links = db.get_links_from(source.id)
+        assert len(links) == 1
+        assert links[0].target_note_id is not None
+
+    def test_batch_embedding_failure_isolated_to_bad_file(
+        self, db: Database, vault: Path
+    ):
+        fake = FakeBatchEmbedder(fail_on="FAIL")
+        _write_md(vault, "bad.md", "# Bad\n\nThis chunk will FAIL.")
+        _write_md(vault, "good.md", "# Good\n\nThis chunk should index.")
+
+        stats = ingest_vault(db, vault, fake)  # type: ignore[arg-type]
+
+        assert stats["ingested"] == 1
+        assert stats["errors"] == 1
+        assert db.get_source_by_path("good.md") is not None
+        assert db.get_source_by_path("bad.md") is None
 
 
 class TestTimestamp:

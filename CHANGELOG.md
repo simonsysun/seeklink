@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The blind-test runner now records first-stage BM25, vector, title, metadata, indegree, and fused-RRF diagnostics in config A result JSON so retrieval misses can be classified without ad hoc scripts.
 - The blind-test runner can now enable an off-by-default local metadata candidate-injection experiment, letting title/alias fallback add source and one-hop neighbor candidates before the single rerank pass.
 
+### Changed
+- Full-vault indexing now embeds chunks in length-sorted batches instead of one file at a time, improving first-run indexing throughput on real Markdown vaults while preserving single-file indexing behavior and the existing SQLite schema.
+
 ### Fixed
 - `seeklink search --rerank-k N` now limits the number of candidates passed to the cross-encoder even when `N` is lower than `--top-k`; the remaining results keep first-stage RRF order.
 - `seeklink search` and `seeklink index` now auto-restart a stale daemon when its vault, embedder, or reranker config no longer matches the caller, avoiding repeated cold-start fallbacks after switching vaults or model settings.
