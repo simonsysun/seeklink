@@ -100,6 +100,14 @@ def _parse_rerank_k(raw: str) -> RerankK:
     return value
 
 
+def _display_path(path: Path) -> str:
+    """Use repo-relative paths in committed result JSON when possible."""
+    try:
+        return path.resolve().relative_to(REPO_ROOT).as_posix()
+    except ValueError:
+        return str(path)
+
+
 @dataclass
 class ResultRow:
     """Everything the framework's acceptance criteria need at evaluation time.
@@ -643,8 +651,8 @@ def main() -> None:
             json.dump(
                 {
                     "config": args.config,
-                    "queries_file": str(args.queries),
-                    "vault": str(vault),
+                    "queries_file": _display_path(args.queries),
+                    "vault": _display_path(vault),
                     "n_queries": len(records),
                     "with_reranker": state.reranker_active,
                     "reranking": {

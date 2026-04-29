@@ -30,8 +30,8 @@ that are technically stored.
 ## 4. File-based scratchpad
 
 Agent writes to and reads from files as needed. Simpler than vector DB;
-works well when the agent knows file paths. Claude Code's CLAUDE.md
-files and the memory file system are this pattern.
+works well when the agent knows file paths. Project instruction files
+and local scratch directories are examples of this pattern.
 
 ## 5. Knowledge graph
 

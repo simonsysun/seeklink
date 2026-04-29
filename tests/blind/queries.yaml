@@ -110,7 +110,7 @@
   expansion:
     - "LLM long-term memory patterns"
     - "RAG memory for chatbots"
-    - "how does Claude remember between sessions"
+    - "how do agents remember between sessions"
 
 - query: "attention mechanism"
   intent: "transformer attention"

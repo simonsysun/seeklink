@@ -1,0 +1,1954 @@
+{
+  "config": "C",
+  "queries_file": "tests/blind/queries.yaml",
+  "vault": "tests/corpus",
+  "n_queries": 22,
+  "with_reranker": true,
+  "reranking": {
+    "enabled": true,
+    "rerank_k": "auto",
+    "resolved_k_counts": {},
+    "metadata_expansion": false
+  },
+  "aggregate": {
+    "n_queries": 22,
+    "mean_recall_at_10": 1.0,
+    "mean_mrr": 0.9772727272727273,
+    "mean_precision_at_5": 0.4727272727272727,
+    "mean_average_precision_at_10": 0.8197420634920634,
+    "mean_ndcg_at_10": 0.9129617600536193,
+    "mean_latency_ms": 4421.025924268179,
+    "p50_latency_ms": 3148.296333150938,
+    "p95_latency_ms": 12332.817750051618
+  },
+  "by_tag": {
+    "cjk": {
+      "n_queries": 8,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 0.9375,
+      "mean_precision_at_5": 0.475,
+      "mean_average_precision_at_10": 0.8170138888888888,
+      "mean_ndcg_at_10": 0.9026014472650565,
+      "mean_latency_ms": 3842.0980626542587,
+      "p50_latency_ms": 3048.555125016719,
+      "p95_latency_ms": 12332.817750051618
+    },
+    "cjk-en-mixed": {
+      "n_queries": 4,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 1.0,
+      "mean_precision_at_5": 0.45,
+      "mean_average_precision_at_10": 0.6923115079365079,
+      "mean_ndcg_at_10": 0.8545172185026457,
+      "mean_latency_ms": 9071.029520709999,
+      "p50_latency_ms": 8246.747999917716,
+      "p95_latency_ms": 16003.740458050743
+    },
+    "common": {
+      "n_queries": 2,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 1.0,
+      "mean_precision_at_5": 0.5,
+      "mean_average_precision_at_10": 0.8089285714285714,
+      "mean_ndcg_at_10": 0.9252914533260628,
+      "mean_latency_ms": 3474.233520682901,
+      "p50_latency_ms": 4211.911083199084,
+      "p95_latency_ms": 4211.911083199084
+    },
+    "conceptual": {
+      "n_queries": 1,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 1.0,
+      "mean_precision_at_5": 0.6,
+      "mean_average_precision_at_10": 0.8055555555555555,
+      "mean_ndcg_at_10": 0.9060254355346823,
+      "mean_latency_ms": 2809.213250176981,
+      "p50_latency_ms": 2809.213250176981,
+      "p95_latency_ms": 2809.213250176981
+    },
+    "english": {
+      "n_queries": 10,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 1.0,
+      "mean_precision_at_5": 0.48,
+      "mean_average_precision_at_10": 0.8728968253968254,
+      "mean_ndcg_at_10": 0.9446278269048591,
+      "mean_latency_ms": 3024.1667749825865,
+      "p50_latency_ms": 2866.247250000015,
+      "p95_latency_ms": 5019.25175008364
+    },
+    "exact-alias": {
+      "n_queries": 2,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 1.0,
+      "mean_precision_at_5": 0.6,
+      "mean_average_precision_at_10": 0.9583333333333333,
+      "mean_ndcg_at_10": 0.9837339917445846,
+      "mean_latency_ms": 3638.2855001138523,
+      "p50_latency_ms": 5019.25175008364,
+      "p95_latency_ms": 5019.25175008364
+    },
+    "exact-title": {
+      "n_queries": 1,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 1.0,
+      "mean_precision_at_5": 0.4,
+      "mean_average_precision_at_10": 0.7666666666666666,
+      "mean_ndcg_at_10": 0.9010126104210695,
+      "mean_latency_ms": 3465.7246249262244,
+      "p50_latency_ms": 3465.7246249262244,
+      "p95_latency_ms": 3465.7246249262244
+    },
+    "long": {
+      "n_queries": 7,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 1.0,
+      "mean_precision_at_5": 0.4857142857142857,
+      "mean_average_precision_at_10": 0.7849206349206349,
+      "mean_ndcg_at_10": 0.9003666274962127,
+      "mean_latency_ms": 4378.54653573595,
+      "p50_latency_ms": 3048.555125016719,
+      "p95_latency_ms": 8246.747999917716
+    },
+    "methodology": {
+      "n_queries": 2,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 1.0,
+      "mean_precision_at_5": 0.4,
+      "mean_average_precision_at_10": 0.6736111111111112,
+      "mean_ndcg_at_10": 0.8452527860032869,
+      "mean_latency_ms": 3288.6774794897065,
+      "p50_latency_ms": 4269.092499976978,
+      "p95_latency_ms": 4269.092499976978
+    },
+    "mid-length": {
+      "n_queries": 3,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 1.0,
+      "mean_precision_at_5": 0.4666666666666666,
+      "mean_average_precision_at_10": 0.7476190476190476,
+      "mean_ndcg_at_10": 0.8900033115527876,
+      "mean_latency_ms": 3085.576500122746,
+      "p50_latency_ms": 2736.5559581667185,
+      "p95_latency_ms": 4211.911083199084
+    },
+    "natural-language": {
+      "n_queries": 2,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 1.0,
+      "mean_precision_at_5": 0.5,
+      "mean_average_precision_at_10": 0.7305555555555555,
+      "mean_ndcg_at_10": 0.8727977490006325,
+      "mean_latency_ms": 3289.69208302442,
+      "p50_latency_ms": 3371.171124977991,
+      "p95_latency_ms": 3371.171124977991
+    },
+    "off-topic": {
+      "n_queries": 2,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 1.0,
+      "mean_precision_at_5": 0.2,
+      "mean_average_precision_at_10": 1.0,
+      "mean_ndcg_at_10": 1.0,
+      "mean_latency_ms": 1591.44891705364,
+      "p50_latency_ms": 1836.7773750796914,
+      "p95_latency_ms": 1836.7773750796914
+    },
+    "scientific": {
+      "n_queries": 1,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 1.0,
+      "mean_precision_at_5": 0.4,
+      "mean_average_precision_at_10": 1.0,
+      "mean_ndcg_at_10": 1.0,
+      "mean_latency_ms": 3048.555125016719,
+      "p50_latency_ms": 3048.555125016719,
+      "p95_latency_ms": 3048.555125016719
+    },
+    "short": {
+      "n_queries": 8,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 0.9375,
+      "mean_precision_at_5": 0.45,
+      "mean_average_precision_at_10": 0.8836557539682539,
+      "mean_ndcg_at_10": 0.9356416886222501,
+      "mean_latency_ms": 4279.329671902815,
+      "p50_latency_ms": 2445.0762080959976,
+      "p95_latency_ms": 16003.740458050743
+    },
+    "synonym": {
+      "n_queries": 1,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 1.0,
+      "mean_precision_at_5": 0.6,
+      "mean_average_precision_at_10": 1.0,
+      "mean_ndcg_at_10": 1.0,
+      "mean_latency_ms": 3148.296333150938,
+      "p50_latency_ms": 3148.296333150938,
+      "p95_latency_ms": 3148.296333150938
+    },
+    "technical": {
+      "n_queries": 6,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 1.0,
+      "mean_precision_at_5": 0.5,
+      "mean_average_precision_at_10": 0.7930224867724868,
+      "mean_ndcg_at_10": 0.903343591766102,
+      "mean_latency_ms": 7353.121791694623,
+      "p50_latency_ms": 7764.537124894559,
+      "p95_latency_ms": 16003.740458050743
+    },
+    "vocab-mismatch": {
+      "n_queries": 4,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 1.0,
+      "mean_precision_at_5": 0.5,
+      "mean_average_precision_at_10": 0.7902777777777777,
+      "mean_ndcg_at_10": 0.8989851008840049,
+      "mean_latency_ms": 5515.124562312849,
+      "p50_latency_ms": 3371.171124977991,
+      "p95_latency_ms": 12332.817750051618
+    },
+    "workflow": {
+      "n_queries": 1,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 1.0,
+      "mean_precision_at_5": 0.4,
+      "mean_average_precision_at_10": 0.7222222222222222,
+      "mean_ndcg_at_10": 0.8710785440003371,
+      "mean_latency_ms": 8246.747999917716,
+      "p50_latency_ms": 8246.747999917716,
+      "p95_latency_ms": 8246.747999917716
+    }
+  },
+  "results": [
+    {
+      "query": "记忆保持力",
+      "config": "C",
+      "tags": [
+        "cjk",
+        "common",
+        "mid-length"
+      ],
+      "hits": [
+        "notes/spaced-repetition.md",
+        "notes/memory-consolidation.md",
+        "notes/forgetting-curve.md",
+        "notes/fsrs-algorithm.md",
+        "sources/wikipedia-forgetting-curve.md",
+        "sources/wikipedia-spaced-repetition.md",
+        "notes/zettelkasten.md",
+        "logs/2026-W16.md",
+        "logs/2026-W15.md",
+        "logs/2026-W14.md"
+      ],
+      "titles": [
+        "Spaced repetition",
+        "记忆巩固 Memory consolidation",
+        "遗忘曲线 Forgetting curve",
+        "FSRS algorithm",
+        "Forgetting curve (Wikipedia summary)",
+        "Spaced repetition (Wikipedia summary)",
+        "Zettelkasten",
+        "2026-W16",
+        "2026-W15",
+        "2026-W14"
+      ],
+      "snippets": [
+        "## The 记忆保持力 problem\n\nThe core question of spaced repetition is: **how do we maximize memory\nretention per hour of study?** Daily re-reading wastes most of the time\non material you already know. One-p",
+        "# 记忆巩固 Memory consolidation\n\n学习到一个新东西之后，它最初存在海马体（hippocampus）的快速编码系统里。\n如果不干预，这个痕迹几小时内就开始衰减（见 [[forgetting-curve]]）。**记忆\n巩固**指的是大脑把短期痕迹\"烧录\"到长期皮层存储的过程——主要发生在睡眠\n期间，尤其是慢波睡眠（SWS）和 REM 阶段。",
+        "## 参考\n- [[spaced-repetition]] —— 对抗遗忘曲线的主要实践\n- [[FSRS]] —— 建模和拟合遗忘曲线的现代算法\n- [[memory-consolidation]] —— 生物学层面的记忆巩固过程",
+        "## Related\n- [[spaced-repetition]] — the practice that FSRS optimizes\n- [[forgetting-curve]] — the phenomenon being modeled\n- [[note-to-card-workflow]] — how permanent notes become reviewable cards",
+        "## Countermeasures\n\nThe forgetting curve can be flattened by:\n\n1. **Active recall** — retrieving the memory, not re-reading. Each\n   retrieval attempt strengthens the trace disproportionately.\n2. **Sp",
+        "## Applications\n\nMedical education (pharmacology, anatomy), foreign language\nacquisition (vocabulary), bar exam preparation, and programming\ncertification all report significant improvements when swit",
+        "## 与 spaced repetition 的区别\n\nZettelkasten 解决的是**写作 + 思考**问题：怎么让新想法和旧想法碰撞出火花。\n[[spaced-repetition]] 解决的是**记忆保持**问题：怎么让已知的事实留在脑子里。\n\n两者互补，不重复。典型工作流：\n- Zettelkasten 建立理解和结构\n- 从 permanent notes 蒸馏出关键 claims",
+        "### See also\n- [[FSRS]] — 理论总览\n- [[forgetting-curve]] — 底层现象\n- [[memory-consolidation]] — 生物学层面的解释",
+        "## 2026-W15 周记\n\n这周主题：[[agent-memory-patterns]]。很多本地 agent 在长期记忆上卡住，\n问题往往不是模型太弱，而是 retrieval 太差。",
+        "## 2026-W14 周记\n\n本周主要在想**记忆保持力**这个问题。起因是发现自己读完 [[zettelkasten]] 相关\n的几本书（Ahrens 的《How to Take Smart Notes》，然后 Luhmann 原文的几篇\n论文），真正能\"用\"的想法其实不多。问题不在于没读懂，是没沉淀到能调用的\n程度。\n\n读懂 ≠ 记住 ≠ 会用。这三个之间的落差是学习系统设计的核心。"
+      ],
+      "scores": [
+        0.06311776759884281,
+        0.06310137310697239,
+        0.06251526251526252,
+        0.06237322114967205,
+        0.059851975981008235,
+        0.058655836916706484,
+        0.046649531024531024,
+        0.04440346790890269,
+        0.04390451832907076,
+        0.03128054740957967
+      ],
+      "relevance": {
+        "notes/spaced-repetition.md": 3.0,
+        "notes/forgetting-curve.md": 3.0,
+        "notes/memory-consolidation.md": 3.0,
+        "logs/2026-W14.md": 3.0
+      },
+      "latency_ms": 4211.911083199084,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.6,
+      "average_precision_at_10": 0.85,
+      "ndcg_at_10": 0.9447176050778179,
+      "last_expected_rank": 10,
+      "rerank_k": "auto",
+      "resolved_rerank_k": null,
+      "rerank_k_reason": null,
+      "first_stage": {},
+      "expansions_used": [
+        "间隔重复 遗忘曲线 FSRS",
+        "如何让大脑记住的东西不忘记",
+        "长期记忆保留 间隔算法"
+      ]
+    },
+    {
+      "query": "遗忘规律",
+      "config": "C",
+      "tags": [
+        "cjk",
+        "short"
+      ],
+      "hits": [
+        "logs/2026-W16.md",
+        "notes/forgetting-curve.md",
+        "sources/wikipedia-forgetting-curve.md",
+        "notes/memory-consolidation.md",
+        "logs/2026-W14.md",
+        "notes/spaced-repetition.md",
+        "notes/zettelkasten.md",
+        "notes/fsrs-algorithm.md",
+        "sources/wikipedia-spaced-repetition.md",
+        "logs/2026-W15.md"
+      ],
+      "titles": [
+        "2026-W16",
+        "遗忘曲线 Forgetting curve",
+        "Forgetting curve (Wikipedia summary)",
+        "记忆巩固 Memory consolidation",
+        "2026-W14",
+        "Spaced repetition",
+        "Zettelkasten",
+        "FSRS algorithm",
+        "Spaced repetition (Wikipedia summary)",
+        "2026-W15"
+      ],
+      "snippets": [
+        "### 遗忘曲线不是指数\n\n这个是真 surprise。传统教科书都说遗忘是 `e^(-t/τ)`（指数衰减）。但\nEbbinghaus 的原始数据和现代大样本研究都显示是**幂律**：",
+        "# 遗忘曲线 Forgetting curve\n\n赫尔曼·艾宾浩斯（Hermann Ebbinghaus, 1850-1909）在 1880 年代用自己做受试者，\n记忆了一批无意义音节（CVC 结构：WID、ZOF 等），然后在不同时间间隔后测量\n还能回忆多少。他画出的曲线是心理学史上第一条严谨的实验曲线，后来被称为\n**遗忘曲线**（forgetting curve）。\n\n基本形状：记住一个新东",
+        "## Countermeasures\n\nThe forgetting curve can be flattened by:\n\n1. **Active recall** — retrieving the memory, not re-reading. Each\n   retrieval attempt strengthens the trace disproportionately.\n2. **Sp",
+        "## 关键发现\n\n- **睡眠剥夺直接降低新记忆的保留率**。一整晚不睡后学的东西，一周后剩下\n  的比正常睡眠少 30-40%。\n- **巩固不是被动的重放**。睡眠中大脑会主动\"重新体验\"白天的关键片段，\n  这个过程压缩了时间（几十毫秒 → 几秒），并把记忆和旧知识网络建立连接。\n- **间隔重复 + 睡眠 = 最优组合**。[[spaced-repetition]] 的每次复习启动\n  一",
+        "## 2026-W14 周记\n\n本周主要在想**记忆保持力**这个问题。起因是发现自己读完 [[zettelkasten]] 相关\n的几本书（Ahrens 的《How to Take Smart Notes》，然后 Luhmann 原文的几篇\n论文），真正能\"用\"的想法其实不多。问题不在于没读懂，是没沉淀到能调用的\n程度。\n\n读懂 ≠ 记住 ≠ 会用。这三个之间的落差是学习系统设计的核心。",
+        "# Spaced repetition\n\nSpaced repetition is the practice of reviewing material at increasing\nintervals, timed to catch you right before you'd forget. It's the single\nmost evidence-backed intervention in",
+        "## 与 spaced repetition 的区别\n\nZettelkasten 解决的是**写作 + 思考**问题：怎么让新想法和旧想法碰撞出火花。\n[[spaced-repetition]] 解决的是**记忆保持**问题：怎么让已知的事实留在脑子里。\n\n两者互补，不重复。典型工作流：\n- Zettelkasten 建立理解和结构\n- 从 permanent notes 蒸馏出关键 claims",
+        "# FSRS algorithm\n\nFSRS (Free Spaced Repetition Scheduler) is a memory model that replaces\nAnki's SM-2 as the default scheduling algorithm in modern flashcard apps.\nIt predicts how long you'll remember",
+        "## History\n\nThe phenomenon was first characterized by **Hermann Ebbinghaus** in\nthe 1880s through experiments on himself using nonsense syllables. He\ndocumented the forgetting curve — retention drops ",
+        "## 2026-W15 周记\n\n这周主题：[[agent-memory-patterns]]。很多本地 agent 在长期记忆上卡住，\n问题往往不是模型太弱，而是 retrieval 太差。"
+      ],
+      "scores": [
+        0.06504494976203068,
+        0.06403688524590165,
+        0.06374807987711213,
+        0.06301166351569577,
+        0.059501666279159884,
+        0.05886896564645925,
+        0.045934988518943745,
+        0.045028884159318945,
+        0.04478277063878469,
+        0.043064182194616975
+      ],
+      "relevance": {
+        "notes/forgetting-curve.md": 3.0,
+        "sources/wikipedia-forgetting-curve.md": 3.0,
+        "notes/memory-consolidation.md": 3.0
+      },
+      "latency_ms": 1860.62724981457,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 0.5,
+      "precision_at_5": 0.6,
+      "average_precision_at_10": 0.6388888888888888,
+      "ndcg_at_10": 0.7328286204777911,
+      "last_expected_rank": 4,
+      "rerank_k": "auto",
+      "resolved_rerank_k": null,
+      "rerank_k_reason": null,
+      "first_stage": {},
+      "expansions_used": [
+        "Ebbinghaus 遗忘曲线",
+        "记忆衰减的数学规律",
+        "forgetting curve 幂律 指数"
+      ]
+    },
+    {
+      "query": "卡片盒笔记法",
+      "config": "C",
+      "tags": [
+        "cjk",
+        "methodology",
+        "mid-length"
+      ],
+      "hits": [
+        "notes/zettelkasten.md",
+        "logs/2026-W14.md",
+        "notes/spaced-repetition.md",
+        "notes/atomic-notes.md",
+        "logs/2026-W17.md",
+        "notes/note-to-card-workflow.md",
+        "notes/feynman-technique.md",
+        "sources/niklas-luhmann-zettelkasten.md",
+        "README.md",
+        "notes/fsrs-algorithm.md"
+      ],
+      "titles": [
+        "Zettelkasten",
+        "2026-W14",
+        "Spaced repetition",
+        "Atomic notes",
+        "2026-W17",
+        "Note-to-card workflow",
+        "Feynman technique",
+        "Niklas Luhmann's Zettelkasten (essay summary)",
+        "seeklink test corpus",
+        "FSRS algorithm"
+      ],
+      "snippets": [
+        "## 三类 zettel\n\n1. **Fleeting notes（灵光笔记）** - 脑子里冒出来的，随手记，几天内整理或丢弃\n2. **Literature notes（文献笔记）** - 读书/看论文时的摘录 + 自己的话复述\n3. **Permanent notes（永久笔记）** - 真正的 zettel，用自己的话写清楚一个\n   原子思想，放进卡片盒，编号，链接到相关卡片\n\nPerm",
+        "### 几个候选方案\n\n1. **纯 Zettelkasten**：每个想法写一张 permanent note，用 wikilink 连接。\n   问题：我查找卡片的姿势本来就是搜索，卡片数到 200+ 以后拓扑已经没法靠\n   脑子维护。需要 seeklink 这种工具。\n2. **Anki + FSRS**：把所有 claim 做成卡片喂给 SRS。[[spaced-repetition]]",
+        "## How it works in practice\n\nApps like Anki, SuperMemo, and Mochi implement spaced repetition via\nflashcards. You create a card (question front, answer back), and the app\nschedules it. You rate each r",
+        "## Related\n- [[zettelkasten]] — the note system this serves\n- [[note-to-card-workflow]] — turning atomic notes into SRS cards\n- [[feynman-technique]] — explaining-for-strangers discipline",
+        "### 共识\n\n- 三本书都同意 [[atomic-notes]] 是核心。\n- 三本书都警告**装饰型 vault** 的陷阱——漂亮的目录结构 ≠ 思考工具。\n- 三本都说 permanent note 必须是**自己的话**。",
+        "# Note-to-card workflow\n\nThe bridge between [[zettelkasten]] (where you *think*) and\n[[spaced-repetition]] (where you *retain*). Permanent notes are too\nlong to review daily. Flashcards are too atomic",
+        "## 与 Zettelkasten 的关系\n\n写 permanent note 的过程基本就是一次 Feynman pass：你在用自己的话重新\n组织一个想法。如果你的 zettel 是复制粘贴 + 摘录，它就不是一张工作型\nzettel，它是装饰品。见 [[zettelkasten]] 对 reformulation 的讨论。",
+        "## The structure\n\nCards were 14.8 × 10.5 cm (A6). Each card contained one thought,\none quote, or one reference, in his handwriting. Cards were kept in\napproximate topical neighborhoods inside the draw",
+        "```bash\nSEEKLINK_VAULT=tests/corpus python -m seeklink index\n```\n",
+        "## Related\n- [[spaced-repetition]] — the practice that FSRS optimizes\n- [[forgetting-curve]] — the phenomenon being modeled\n- [[note-to-card-workflow]] — how permanent notes become reviewable cards"
+      ],
+      "scores": [
+        0.06505334374186833,
+        0.06329098952049772,
+        0.06066176470588235,
+        0.06062726142017187,
+        0.06042774214213215,
+        0.04838709677419355,
+        0.04596351361057244,
+        0.04556626169529395,
+        0.04370384104323105,
+        0.03076923076923077
+      ],
+      "relevance": {
+        "notes/zettelkasten.md": 3.0,
+        "sources/niklas-luhmann-zettelkasten.md": 3.0,
+        "notes/atomic-notes.md": 3.0
+      },
+      "latency_ms": 2308.262459002435,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.4,
+      "average_precision_at_10": 0.625,
+      "ndcg_at_10": 0.8194270280062367,
+      "last_expected_rank": 8,
+      "rerank_k": "auto",
+      "resolved_rerank_k": null,
+      "rerank_k_reason": null,
+      "first_stage": {},
+      "expansions_used": [
+        "Zettelkasten Luhmann",
+        "永久笔记 原子笔记",
+        "slip-box note taking"
+      ]
+    },
+    {
+      "query": "红烧肉做法",
+      "config": "C",
+      "tags": [
+        "cjk",
+        "off-topic",
+        "short"
+      ],
+      "hits": [
+        "recipes/red-braised-pork.md",
+        "recipes/pad-thai.md",
+        "README.md",
+        "notes/attention-mechanism.md",
+        "notes/reciprocal-rank-fusion.md",
+        "notes/note-to-card-workflow.md",
+        "recipes/sourdough-starter.md",
+        "notes/deep-work-deliberate-practice.md",
+        "logs/2026-W16.md",
+        "cards/card-rrf-formula.md"
+      ],
+      "titles": [
+        "红烧肉 Red-braised pork",
+        "Pad Thai",
+        "seeklink test corpus",
+        "Attention mechanism",
+        "Reciprocal Rank Fusion (RRF)",
+        "Note-to-card workflow",
+        "Sourdough starter from scratch",
+        "Deep work and deliberate practice",
+        "2026-W16",
+        "Card: RRF formula"
+      ],
+      "snippets": [
+        "# 红烧肉 Red-braised pork\n\n经典的家常做法，南方版（上海/无锡偏甜）。",
+        "## Ingredients (serves 2)\n\nFor the sauce:\n- 3 tbsp tamarind paste\n- 2 tbsp palm sugar (or brown sugar)\n- 2 tbsp fish sauce\n- 1 tbsp soy sauce\n\nFor the stir-fry:\n- 200g flat rice noodles, soaked in roo",
+        "```bash\nSEEKLINK_VAULT=tests/corpus python -m seeklink index\n```\n",
+        "## Why it works\n\n- **Parallel**: unlike RNNs, all positions compute simultaneously.\n- **Long range**: the softmax over all positions means a token 2000\n  away can still influence the output if its key",
+        "```\nscore(c) = Σ_i w_i / (k + rank_i(c))\n```\n",
+        "## The distillation step\n\nFor each permanent note worth retaining:\n\n1. Identify the **claim** the note argues for. One sentence.\n2. Write it as a question whose answer is that claim. Front side.\n3. Wr",
+        "## What can go wrong\n\n- **Pink/orange streaks**: contamination. Throw it out, start over.\n- **Harsh ammonia smell**: starving. Feed more frequently.\n- **Liquid on top (\"hooch\")**: hungry but not dange",
+        "## The daily structure that works\n\nFor a knowledge worker: **2-4 hours of deep work, early in the day,\nbefore meetings/email/messaging.** Protect it ritualistically. This\nis where learning, writing, a",
+        "```\nR(t) = 1 / (1 + (t/S)^c)\n```\n",
+        "```\nscore(c) = Σ_i w_i / (k + rank_i(c))\n```\n"
+      ],
+      "scores": [
+        0.04918032786885246,
+        0.048131080389144903,
+        0.04621952999562108,
+        0.04395604395604395,
+        0.03149801587301587,
+        0.03036576949620428,
+        0.03007688828584351,
+        0.02967032967032967,
+        0.02919863597612958,
+        0.015625
+      ],
+      "relevance": {
+        "recipes/red-braised-pork.md": 3.0
+      },
+      "latency_ms": 1346.1204590275884,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.2,
+      "average_precision_at_10": 1.0,
+      "ndcg_at_10": 1.0,
+      "last_expected_rank": 1,
+      "rerank_k": "auto",
+      "resolved_rerank_k": null,
+      "rerank_k_reason": null,
+      "first_stage": {},
+      "expansions_used": [
+        "五花肉 糖色 红烧",
+        "braised pork belly Chinese"
+      ]
+    },
+    {
+      "query": "睡眠对记忆的影响",
+      "config": "C",
+      "tags": [
+        "cjk",
+        "scientific",
+        "long"
+      ],
+      "hits": [
+        "notes/memory-consolidation.md",
+        "sources/wikipedia-forgetting-curve.md",
+        "notes/forgetting-curve.md",
+        "notes/spaced-repetition.md",
+        "sources/wikipedia-spaced-repetition.md",
+        "logs/2026-W14.md",
+        "notes/zettelkasten.md",
+        "logs/2026-W16.md",
+        "notes/deep-work-deliberate-practice.md",
+        "notes/fsrs-algorithm.md"
+      ],
+      "titles": [
+        "记忆巩固 Memory consolidation",
+        "Forgetting curve (Wikipedia summary)",
+        "遗忘曲线 Forgetting curve",
+        "Spaced repetition",
+        "Spaced repetition (Wikipedia summary)",
+        "2026-W14",
+        "Zettelkasten",
+        "2026-W16",
+        "Deep work and deliberate practice",
+        "FSRS algorithm"
+      ],
+      "snippets": [
+        "## 关键发现\n\n- **睡眠剥夺直接降低新记忆的保留率**。一整晚不睡后学的东西，一周后剩下\n  的比正常睡眠少 30-40%。\n- **巩固不是被动的重放**。睡眠中大脑会主动\"重新体验\"白天的关键片段，\n  这个过程压缩了时间（几十毫秒 → 几秒），并把记忆和旧知识网络建立连接。\n- **间隔重复 + 睡眠 = 最优组合**。[[spaced-repetition]] 的每次复习启动\n  一",
+        "## Countermeasures\n\nThe forgetting curve can be flattened by:\n\n1. **Active recall** — retrieving the memory, not re-reading. Each\n   retrieval attempt strengthens the trace disproportionately.\n2. **Sp",
+        "## 实践启示\n\n- 学习后**当天晚上**做一次短复习比三天后多一次复习效果更好。\n- 长间隔不等于懒复习——只要每次都\"踩\"在曲线下降的关键点。\n- 课堂教学的一次性讲授，如果没有后续复习机制，从遗忘曲线看基本是浪费。",
+        "## The 记忆保持力 problem\n\nThe core question of spaced repetition is: **how do we maximize memory\nretention per hour of study?** Daily re-reading wastes most of the time\non material you already know. One-p",
+        "## History\n\nThe phenomenon was first characterized by **Hermann Ebbinghaus** in\nthe 1880s through experiments on himself using nonsense syllables. He\ndocumented the forgetting curve — retention drops ",
+        "## 2026-W14 周记\n\n本周主要在想**记忆保持力**这个问题。起因是发现自己读完 [[zettelkasten]] 相关\n的几本书（Ahrens 的《How to Take Smart Notes》，然后 Luhmann 原文的几篇\n论文），真正能\"用\"的想法其实不多。问题不在于没读懂，是没沉淀到能调用的\n程度。\n\n读懂 ≠ 记住 ≠ 会用。这三个之间的落差是学习系统设计的核心。",
+        "## 与 spaced repetition 的区别\n\nZettelkasten 解决的是**写作 + 思考**问题：怎么让新想法和旧想法碰撞出火花。\n[[spaced-repetition]] 解决的是**记忆保持**问题：怎么让已知的事实留在脑子里。\n\n两者互补，不重复。典型工作流：\n- Zettelkasten 建立理解和结构\n- 从 permanent notes 蒸馏出关键 claims",
+        "### See also\n- [[FSRS]] — 理论总览\n- [[forgetting-curve]] — 底层现象\n- [[memory-consolidation]] — 生物学层面的解释",
+        "## Related\n- [[feynman-technique]]\n- [[zettelkasten]] — benefits from deep work, suffers without",
+        "## Why FSRS beats SM-2\n\nSM-2 uses a fixed formula tied to a user-reported \"ease factor\" per card.\nIt doesn't learn from population data, and its intervals tend to grow\ntoo fast for hard cards and too "
+      ],
+      "scores": [
+        0.06557377049180328,
+        0.06351569577376029,
+        0.06325967938871165,
+        0.06301166351569577,
+        0.05890231092436975,
+        0.044782770638784684,
+        0.04435015112764473,
+        0.03055037313432836,
+        0.03055037313432836,
+        0.03007688828584351
+      ],
+      "relevance": {
+        "notes/memory-consolidation.md": 3.0,
+        "sources/wikipedia-forgetting-curve.md": 3.0
+      },
+      "latency_ms": 3048.555125016719,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.4,
+      "average_precision_at_10": 1.0,
+      "ndcg_at_10": 1.0,
+      "last_expected_rank": 2,
+      "rerank_k": "auto",
+      "resolved_rerank_k": null,
+      "rerank_k_reason": null,
+      "first_stage": {},
+      "expansions_used": [
+        "睡眠 巩固 海马体 记忆",
+        "sleep consolidation hippocampus",
+        "为什么熬夜学不进去"
+      ]
+    },
+    {
+      "query": "spaced repetition algorithm",
+      "config": "C",
+      "tags": [
+        "english",
+        "common",
+        "mid-length"
+      ],
+      "hits": [
+        "notes/fsrs-algorithm.md",
+        "notes/spaced-repetition.md",
+        "notes/note-to-card-workflow.md",
+        "sources/anki-and-flashcards-intro.md",
+        "notes/forgetting-curve.md",
+        "logs/2026-W16.md",
+        "sources/wikipedia-spaced-repetition.md",
+        "logs/2026-W14.md",
+        "notes/zettelkasten.md",
+        "notes/memory-consolidation.md"
+      ],
+      "titles": [
+        "FSRS algorithm",
+        "Spaced repetition",
+        "Note-to-card workflow",
+        "Anki and flashcards — a practical intro",
+        "遗忘曲线 Forgetting curve",
+        "2026-W16",
+        "Spaced repetition (Wikipedia summary)",
+        "2026-W14",
+        "Zettelkasten",
+        "记忆巩固 Memory consolidation"
+      ],
+      "snippets": [
+        "# FSRS algorithm\n\nFSRS (Free Spaced Repetition Scheduler) is a memory model that replaces\nAnki's SM-2 as the default scheduling algorithm in modern flashcard apps.\nIt predicts how long you'll remember",
+        "## How it works in practice\n\nApps like Anki, SuperMemo, and Mochi implement spaced repetition via\nflashcards. You create a card (question front, answer back), and the app\nschedules it. You rate each r",
+        "## Related\n- [[FSRS]] — scheduler that processes the cards\n- [[atomic-notes]] — what you're distilling from\n- [[spaced-repetition]] — why distillation is worth doing",
+        "## Algorithms\n\nAnki's default scheduler has been **SM-2** (derived from SuperMemo's\n1985 algorithm) for most of its history. Since 2024, **FSRS** is\nshipped as an optional (now default on 2.1.66+) rep",
+        "## 参考\n- [[spaced-repetition]] —— 对抗遗忘曲线的主要实践\n- [[FSRS]] —— 建模和拟合遗忘曲线的现代算法\n- [[memory-consolidation]] —— 生物学层面的记忆巩固过程",
+        "```\nR(t) = 1 / (1 + (t/S)^c)\n```\n",
+        "## Modern implementations\n\nThe first computer-based spaced repetition system was **SuperMemo**,\ndeveloped by Piotr Wozniak starting in 1985. SuperMemo introduced the\nSM-2 algorithm, which is still wid",
+        "### 下周计划\n\n- 再读一遍 [[FSRS]] paper，理解它的 90% retrievability 目标是怎么校的\n- 调查 [[forgetting-curve]] 对\"会用\"的影响（不是\"还记得\"）\n- 比较纯关键词、向量搜索、混合检索在个人笔记里的召回差异",
+        "## 与 spaced repetition 的区别\n\nZettelkasten 解决的是**写作 + 思考**问题：怎么让新想法和旧想法碰撞出火花。\n[[spaced-repetition]] 解决的是**记忆保持**问题：怎么让已知的事实留在脑子里。\n\n两者互补，不重复。典型工作流：\n- Zettelkasten 建立理解和结构\n- 从 permanent notes 蒸馏出关键 claims",
+        "## Related\n- [[forgetting-curve]] —— 如果不巩固的衰减曲线\n- [[spaced-repetition]] —— 利用巩固窗口的实践"
+      ],
+      "scores": [
+        0.06478893337698202,
+        0.06327607388058208,
+        0.04713064713064713,
+        0.046543778801843315,
+        0.04526926877470356,
+        0.04483608742004264,
+        0.03128054740957967,
+        0.029857397504456328,
+        0.02967032967032967,
+        0.02964426877470356
+      ],
+      "relevance": {
+        "notes/fsrs-algorithm.md": 3.0,
+        "notes/spaced-repetition.md": 3.0,
+        "sources/wikipedia-spaced-repetition.md": 3.0,
+        "logs/2026-W16.md": 3.0
+      },
+      "latency_ms": 2736.5559581667185,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.4,
+      "average_precision_at_10": 0.7678571428571428,
+      "ndcg_at_10": 0.9058653015743078,
+      "last_expected_rank": 7,
+      "rerank_k": "auto",
+      "resolved_rerank_k": null,
+      "rerank_k_reason": null,
+      "first_stage": {},
+      "expansions_used": [
+        "SRS scheduler Anki SuperMemo",
+        "how Anki decides when to show a card",
+        "FSRS SM-2 memory model"
+      ]
+    },
+    {
+      "query": "why is BM25 still useful",
+      "config": "C",
+      "tags": [
+        "english",
+        "technical",
+        "long"
+      ],
+      "hits": [
+        "notes/bm25-intuition.md",
+        "notes/retrieval-augmented-generation.md",
+        "notes/sqlite-fts5-cjk.md",
+        "notes/vector-embeddings.md",
+        "notes/reciprocal-rank-fusion.md",
+        "notes/agent-memory-patterns.md",
+        "notes/attention-mechanism.md",
+        "logs/2026-W18.md",
+        "notes/note-to-card-workflow.md",
+        "logs/2026-W15.md"
+      ],
+      "titles": [
+        "BM25 intuition",
+        "Retrieval-augmented generation",
+        "SQLite FTS5 + CJK (jieba)",
+        "Vector embeddings",
+        "Reciprocal Rank Fusion (RRF)",
+        "Agent memory patterns",
+        "Attention mechanism",
+        "2026-W18",
+        "Note-to-card workflow",
+        "2026-W15"
+      ],
+      "snippets": [
+        "# BM25 intuition\n\nBM25 is the classic keyword-matching ranking function from 1990s IR\nresearch. It scores a (query, document) pair based on how often the\nquery's terms appear in the document, with two",
+        "## Related\n- [[BM25]] — keyword retrieval channel\n- [[RRF]] — fusion\n- [[vector-embeddings]] — semantic channel\n- [[attention-mechanism]] — reranker internals\n- [[agent-memory-patterns]] — RAG as memo",
+        "## Related\n- [[bm25-intuition]] — BM25 is what runs on this index\n- [[RRF]] — how the BM25 channel gets combined with vector",
+        "## Related\n- [[BM25]] — sparse retrieval counterpart\n- [[attention-mechanism]] — what the embedder is doing internally\n- [[retrieval-augmented-generation]] — end-to-end system",
+        "## Why RRF works\n\n- **Scale-free**: BM25 returns raw scores in [0, 30]; vector similarity\n  returns [0, 1]. Can't average these directly. RRF only uses ranks,\n  which are always 1, 2, 3...\n- **Rank-se",
+        "## Search quality dominates\n\nIn all RAG-based memory systems, **the agent is only as smart as its\nsearch layer**. If seeklink returns the wrong three chunks, the agent\nanswers wrong with confidence. R",
+        "## Relevance to retrieval\n\nA **cross-encoder reranker** (like Qwen3-Reranker-0.6B) uses attention\nacross the concatenated `(query, passage)` pair — that's what makes it\nmore accurate than a bi-encoder",
+        "### 4. Hybrid retrieval 的论文很多但工具很少\n\nIR 会议论文几乎都在做 hybrid + rerank，但 pip install 能用的\nend-to-end 工具寥寥无几。seeklink 的定位就站这个缝里：论文早有，\n好用的 CLI 罕见。",
+        "## Example\n\n**Note** ([[FSRS]]): argues FSRS beats SM-2 because it models\npopulation-fitted stability instead of per-card ease.\n\n**Card front**: \"Why does FSRS outperform SM-2 at the same retention\nta",
+        "### 讨论记录\n\n整理了一组设计观察：\n\n1. LLM 本身 stateless，所有\"记忆\"都是 retrieval。\n2. Retrieval 质量 = agent 智商上限。返回错的 chunk = agent 自信地胡说。\n3. 现有方案多是 vector-only RAG，对 CJK 极差，对 exact-keyword 极差。\n4. 没人认真做 hybrid + rerank 这套工"
+      ],
+      "scores": [
+        0.06403612252369524,
+        0.06264428275035797,
+        0.06168458525348346,
+        0.061355413377472204,
+        0.04715356328259554,
+        0.04500226142017187,
+        0.04440346790890269,
+        0.0315136476426799,
+        0.030117753623188408,
+        0.029411764705882353
+      ],
+      "relevance": {
+        "notes/bm25-intuition.md": 3.0,
+        "notes/retrieval-augmented-generation.md": 3.0,
+        "notes/reciprocal-rank-fusion.md": 3.0
+      },
+      "latency_ms": 2706.31195907481,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.6,
+      "average_precision_at_10": 0.8666666666666667,
+      "ndcg_at_10": 0.9469024295259745,
+      "last_expected_rank": 5,
+      "rerank_k": "auto",
+      "resolved_rerank_k": null,
+      "rerank_k_reason": null,
+      "first_stage": {},
+      "expansions_used": [
+        "keyword retrieval vs vector search",
+        "hybrid retrieval BM25 dense",
+        "when does lexical match beat semantic"
+      ]
+    },
+    {
+      "query": "agent memory architectures",
+      "config": "C",
+      "tags": [
+        "english",
+        "technical",
+        "long"
+      ],
+      "hits": [
+        "notes/agent-memory-patterns.md",
+        "logs/2026-W15.md",
+        "notes/spaced-repetition.md",
+        "notes/fsrs-algorithm.md",
+        "notes/retrieval-augmented-generation.md",
+        "notes/forgetting-curve.md",
+        "notes/zettelkasten.md",
+        "notes/memory-consolidation.md",
+        "notes/attention-mechanism.md",
+        "logs/2026-W14.md"
+      ],
+      "titles": [
+        "Agent memory patterns",
+        "2026-W15",
+        "Spaced repetition",
+        "FSRS algorithm",
+        "Retrieval-augmented generation",
+        "遗忘曲线 Forgetting curve",
+        "Zettelkasten",
+        "记忆巩固 Memory consolidation",
+        "Attention mechanism",
+        "2026-W14"
+      ],
+      "snippets": [
+        "# Agent memory patterns\n\nLLMs are stateless between calls. Any \"memory\" an agent exhibits comes\nfrom something external that persists across invocations. A few patterns\nin current practice:",
+        "## 2026-W15 周记\n\n这周主题：[[agent-memory-patterns]]。很多本地 agent 在长期记忆上卡住，\n问题往往不是模型太弱，而是 retrieval 太差。",
+        "## Related\n- [[FSRS]] — state-of-the-art scheduler\n- [[forgetting-curve]] — what the spacing fights against\n- [[feynman-technique]] — complementary practice for deep understanding\n- [[zettelkasten]] —",
+        "# FSRS algorithm\n\nFSRS (Free Spaced Repetition Scheduler) is a memory model that replaces\nAnki's SM-2 as the default scheduling algorithm in modern flashcard apps.\nIt predicts how long you'll remember",
+        "## Related\n- [[BM25]] — keyword retrieval channel\n- [[RRF]] — fusion\n- [[vector-embeddings]] — semantic channel\n- [[attention-mechanism]] — reranker internals\n- [[agent-memory-patterns]] — RAG as memo",
+        "## 参考\n- [[spaced-repetition]] —— 对抗遗忘曲线的主要实践\n- [[FSRS]] —— 建模和拟合遗忘曲线的现代算法\n- [[memory-consolidation]] —— 生物学层面的记忆巩固过程",
+        "## 与 spaced repetition 的区别\n\nZettelkasten 解决的是**写作 + 思考**问题：怎么让新想法和旧想法碰撞出火花。\n[[spaced-repetition]] 解决的是**记忆保持**问题：怎么让已知的事实留在脑子里。\n\n两者互补，不重复。典型工作流：\n- Zettelkasten 建立理解和结构\n- 从 permanent notes 蒸馏出关键 claims",
+        "# 记忆巩固 Memory consolidation\n\n学习到一个新东西之后，它最初存在海马体（hippocampus）的快速编码系统里。\n如果不干预，这个痕迹几小时内就开始衰减（见 [[forgetting-curve]]）。**记忆\n巩固**指的是大脑把短期痕迹\"烧录\"到长期皮层存储的过程——主要发生在睡眠\n期间，尤其是慢波睡眠（SWS）和 REM 阶段。",
+        "# Attention mechanism\n\nThe operation at the core of Transformer architectures. Given a sequence\nof tokens, attention lets every position look at every other position\nwith learnable weights. For the ou",
+        "### 当前想法\n\n**三者都要**，但不要求每个想法都进所有三个层。典型生命周期：\n- 读到一个想法 → fleeting note（草）\n- 想清楚了 → permanent note in zettelkasten\n- 想不想持续调用？想 → 蒸馏成 1-3 张 flashcard 进 Anki\n- 不想进 Anki 也 ok，zettelkasten 查得到就行\n\n关键是 **seekli"
+      ],
+      "scores": [
+        0.06530936012691697,
+        0.06400409626216078,
+        0.0610865036704589,
+        0.05927552426197309,
+        0.04697234084890787,
+        0.045715497737556565,
+        0.044864612511671335,
+        0.031054405392392875,
+        0.031009615384615385,
+        0.030536130536130537
+      ],
+      "relevance": {
+        "notes/agent-memory-patterns.md": 3.0,
+        "notes/retrieval-augmented-generation.md": 3.0,
+        "logs/2026-W15.md": 3.0
+      },
+      "latency_ms": 2866.247250000015,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.6,
+      "average_precision_at_10": 0.8666666666666667,
+      "ndcg_at_10": 0.9469024295259745,
+      "last_expected_rank": 5,
+      "rerank_k": "auto",
+      "resolved_rerank_k": null,
+      "rerank_k_reason": null,
+      "first_stage": {},
+      "expansions_used": [
+        "LLM long-term memory patterns",
+        "RAG memory for chatbots",
+        "how do agents remember between sessions"
+      ]
+    },
+    {
+      "query": "attention mechanism",
+      "config": "C",
+      "tags": [
+        "english",
+        "technical",
+        "short"
+      ],
+      "hits": [
+        "notes/attention-mechanism.md",
+        "cards/card-attention-formula.md",
+        "notes/vector-embeddings.md",
+        "notes/agent-memory-patterns.md",
+        "logs/2026-W14.md",
+        "notes/retrieval-augmented-generation.md",
+        "logs/2026-W15.md",
+        "notes/reciprocal-rank-fusion.md",
+        "notes/zettelkasten.md",
+        "notes/forgetting-curve.md"
+      ],
+      "titles": [
+        "Attention mechanism",
+        "Card: Attention formula",
+        "Vector embeddings",
+        "Agent memory patterns",
+        "2026-W14",
+        "Retrieval-augmented generation",
+        "2026-W15",
+        "Reciprocal Rank Fusion (RRF)",
+        "Zettelkasten",
+        "遗忘曲线 Forgetting curve"
+      ],
+      "snippets": [
+        "# Attention mechanism\n\nThe operation at the core of Transformer architectures. Given a sequence\nof tokens, attention lets every position look at every other position\nwith learnable weights. For the ou",
+        "Query `Q`, key `K`, value `V` are linear projections of the input.\nScaling by `sqrt(d_k)` prevents softmax saturation at high dimension.\n\nSee [[attention-mechanism]] for why each piece is there.",
+        "## Related\n- [[BM25]] — sparse retrieval counterpart\n- [[attention-mechanism]] — what the embedder is doing internally\n- [[retrieval-augmented-generation]] — end-to-end system",
+        "## Search quality dominates\n\nIn all RAG-based memory systems, **the agent is only as smart as its\nsearch layer**. If seeklink returns the wrong three chunks, the agent\nanswers wrong with confidence. R",
+        "### 下周计划\n\n- 再读一遍 [[FSRS]] paper，理解它的 90% retrievability 目标是怎么校的\n- 调查 [[forgetting-curve]] 对\"会用\"的影响（不是\"还记得\"）\n- 比较纯关键词、向量搜索、混合检索在个人笔记里的召回差异",
+        "## Related\n- [[BM25]] — keyword retrieval channel\n- [[RRF]] — fusion\n- [[vector-embeddings]] — semantic channel\n- [[attention-mechanism]] — reranker internals\n- [[agent-memory-patterns]] — RAG as memo",
+        "### 检索系统的设计要求\n\n个人 vault + agent 场景需要的不只是\"又一个语义搜索\"，而是把信息检索里\n成熟的 hybrid retrieval 结构做成一个本地工具：\n- BM25 + vector + graph + title 四路召回（[[RRF]] 融合）\n- 可选 cross-encoder 重排（[[attention-mechanism]]）\n- CJK 一等公民（j",
+        "## Related\n- [[bm25-intuition]]\n- [[vector-embeddings]]\n- [[retrieval-augmented-generation]]",
+        "## 与 spaced repetition 的区别\n\nZettelkasten 解决的是**写作 + 思考**问题：怎么让新想法和旧想法碰撞出火花。\n[[spaced-repetition]] 解决的是**记忆保持**问题：怎么让已知的事实留在脑子里。\n\n两者互补，不重复。典型工作流：\n- Zettelkasten 建立理解和结构\n- 从 permanent notes 蒸馏出关键 claims",
+        "## 参考\n- [[spaced-repetition]] —— 对抗遗忘曲线的主要实践\n- [[FSRS]] —— 建模和拟合遗忘曲线的现代算法\n- [[memory-consolidation]] —— 生物学层面的记忆巩固过程"
+      ],
+      "scores": [
+        0.06530936012691699,
+        0.06426850662704708,
+        0.06182889822595705,
+        0.0460397465437788,
+        0.045228403437358664,
+        0.04459570280465803,
+        0.044143111790170615,
+        0.03055037313432836,
+        0.030090497737556562,
+        0.02967032967032967
+      ],
+      "relevance": {
+        "notes/attention-mechanism.md": 3.0,
+        "cards/card-attention-formula.md": 3.0
+      },
+      "latency_ms": 2445.0762080959976,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.4,
+      "average_precision_at_10": 1.0,
+      "ndcg_at_10": 1.0,
+      "last_expected_rank": 2,
+      "rerank_k": "auto",
+      "resolved_rerank_k": null,
+      "rerank_k_reason": null,
+      "first_stage": {},
+      "expansions_used": [
+        "scaled dot-product attention",
+        "multi-head self attention",
+        "softmax QK^T / sqrt(d_k)"
+      ]
+    },
+    {
+      "query": "sourdough bread starter",
+      "config": "C",
+      "tags": [
+        "english",
+        "off-topic",
+        "short"
+      ],
+      "hits": [
+        "recipes/sourdough-starter.md",
+        "README.md",
+        "notes/reciprocal-rank-fusion.md",
+        "recipes/pad-thai.md",
+        "logs/2026-W18.md",
+        "notes/note-to-card-workflow.md",
+        "recipes/red-braised-pork.md",
+        "logs/2026-W15.md",
+        "notes/vector-embeddings.md",
+        "notes/sqlite-fts5-cjk.md"
+      ],
+      "titles": [
+        "Sourdough starter from scratch",
+        "seeklink test corpus",
+        "Reciprocal Rank Fusion (RRF)",
+        "Pad Thai",
+        "2026-W18",
+        "Note-to-card workflow",
+        "红烧肉 Red-braised pork",
+        "2026-W15",
+        "Vector embeddings",
+        "SQLite FTS5 + CJK (jieba)"
+      ],
+      "snippets": [
+        "# Sourdough starter from scratch\n\nTakes 7-10 days to build a viable starter. No yeast, no commercial\ncultures. Just flour, water, and wild yeast from the air.",
+        "## Layout\n\n| Folder | Purpose | Style |\n|---|---|---|\n| `notes/` | Permanent notes | Strong frontmatter (tags, aliases), clear titles, wikilinks between notes, 300-800 words |\n| `logs/` | Weekly/daily",
+        "```\nbm25:    1.0\nvector:  1.0\nindegree: 0.3\ntitle:   1.5\n```\n",
+        "## Method\n\n1. **Make sauce**: whisk tamarind, palm sugar, fish sauce, soy sauce in\n   a bowl until sugar dissolves. Taste — should be equal parts sweet,\n   salty, sour. Adjust.\n2. **Prep**: have all i",
+        "## 2026-W18 — 关于 RAG pipeline 的几个碎片\n\nrandom notes this week, 没打算写成完整论证。",
+        "## Related\n- [[FSRS]] — scheduler that processes the cards\n- [[atomic-notes]] — what you're distilling from\n- [[spaced-repetition]] — why distillation is worth doing",
+        "## 用料\n\n- 五花肉 500g（三层分明的最好）\n- 生抽 2 汤匙\n- 老抽 1 汤匙\n- 冰糖 30g\n- 料酒 2 汤匙\n- 姜片 3 片\n- 葱段 2 根\n- 八角 1 颗\n- 水或高汤 约 500ml",
+        "### 下周\n\n用小型双语 fixture 验证 reranking、line ranges、title/alias queries。",
+        "```\nsim(a, b) = (a · b) / (|a| * |b|)\n```\n",
+        "## The fix: jieba as custom tokenizer\n\n[jieba](https://github.com/fxsjy/jieba) is the standard Chinese word\nsegmenter. It uses a dictionary + HMM to split `语义搜索的研究` into\n`[语义, 搜索, 的, 研究]`. Plugging ji"
+      ],
+      "scores": [
+        0.04918032786885246,
+        0.04838709677419355,
+        0.046671404880360104,
+        0.046649531024531024,
+        0.044782770638784684,
+        0.03076923076923077,
+        0.03055037313432836,
+        0.030330882352941176,
+        0.029877369007803793,
+        0.028985507246376812
+      ],
+      "relevance": {
+        "recipes/sourdough-starter.md": 3.0
+      },
+      "latency_ms": 1836.7773750796914,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.2,
+      "average_precision_at_10": 1.0,
+      "ndcg_at_10": 1.0,
+      "last_expected_rank": 1,
+      "rerank_k": "auto",
+      "resolved_rerank_k": null,
+      "rerank_k_reason": null,
+      "first_stage": {},
+      "expansions_used": [
+        "wild yeast starter flour water",
+        "making bread from scratch natural fermentation"
+      ]
+    },
+    {
+      "query": "how to stop forgetting things I study",
+      "config": "C",
+      "tags": [
+        "english",
+        "vocab-mismatch",
+        "long",
+        "natural-language"
+      ],
+      "hits": [
+        "notes/spaced-repetition.md",
+        "notes/memory-consolidation.md",
+        "notes/forgetting-curve.md",
+        "logs/2026-W14.md",
+        "notes/zettelkasten.md",
+        "notes/fsrs-algorithm.md",
+        "sources/wikipedia-forgetting-curve.md",
+        "logs/2026-W15.md",
+        "sources/anki-and-flashcards-intro.md",
+        "sources/wikipedia-spaced-repetition.md"
+      ],
+      "titles": [
+        "Spaced repetition",
+        "记忆巩固 Memory consolidation",
+        "遗忘曲线 Forgetting curve",
+        "2026-W14",
+        "Zettelkasten",
+        "FSRS algorithm",
+        "Forgetting curve (Wikipedia summary)",
+        "2026-W15",
+        "Anki and flashcards — a practical intro",
+        "Spaced repetition (Wikipedia summary)"
+      ],
+      "snippets": [
+        "## The 记忆保持力 problem\n\nThe core question of spaced repetition is: **how do we maximize memory\nretention per hour of study?** Daily re-reading wastes most of the time\non material you already know. One-p",
+        "## 关键发现\n\n- **睡眠剥夺直接降低新记忆的保留率**。一整晚不睡后学的东西，一周后剩下\n  的比正常睡眠少 30-40%。\n- **巩固不是被动的重放**。睡眠中大脑会主动\"重新体验\"白天的关键片段，\n  这个过程压缩了时间（几十毫秒 → 几秒），并把记忆和旧知识网络建立连接。\n- **间隔重复 + 睡眠 = 最优组合**。[[spaced-repetition]] 的每次复习启动\n  一",
+        "## 实践启示\n\n- 学习后**当天晚上**做一次短复习比三天后多一次复习效果更好。\n- 长间隔不等于懒复习——只要每次都\"踩\"在曲线下降的关键点。\n- 课堂教学的一次性讲授，如果没有后续复习机制，从遗忘曲线看基本是浪费。",
+        "## 2026-W14 周记\n\n本周主要在想**记忆保持力**这个问题。起因是发现自己读完 [[zettelkasten]] 相关\n的几本书（Ahrens 的《How to Take Smart Notes》，然后 Luhmann 原文的几篇\n论文），真正能\"用\"的想法其实不多。问题不在于没读懂，是没沉淀到能调用的\n程度。\n\n读懂 ≠ 记住 ≠ 会用。这三个之间的落差是学习系统设计的核心。",
+        "## 与 spaced repetition 的区别\n\nZettelkasten 解决的是**写作 + 思考**问题：怎么让新想法和旧想法碰撞出火花。\n[[spaced-repetition]] 解决的是**记忆保持**问题：怎么让已知的事实留在脑子里。\n\n两者互补，不重复。典型工作流：\n- Zettelkasten 建立理解和结构\n- 从 permanent notes 蒸馏出关键 claims",
+        "## Related\n- [[spaced-repetition]] — the practice that FSRS optimizes\n- [[forgetting-curve]] — the phenomenon being modeled\n- [[note-to-card-workflow]] — how permanent notes become reviewable cards",
+        "## Implications for learners\n\nWithout systematic review, most of any study session is forgotten\nwithin a month. With a review pattern tuned to catch each item near\nthe retrievability threshold (typica",
+        "## 2026-W15 周记\n\n这周主题：[[agent-memory-patterns]]。很多本地 agent 在长期记忆上卡住，\n问题往往不是模型太弱，而是 retrieval 太差。",
+        "## When not to use Anki\n\n- If you haven't understood the material yet. Anki entrenches; it\n  doesn't teach. Understand first (Feynman), then memorize.\n- If the material has a 2-week shelf life. Use a ",
+        "## Applications\n\nMedical education (pharmacology, anatomy), foreign language\nacquisition (vocabulary), bar exam preparation, and programming\ncertification all report significant improvements when swit"
+      ],
+      "scores": [
+        0.06430053288858155,
+        0.06357688027340822,
+        0.06327607388058208,
+        0.061375384880819665,
+        0.04620592054390803,
+        0.04599076949620428,
+        0.045715497737556565,
+        0.04412400911045794,
+        0.029857397504456328,
+        0.029437229437229435
+      ],
+      "relevance": {
+        "notes/spaced-repetition.md": 3.0,
+        "sources/wikipedia-spaced-repetition.md": 3.0,
+        "notes/forgetting-curve.md": 3.0
+      },
+      "latency_ms": 3208.2130410708487,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.4,
+      "average_precision_at_10": 0.6555555555555556,
+      "ndcg_at_10": 0.8395700624665825,
+      "last_expected_rank": 10,
+      "rerank_k": "auto",
+      "resolved_rerank_k": null,
+      "rerank_k_reason": null,
+      "first_stage": {},
+      "expansions_used": [
+        "retention techniques memorization",
+        "spaced repetition flashcards active recall",
+        "why I forget everything I read"
+      ]
+    },
+    {
+      "query": "学完就忘怎么办",
+      "config": "C",
+      "tags": [
+        "cjk",
+        "vocab-mismatch",
+        "natural-language"
+      ],
+      "hits": [
+        "notes/spaced-repetition.md",
+        "notes/memory-consolidation.md",
+        "notes/forgetting-curve.md",
+        "logs/2026-W14.md",
+        "sources/wikipedia-forgetting-curve.md",
+        "notes/zettelkasten.md",
+        "notes/deep-work-deliberate-practice.md",
+        "sources/wikipedia-spaced-repetition.md",
+        "logs/2026-W16.md",
+        "notes/fsrs-algorithm.md"
+      ],
+      "titles": [
+        "Spaced repetition",
+        "记忆巩固 Memory consolidation",
+        "遗忘曲线 Forgetting curve",
+        "2026-W14",
+        "Forgetting curve (Wikipedia summary)",
+        "Zettelkasten",
+        "Deep work and deliberate practice",
+        "Spaced repetition (Wikipedia summary)",
+        "2026-W16",
+        "FSRS algorithm"
+      ],
+      "snippets": [
+        "## The 记忆保持力 problem\n\nThe core question of spaced repetition is: **how do we maximize memory\nretention per hour of study?** Daily re-reading wastes most of the time\non material you already know. One-p",
+        "## 关键发现\n\n- **睡眠剥夺直接降低新记忆的保留率**。一整晚不睡后学的东西，一周后剩下\n  的比正常睡眠少 30-40%。\n- **巩固不是被动的重放**。睡眠中大脑会主动\"重新体验\"白天的关键片段，\n  这个过程压缩了时间（几十毫秒 → 几秒），并把记忆和旧知识网络建立连接。\n- **间隔重复 + 睡眠 = 最优组合**。[[spaced-repetition]] 的每次复习启动\n  一",
+        "## 实践启示\n\n- 学习后**当天晚上**做一次短复习比三天后多一次复习效果更好。\n- 长间隔不等于懒复习——只要每次都\"踩\"在曲线下降的关键点。\n- 课堂教学的一次性讲授，如果没有后续复习机制，从遗忘曲线看基本是浪费。",
+        "## 2026-W14 周记\n\n本周主要在想**记忆保持力**这个问题。起因是发现自己读完 [[zettelkasten]] 相关\n的几本书（Ahrens 的《How to Take Smart Notes》，然后 Luhmann 原文的几篇\n论文），真正能\"用\"的想法其实不多。问题不在于没读懂，是没沉淀到能调用的\n程度。\n\n读懂 ≠ 记住 ≠ 会用。这三个之间的落差是学习系统设计的核心。",
+        "## Implications for learners\n\nWithout systematic review, most of any study session is forgotten\nwithin a month. With a review pattern tuned to catch each item near\nthe retrievability threshold (typica",
+        "## 与 spaced repetition 的区别\n\nZettelkasten 解决的是**写作 + 思考**问题：怎么让新想法和旧想法碰撞出火花。\n[[spaced-repetition]] 解决的是**记忆保持**问题：怎么让已知的事实留在脑子里。\n\n两者互补，不重复。典型工作流：\n- Zettelkasten 建立理解和结构\n- 从 permanent notes 蒸馏出关键 claims",
+        "## Why this matters for learning systems\n\nSpaced repetition, Zettelkasten, and Feynman technique all assume\ndeliberate practice conditions. If you're reviewing Anki cards while\nwatching YouTube, you'r",
+        "## History\n\nThe phenomenon was first characterized by **Hermann Ebbinghaus** in\nthe 1880s through experiments on himself using nonsense syllables. He\ndocumented the forgetting curve — retention drops ",
+        "### 遗忘曲线不是指数\n\n这个是真 surprise。传统教科书都说遗忘是 `e^(-t/τ)`（指数衰减）。但\nEbbinghaus 的原始数据和现代大样本研究都显示是**幂律**：",
+        "## Related\n- [[spaced-repetition]] — the practice that FSRS optimizes\n- [[forgetting-curve]] — the phenomenon being modeled\n- [[note-to-card-workflow]] — how permanent notes become reviewable cards"
+      ],
+      "scores": [
+        0.06505334374186833,
+        0.06427650713907986,
+        0.06300403225806452,
+        0.061793761793761795,
+        0.061420174888597155,
+        0.06021015371322658,
+        0.044362602571557795,
+        0.04391088038070517,
+        0.04285714285714286,
+        0.030090497737556562
+      ],
+      "relevance": {
+        "notes/spaced-repetition.md": 3.0,
+        "notes/forgetting-curve.md": 3.0,
+        "logs/2026-W14.md": 3.0
+      },
+      "latency_ms": 3371.171124977991,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.6,
+      "average_precision_at_10": 0.8055555555555555,
+      "ndcg_at_10": 0.9060254355346823,
+      "last_expected_rank": 4,
+      "rerank_k": "auto",
+      "resolved_rerank_k": null,
+      "rerank_k_reason": null,
+      "first_stage": {},
+      "expansions_used": [
+        "记忆保持 间隔重复",
+        "防止遗忘的学习方法",
+        "读完书记不住 how to fix"
+      ]
+    },
+    {
+      "query": "second brain slip box",
+      "config": "C",
+      "tags": [
+        "english",
+        "vocab-mismatch",
+        "synonym"
+      ],
+      "hits": [
+        "notes/zettelkasten.md",
+        "sources/niklas-luhmann-zettelkasten.md",
+        "notes/atomic-notes.md",
+        "README.md",
+        "logs/2026-W14.md",
+        "notes/spaced-repetition.md",
+        "notes/note-to-card-workflow.md",
+        "notes/feynman-technique.md",
+        "notes/deep-work-deliberate-practice.md",
+        "logs/2026-W17.md"
+      ],
+      "titles": [
+        "Zettelkasten",
+        "Niklas Luhmann's Zettelkasten (essay summary)",
+        "Atomic notes",
+        "seeklink test corpus",
+        "2026-W14",
+        "Spaced repetition",
+        "Note-to-card workflow",
+        "Feynman technique",
+        "Deep work and deliberate practice",
+        "2026-W17"
+      ],
+      "snippets": [
+        "# Zettelkasten\n\nZettelkasten (德语：\"卡片盒\")是德国社会学家 Niklas Luhmann 在 1960-90 年代\n使用的个人知识系统，他用它在 30 年里写了 70 多本书、400 多篇论文。核心是一\n堆编号索引卡（约 9 万张），每张一个原子想法，卡片之间通过编号互相引用。\n\n关键不是卡片，是**原子性 + 引用**。每张卡只讲一件事；卡片之间的链接形成\n一张",
+        "## Contemporary inheritors\n\nDigital Zettelkasten-inspired tools include Obsidian, Roam Research,\nLogseq, and various plain-markdown vault systems. They share Luhmann's\natomic-note + wikilink pattern b",
+        "## Related\n- [[zettelkasten]] — the note system this serves\n- [[note-to-card-workflow]] — turning atomic notes into SRS cards\n- [[feynman-technique]] — explaining-for-strangers discipline",
+        "## Topics\n\nThree semantic clusters:\n\n1. **Learning science / PKM** — FSRS, spaced repetition, Zettelkasten,\n   Feynman technique, forgetting curve. Heavily cross-linked.\n2. **ML / IR / agents** — atte",
+        "### 当前想法\n\n**三者都要**，但不要求每个想法都进所有三个层。典型生命周期：\n- 读到一个想法 → fleeting note（草）\n- 想清楚了 → permanent note in zettelkasten\n- 想不想持续调用？想 → 蒸馏成 1-3 张 flashcard 进 Anki\n- 不想进 Anki 也 ok，zettelkasten 查得到就行\n\n关键是 **seekli",
+        "## Related\n- [[FSRS]] — state-of-the-art scheduler\n- [[forgetting-curve]] — what the spacing fights against\n- [[feynman-technique]] — complementary practice for deep understanding\n- [[zettelkasten]] —",
+        "# Note-to-card workflow\n\nThe bridge between [[zettelkasten]] (where you *think*) and\n[[spaced-repetition]] (where you *retain*). Permanent notes are too\nlong to review daily. Flashcards are too atomic",
+        "## 与 Zettelkasten 的关系\n\n写 permanent note 的过程基本就是一次 Feynman pass：你在用自己的话重新\n组织一个想法。如果你的 zettel 是复制粘贴 + 摘录，它就不是一张工作型\nzettel，它是装饰品。见 [[zettelkasten]] 对 reformulation 的讨论。",
+        "## Related\n- [[feynman-technique]]\n- [[zettelkasten]] — benefits from deep work, suffers without",
+        "## 2026-W17 — Zettelkasten 几本书的交叉笔记\n\n这周读完三本 zettelkasten 相关的：\n\n1. **Sönke Ahrens, How to Take Smart Notes (2017)** — 最流行的入门\n2. **Niklas Luhmann, Communicating with Slip Boxes (1981)** — Luhmann 自己写的方法"
+      ],
+      "scores": [
+        0.06505334374186833,
+        0.04788306451612903,
+        0.04715356328259554,
+        0.046063772293280486,
+        0.045730413377472204,
+        0.045015870871884925,
+        0.04440346790890269,
+        0.0315136476426799,
+        0.031009615384615385,
+        0.030158730158730156
+      ],
+      "relevance": {
+        "notes/zettelkasten.md": 3.0,
+        "sources/niklas-luhmann-zettelkasten.md": 3.0,
+        "notes/atomic-notes.md": 3.0
+      },
+      "latency_ms": 3148.296333150938,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.6,
+      "average_precision_at_10": 1.0,
+      "ndcg_at_10": 1.0,
+      "last_expected_rank": 3,
+      "rerank_k": "auto",
+      "resolved_rerank_k": null,
+      "rerank_k_reason": null,
+      "first_stage": {},
+      "expansions_used": [
+        "Zettelkasten",
+        "Luhmann index card system",
+        "personal knowledge management note linking"
+      ]
+    },
+    {
+      "query": "把文档切块放进向量库",
+      "config": "C",
+      "tags": [
+        "cjk",
+        "vocab-mismatch",
+        "technical"
+      ],
+      "hits": [
+        "notes/vector-embeddings.md",
+        "notes/agent-memory-patterns.md",
+        "notes/attention-mechanism.md",
+        "notes/bm25-intuition.md",
+        "notes/retrieval-augmented-generation.md",
+        "logs/2026-W18.md",
+        "notes/reciprocal-rank-fusion.md",
+        "logs/2026-W15.md",
+        "notes/sqlite-fts5-cjk.md",
+        "cards/card-attention-formula.md"
+      ],
+      "titles": [
+        "Vector embeddings",
+        "Agent memory patterns",
+        "Attention mechanism",
+        "BM25 intuition",
+        "Retrieval-augmented generation",
+        "2026-W18",
+        "Reciprocal Rank Fusion (RRF)",
+        "2026-W15",
+        "SQLite FTS5 + CJK (jieba)",
+        "Card: Attention formula"
+      ],
+      "snippets": [
+        "# Vector embeddings\n\nAn embedding is a fixed-length numeric vector that represents a piece\nof text (or image, or code) in a geometric space where **semantic\nsimilarity maps to geometric proximity**. T",
+        "## 3. Retrieval-based (RAG)\n\nStore turns, notes, and tool outputs as documents; index them with\n[[vector-embeddings]] + [[BM25]]; retrieve relevant ones at each turn.\nSee [[retrieval-augmented-generat",
+        "where `Q`, `K`, `V` are linear projections of the input (queries, keys,\nvalues), and `d_k` is the key dimension (scaling prevents softmax\nsaturation at large dims).",
+        "## Related\n- [[RRF]] — how BM25 and vector channels are combined\n- [[sqlite-fts5-cjk]] — seeklink's implementation\n- [[vector-embeddings]] — semantic counterpart",
+        "## Related\n- [[BM25]] — keyword retrieval channel\n- [[RRF]] — fusion\n- [[vector-embeddings]] — semantic channel\n- [[attention-mechanism]] — reranker internals\n- [[agent-memory-patterns]] — RAG as memo",
+        "### 3. CJK 处理上 seeklink 的 unfair advantage\n\n国内做 RAG 的产品都用 openai 的 embedder 或者 BGE-large。jina-v2-zh\n是 2024 年做中文 embedder 做得最细的一家，但英文场景少人用所以没\nlisticle 报道。对 CJK-first vault 是 underappreciated 的好东西。\n见 [[",
+        "## Related\n- [[bm25-intuition]]\n- [[vector-embeddings]]\n- [[retrieval-augmented-generation]]",
+        "### 检索系统的设计要求\n\n个人 vault + agent 场景需要的不只是\"又一个语义搜索\"，而是把信息检索里\n成熟的 hybrid retrieval 结构做成一个本地工具：\n- BM25 + vector + graph + title 四路召回（[[RRF]] 融合）\n- 可选 cross-encoder 重排（[[attention-mechanism]]）\n- CJK 一等公民（j",
+        "# SQLite FTS5 + CJK (jieba)\n\nSQLite's FTS5 extension provides full-text search out of the box, but\nits default tokenizers (`simple`, `porter`, `unicode61`) all assume\nwhitespace or Unicode word bounda",
+        "```\nAttention(Q, K, V) = softmax(Q @ K.T / sqrt(d_k)) @ V\n```\n"
+      ],
+      "scores": [
+        0.06430053288858155,
+        0.0630272952853598,
+        0.06236781762728467,
+        0.061217078599080404,
+        0.04669647292598113,
+        0.04617537313432836,
+        0.04596351361057244,
+        0.045730413377472204,
+        0.04483608742004264,
+        0.03007688828584351
+      ],
+      "relevance": {
+        "notes/retrieval-augmented-generation.md": 3.0,
+        "notes/vector-embeddings.md": 3.0
+      },
+      "latency_ms": 12332.817750051618,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.4,
+      "average_precision_at_10": 0.7,
+      "ndcg_at_10": 0.8503449055347546,
+      "last_expected_rank": 5,
+      "rerank_k": "auto",
+      "resolved_rerank_k": null,
+      "rerank_k_reason": null,
+      "first_stage": {},
+      "expansions_used": [
+        "RAG 检索增强生成",
+        "chunk embedding vector DB",
+        "文档向量化 搜索"
+      ]
+    },
+    {
+      "query": "Luhmann 原子笔记",
+      "config": "C",
+      "tags": [
+        "cjk-en-mixed",
+        "methodology"
+      ],
+      "hits": [
+        "notes/zettelkasten.md",
+        "logs/2026-W17.md",
+        "sources/niklas-luhmann-zettelkasten.md",
+        "notes/feynman-technique.md",
+        "logs/2026-W14.md",
+        "notes/atomic-notes.md",
+        "README.md",
+        "notes/note-to-card-workflow.md",
+        "notes/forgetting-curve.md",
+        "logs/2026-W16.md"
+      ],
+      "titles": [
+        "Zettelkasten",
+        "2026-W17",
+        "Niklas Luhmann's Zettelkasten (essay summary)",
+        "Feynman technique",
+        "2026-W14",
+        "Atomic notes",
+        "seeklink test corpus",
+        "Note-to-card workflow",
+        "遗忘曲线 Forgetting curve",
+        "2026-W16"
+      ],
+      "snippets": [
+        "## 引用\n- [[atomic-notes]] —— 原子性的深度讨论\n- [[note-to-card-workflow]] —— 从 zettel 到 flashcard 的蒸馏\n- [[deep-work-deliberate-practice]] —— 配套的工作姿态",
+        "### 共识\n\n- 三本书都同意 [[atomic-notes]] 是核心。\n- 三本书都警告**装饰型 vault** 的陷阱——漂亮的目录结构 ≠ 思考工具。\n- 三本都说 permanent note 必须是**自己的话**。",
+        "# Niklas Luhmann's Zettelkasten (essay summary)\n\n*Paraphrased summary of Luhmann's 1981 essay \"Communicating with Slip\nBoxes\" and surrounding interviews, for the test corpus.*\n\nLuhmann (1927-1998) was",
+        "## Related\n- [[deep-work-deliberate-practice]] —— 包含费曼技巧的更大框架\n- [[atomic-notes]] —— 产出物",
+        "## 2026-W14 周记\n\n本周主要在想**记忆保持力**这个问题。起因是发现自己读完 [[zettelkasten]] 相关\n的几本书（Ahrens 的《How to Take Smart Notes》，然后 Luhmann 原文的几篇\n论文），真正能\"用\"的想法其实不多。问题不在于没读懂，是没沉淀到能调用的\n程度。\n\n读懂 ≠ 记住 ≠ 会用。这三个之间的落差是学习系统设计的核心。",
+        "## Why atomicity matters\n\n- **Linking**: you can only usefully link to a note if the note has a\n  clear subject. \"My thoughts on memory\" is unlinkable; \"Forgetting\n  curves are empirically power-law, ",
+        "## Layout\n\n| Folder | Purpose | Style |\n|---|---|---|\n| `notes/` | Permanent notes | Strong frontmatter (tags, aliases), clear titles, wikilinks between notes, 300-800 words |\n| `logs/` | Weekly/daily",
+        "## Related\n- [[FSRS]] — scheduler that processes the cards\n- [[atomic-notes]] — what you're distilling from\n- [[spaced-repetition]] — why distillation is worth doing",
+        "# 遗忘曲线 Forgetting curve\n\n赫尔曼·艾宾浩斯（Hermann Ebbinghaus, 1850-1909）在 1880 年代用自己做受试者，\n记忆了一批无意义音节（CVC 结构：WID、ZOF 等），然后在不同时间间隔后测量\n还能回忆多少。他画出的曲线是心理学史上第一条严谨的实验曲线，后来被称为\n**遗忘曲线**（forgetting curve）。\n\n基本形状：记住一个新东",
+        "### 对系统的启示\n\n- search indexes usually rank the current corpus, not what the user has\n  recently recalled\n- 如果想给笔记做 FSRS 式调度，需要存**每次访问时间戳**（现在没存）\n- recency and review scheduling should be optional signa"
+      ],
+      "scores": [
+        0.04865990111891752,
+        0.0471386476426799,
+        0.04697234084890787,
+        0.045934988518943745,
+        0.04479578392621871,
+        0.03200204813108039,
+        0.031054405392392875,
+        0.030330882352941176,
+        0.02967032967032967,
+        0.02877846790890269
+      ],
+      "relevance": {
+        "notes/atomic-notes.md": 3.0,
+        "notes/zettelkasten.md": 3.0,
+        "sources/niklas-luhmann-zettelkasten.md": 3.0
+      },
+      "latency_ms": 4269.092499976978,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.4,
+      "average_precision_at_10": 0.7222222222222222,
+      "ndcg_at_10": 0.8710785440003371,
+      "last_expected_rank": 6,
+      "rerank_k": "auto",
+      "resolved_rerank_k": null,
+      "rerank_k_reason": null,
+      "first_stage": {},
+      "expansions_used": [
+        "atomic notes 原子性 卡片",
+        "Luhmann zettel 单一想法"
+      ]
+    },
+    {
+      "query": "FSRS 算法原理",
+      "config": "C",
+      "tags": [
+        "cjk-en-mixed",
+        "technical",
+        "short"
+      ],
+      "hits": [
+        "notes/fsrs-algorithm.md",
+        "notes/note-to-card-workflow.md",
+        "cards/card-fsrs-core-idea.md",
+        "logs/2026-W16.md",
+        "sources/wikipedia-forgetting-curve.md",
+        "sources/wikipedia-spaced-repetition.md",
+        "sources/anki-and-flashcards-intro.md",
+        "notes/forgetting-curve.md",
+        "notes/memory-consolidation.md",
+        "notes/spaced-repetition.md"
+      ],
+      "titles": [
+        "FSRS algorithm",
+        "Note-to-card workflow",
+        "Card: FSRS core idea",
+        "2026-W16",
+        "Forgetting curve (Wikipedia summary)",
+        "Spaced repetition (Wikipedia summary)",
+        "Anki and flashcards — a practical intro",
+        "遗忘曲线 Forgetting curve",
+        "记忆巩固 Memory consolidation",
+        "Spaced repetition"
+      ],
+      "snippets": [
+        "# FSRS algorithm\n\nFSRS (Free Spaced Repetition Scheduler) is a memory model that replaces\nAnki's SM-2 as the default scheduling algorithm in modern flashcard apps.\nIt predicts how long you'll remember",
+        "## Example\n\n**Note** ([[FSRS]]): argues FSRS beats SM-2 because it models\npopulation-fitted stability instead of per-card ease.\n\n**Card front**: \"Why does FSRS outperform SM-2 at the same retention\nta",
+        "# Card: FSRS core idea\n\n**Q**: What does FSRS do differently from SM-2?\n\n**A**: FSRS fits a **17-parameter power-law memory model** on\npopulation review data, outputting per-card intervals that target",
+        "### FSRS 不是\"黑盒算法\"\n\n以为 FSRS 是某种神经网络。其实不是——它是一个**17 参数的经验公式**，\n通过在 11M 条真实 review log 上 L-BFGS 拟合出来的。每个参数都有物理\n含义（stability growth, difficulty decay, etc.），可以逐个解读。\n\n这意味着：\n- 可以在**你自己的 review log** 上重新拟合参数",
+        "## Mathematical models\n\n- **Ebbinghaus (1885)**: proposed an exponential-decay-like form with\n  decreasing marginal rate.\n- **Wickelgren (1972)**: power-function memory trace model.\n- **Wixted & Ebbes",
+        "## Modern implementations\n\nThe first computer-based spaced repetition system was **SuperMemo**,\ndeveloped by Piotr Wozniak starting in 1985. SuperMemo introduced the\nSM-2 algorithm, which is still wid",
+        "## Algorithms\n\nAnki's default scheduler has been **SM-2** (derived from SuperMemo's\n1985 algorithm) for most of its history. Since 2024, **FSRS** is\nshipped as an optional (now default on 2.1.66+) rep",
+        "其中 `R(t)` 是时间 `t` 后的 retrievability（可回忆概率），`S` 是 stability\n（保持期常数），`c` 是经验指数。现代模型（如 FSRS）用类似的幂律或指数衰减，\n并让 `S` 随每次复习增长——这就是**间隔重复**的理论基础。",
+        "## 和 FSRS 的关系\n\n[[FSRS]] 不建模睡眠——它只建模时间。但实际使用中，规律睡眠的人能在\nFSRS 的 90% 目标上稳定超出，睡眠紊乱的人会稳定低 5-10%。这不是算法的\n锅，是生理的锅。",
+        "## Related\n- [[FSRS]] — state-of-the-art scheduler\n- [[forgetting-curve]] — what the spacing fights against\n- [[feynman-technique]] — complementary practice for deep understanding\n- [[zettelkasten]] —"
+      ],
+      "scores": [
+        0.06428490111891752,
+        0.0601803993108341,
+        0.04839549075403121,
+        0.04692742126540875,
+        0.04680818916672962,
+        0.04666516279419505,
+        0.046634615384615385,
+        0.04570188828584351,
+        0.04390451832907076,
+        0.030158730158730156
+      ],
+      "relevance": {
+        "notes/fsrs-algorithm.md": 3.0,
+        "cards/card-fsrs-core-idea.md": 3.0,
+        "logs/2026-W16.md": 3.0,
+        "sources/anki-and-flashcards-intro.md": 3.0
+      },
+      "latency_ms": 16003.740458050743,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.6,
+      "average_precision_at_10": 0.7470238095238095,
+      "ndcg_at_10": 0.8838242945899706,
+      "last_expected_rank": 7,
+      "rerank_k": "auto",
+      "resolved_rerank_k": null,
+      "rerank_k_reason": null,
+      "first_stage": {},
+      "expansions_used": [
+        "FSRS 算法 参数",
+        "Free Spaced Repetition Scheduler",
+        "SM-2 对比 FSRS 公式"
+      ]
+    },
+    {
+      "query": "Zettelkasten",
+      "config": "C",
+      "tags": [
+        "english",
+        "exact-title",
+        "short"
+      ],
+      "hits": [
+        "notes/zettelkasten.md",
+        "sources/niklas-luhmann-zettelkasten.md",
+        "notes/spaced-repetition.md",
+        "logs/2026-W17.md",
+        "notes/deep-work-deliberate-practice.md",
+        "notes/feynman-technique.md",
+        "notes/fsrs-algorithm.md",
+        "notes/note-to-card-workflow.md",
+        "logs/2026-W14.md",
+        "notes/atomic-notes.md"
+      ],
+      "titles": [
+        "Zettelkasten",
+        "Niklas Luhmann's Zettelkasten (essay summary)",
+        "Spaced repetition",
+        "2026-W17",
+        "Deep work and deliberate practice",
+        "Feynman technique",
+        "FSRS algorithm",
+        "Note-to-card workflow",
+        "2026-W14",
+        "Atomic notes"
+      ],
+      "snippets": [
+        "## 与 spaced repetition 的区别\n\nZettelkasten 解决的是**写作 + 思考**问题：怎么让新想法和旧想法碰撞出火花。\n[[spaced-repetition]] 解决的是**记忆保持**问题：怎么让已知的事实留在脑子里。\n\n两者互补，不重复。典型工作流：\n- Zettelkasten 建立理解和结构\n- 从 permanent notes 蒸馏出关键 claims",
+        "## Contemporary inheritors\n\nDigital Zettelkasten-inspired tools include Obsidian, Roam Research,\nLogseq, and various plain-markdown vault systems. They share Luhmann's\natomic-note + wikilink pattern b",
+        "## Related\n- [[FSRS]] — state-of-the-art scheduler\n- [[forgetting-curve]] — what the spacing fights against\n- [[feynman-technique]] — complementary practice for deep understanding\n- [[zettelkasten]] —",
+        "## 2026-W17 — Zettelkasten 几本书的交叉笔记\n\n这周读完三本 zettelkasten 相关的：\n\n1. **Sönke Ahrens, How to Take Smart Notes (2017)** — 最流行的入门\n2. **Niklas Luhmann, Communicating with Slip Boxes (1981)** — Luhmann 自己写的方法",
+        "## Related\n- [[feynman-technique]]\n- [[zettelkasten]] — benefits from deep work, suffers without",
+        "## 与 Zettelkasten 的关系\n\n写 permanent note 的过程基本就是一次 Feynman pass：你在用自己的话重新\n组织一个想法。如果你的 zettel 是复制粘贴 + 摘录，它就不是一张工作型\nzettel，它是装饰品。见 [[zettelkasten]] 对 reformulation 的讨论。",
+        "## Related\n- [[spaced-repetition]] — the practice that FSRS optimizes\n- [[forgetting-curve]] — the phenomenon being modeled\n- [[note-to-card-workflow]] — how permanent notes become reviewable cards",
+        "# Note-to-card workflow\n\nThe bridge between [[zettelkasten]] (where you *think*) and\n[[spaced-repetition]] (where you *retain*). Permanent notes are too\nlong to review daily. Flashcards are too atomic",
+        "### 当前想法\n\n**三者都要**，但不要求每个想法都进所有三个层。典型生命周期：\n- 读到一个想法 → fleeting note（草）\n- 想清楚了 → permanent note in zettelkasten\n- 想不想持续调用？想 → 蒸馏成 1-3 张 flashcard 进 Anki\n- 不想进 Anki 也 ok，zettelkasten 查得到就行\n\n关键是 **seekli",
+        "## Related\n- [[zettelkasten]] — the note system this serves\n- [[note-to-card-workflow]] — turning atomic notes into SRS cards\n- [[feynman-technique]] — explaining-for-strangers discipline"
+      ],
+      "scores": [
+        0.04918032786885246,
+        0.04690554740957967,
+        0.045934988518943745,
+        0.04529114263053264,
+        0.04416308329351808,
+        0.031754032258064516,
+        0.03125763125763126,
+        0.030621785881252923,
+        0.03057889822595705,
+        0.03007688828584351
+      ],
+      "relevance": {
+        "notes/zettelkasten.md": 3.0,
+        "sources/niklas-luhmann-zettelkasten.md": 3.0,
+        "notes/atomic-notes.md": 3.0
+      },
+      "latency_ms": 3465.7246249262244,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.4,
+      "average_precision_at_10": 0.7666666666666666,
+      "ndcg_at_10": 0.9010126104210695,
+      "last_expected_rank": 10,
+      "rerank_k": "auto",
+      "resolved_rerank_k": null,
+      "rerank_k_reason": null,
+      "first_stage": {},
+      "expansions_used": [
+        "卡片盒笔记法",
+        "Luhmann slip box"
+      ]
+    },
+    {
+      "query": "RRF",
+      "config": "C",
+      "tags": [
+        "english",
+        "exact-alias",
+        "short"
+      ],
+      "hits": [
+        "notes/reciprocal-rank-fusion.md",
+        "notes/retrieval-augmented-generation.md",
+        "cards/card-rrf-formula.md",
+        "notes/bm25-intuition.md",
+        "notes/agent-memory-patterns.md",
+        "notes/sqlite-fts5-cjk.md",
+        "notes/vector-embeddings.md",
+        "logs/2026-W18.md",
+        "logs/2026-W15.md",
+        "notes/attention-mechanism.md"
+      ],
+      "titles": [
+        "Reciprocal Rank Fusion (RRF)",
+        "Retrieval-augmented generation",
+        "Card: RRF formula",
+        "BM25 intuition",
+        "Agent memory patterns",
+        "SQLite FTS5 + CJK (jieba)",
+        "Vector embeddings",
+        "2026-W18",
+        "2026-W15",
+        "Attention mechanism"
+      ],
+      "snippets": [
+        "# Reciprocal Rank Fusion (RRF)\n\nA simple algorithm for combining ranked lists from multiple retrieval\nsystems into a single ranked list. Given `N` channels, each producing\nits own ranking of the same ",
+        "## Related\n- [[BM25]] — keyword retrieval channel\n- [[RRF]] — fusion\n- [[vector-embeddings]] — semantic channel\n- [[attention-mechanism]] — reranker internals\n- [[agent-memory-patterns]] — RAG as memo",
+        "# Card: RRF formula\n\n**Q**: How does Reciprocal Rank Fusion combine rankings from multiple\nretrieval channels?\n\n**A**:",
+        "## Related\n- [[RRF]] — how BM25 and vector channels are combined\n- [[sqlite-fts5-cjk]] — seeklink's implementation\n- [[vector-embeddings]] — semantic counterpart",
+        "## Related\n- [[retrieval-augmented-generation]]\n- [[vector-embeddings]]\n- [[RRF]]",
+        "## Related\n- [[bm25-intuition]] — BM25 is what runs on this index\n- [[RRF]] — how the BM25 channel gets combined with vector",
+        "## How similarity is computed\n\nCosine similarity:",
+        "### 4. Hybrid retrieval 的论文很多但工具很少\n\nIR 会议论文几乎都在做 hybrid + rerank，但 pip install 能用的\nend-to-end 工具寥寥无几。seeklink 的定位就站这个缝里：论文早有，\n好用的 CLI 罕见。",
+        "### 检索系统的设计要求\n\n个人 vault + agent 场景需要的不只是\"又一个语义搜索\"，而是把信息检索里\n成熟的 hybrid retrieval 结构做成一个本地工具：\n- BM25 + vector + graph + title 四路召回（[[RRF]] 融合）\n- 可选 cross-encoder 重排（[[attention-mechanism]]）\n- CJK 一等公民（j",
+        "## Relevance to retrieval\n\nA **cross-encoder reranker** (like Qwen3-Reranker-0.6B) uses attention\nacross the concatenated `(query, passage)` pair — that's what makes it\nmore accurate than a bi-encoder"
+      ],
+      "scores": [
+        0.06480532786885246,
+        0.06427650713907986,
+        0.06400409626216078,
+        0.06183652948358831,
+        0.060860361653272105,
+        0.045062229437229435,
+        0.03076923076923077,
+        0.030303030303030304,
+        0.029418126757516764,
+        0.029411764705882353
+      ],
+      "relevance": {
+        "notes/reciprocal-rank-fusion.md": 3.0,
+        "cards/card-rrf-formula.md": 3.0,
+        "notes/retrieval-augmented-generation.md": 3.0
+      },
+      "latency_ms": 5019.25175008364,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.6,
+      "average_precision_at_10": 1.0,
+      "ndcg_at_10": 1.0,
+      "last_expected_rank": 3,
+      "rerank_k": "auto",
+      "resolved_rerank_k": null,
+      "rerank_k_reason": null,
+      "first_stage": {},
+      "expansions_used": [
+        "reciprocal rank fusion",
+        "combining search channels",
+        "RRF 倒数排名融合"
+      ]
+    },
+    {
+      "query": "遗忘曲线",
+      "config": "C",
+      "tags": [
+        "cjk",
+        "exact-alias",
+        "short"
+      ],
+      "hits": [
+        "notes/forgetting-curve.md",
+        "sources/wikipedia-forgetting-curve.md",
+        "logs/2026-W16.md",
+        "notes/memory-consolidation.md",
+        "sources/wikipedia-spaced-repetition.md",
+        "logs/2026-W14.md",
+        "notes/fsrs-algorithm.md",
+        "notes/spaced-repetition.md",
+        "notes/zettelkasten.md",
+        "logs/2026-W15.md"
+      ],
+      "titles": [
+        "遗忘曲线 Forgetting curve",
+        "Forgetting curve (Wikipedia summary)",
+        "2026-W16",
+        "记忆巩固 Memory consolidation",
+        "Spaced repetition (Wikipedia summary)",
+        "2026-W14",
+        "FSRS algorithm",
+        "Spaced repetition",
+        "Zettelkasten",
+        "2026-W15"
+      ],
+      "snippets": [
+        "## 参考\n- [[spaced-repetition]] —— 对抗遗忘曲线的主要实践\n- [[FSRS]] —— 建模和拟合遗忘曲线的现代算法\n- [[memory-consolidation]] —— 生物学层面的记忆巩固过程",
+        "# Forgetting curve (Wikipedia summary)\n\n*Summary paraphrased from the Wikipedia article.*\n\nThe forgetting curve describes the decrease in retention of information\nover time when there is no attempt at",
+        "### 遗忘曲线不是指数\n\n这个是真 surprise。传统教科书都说遗忘是 `e^(-t/τ)`（指数衰减）。但\nEbbinghaus 的原始数据和现代大样本研究都显示是**幂律**：",
+        "## Related\n- [[forgetting-curve]] —— 如果不巩固的衰减曲线\n- [[spaced-repetition]] —— 利用巩固窗口的实践",
+        "## History\n\nThe phenomenon was first characterized by **Hermann Ebbinghaus** in\nthe 1880s through experiments on himself using nonsense syllables. He\ndocumented the forgetting curve — retention drops ",
+        "### 下周计划\n\n- 再读一遍 [[FSRS]] paper，理解它的 90% retrievability 目标是怎么校的\n- 调查 [[forgetting-curve]] 对\"会用\"的影响（不是\"还记得\"）\n- 比较纯关键词、向量搜索、混合检索在个人笔记里的召回差异",
+        "## Why FSRS beats SM-2\n\nSM-2 uses a fixed formula tied to a user-reported \"ease factor\" per card.\nIt doesn't learn from population data, and its intervals tend to grow\ntoo fast for hard cards and too ",
+        "## Related\n- [[FSRS]] — state-of-the-art scheduler\n- [[forgetting-curve]] — what the spacing fights against\n- [[feynman-technique]] — complementary practice for deep understanding\n- [[zettelkasten]] —",
+        "## 与 spaced repetition 的区别\n\nZettelkasten 解决的是**写作 + 思考**问题：怎么让新想法和旧想法碰撞出火花。\n[[spaced-repetition]] 解决的是**记忆保持**问题：怎么让已知的事实留在脑子里。\n\n两者互补，不重复。典型工作流：\n- Zettelkasten 建立理解和结构\n- 从 permanent notes 蒸馏出关键 claims",
+        "### 讨论记录\n\n整理了一组设计观察：\n\n1. LLM 本身 stateless，所有\"记忆\"都是 retrieval。\n2. Retrieval 质量 = agent 智商上限。返回错的 chunk = agent 自信地胡说。\n3. 现有方案多是 vector-only RAG，对 CJK 极差，对 exact-keyword 极差。\n4. 没人认真做 hybrid + rerank 这套工"
+      ],
+      "scores": [
+        0.04891591750396616,
+        0.04813947436898257,
+        0.04788306451612903,
+        0.046649531024531024,
+        0.04525625548726954,
+        0.044362602571557795,
+        0.03076923076923077,
+        0.029857397504456328,
+        0.02967032967032967,
+        0.029418126757516764
+      ],
+      "relevance": {
+        "notes/forgetting-curve.md": 3.0,
+        "sources/wikipedia-forgetting-curve.md": 3.0,
+        "notes/memory-consolidation.md": 3.0
+      },
+      "latency_ms": 2257.3192501440644,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.6,
+      "average_precision_at_10": 0.9166666666666666,
+      "ndcg_at_10": 0.9674679834891693,
+      "last_expected_rank": 4,
+      "rerank_k": "auto",
+      "resolved_rerank_k": null,
+      "rerank_k_reason": null,
+      "first_stage": {},
+      "expansions_used": [
+        "Ebbinghaus 遗忘",
+        "forgetting curve"
+      ]
+    },
+    {
+      "query": "how transformers relate to information retrieval",
+      "config": "C",
+      "tags": [
+        "english",
+        "conceptual",
+        "long"
+      ],
+      "hits": [
+        "notes/attention-mechanism.md",
+        "notes/agent-memory-patterns.md",
+        "notes/retrieval-augmented-generation.md",
+        "notes/vector-embeddings.md",
+        "notes/reciprocal-rank-fusion.md",
+        "logs/2026-W15.md",
+        "logs/2026-W18.md",
+        "README.md",
+        "cards/card-attention-formula.md",
+        "logs/2026-W17.md"
+      ],
+      "titles": [
+        "Attention mechanism",
+        "Agent memory patterns",
+        "Retrieval-augmented generation",
+        "Vector embeddings",
+        "Reciprocal Rank Fusion (RRF)",
+        "2026-W15",
+        "2026-W18",
+        "seeklink test corpus",
+        "Card: Attention formula",
+        "2026-W17"
+      ],
+      "snippets": [
+        "# Attention mechanism\n\nThe operation at the core of Transformer architectures. Given a sequence\nof tokens, attention lets every position look at every other position\nwith learnable weights. For the ou",
+        "## 3. Retrieval-based (RAG)\n\nStore turns, notes, and tool outputs as documents; index them with\n[[vector-embeddings]] + [[BM25]]; retrieve relevant ones at each turn.\nSee [[retrieval-augmented-generat",
+        "## The hybrid retrieval insight\n\nPure vector retrieval misses exact keyword matches. Pure keyword\n([[BM25]]) misses semantic matches. **Hybrid** combines both channels\nvia a fusion algorithm, typicall",
+        "## Related\n- [[BM25]] — sparse retrieval counterpart\n- [[attention-mechanism]] — what the embedder is doing internally\n- [[retrieval-augmented-generation]] — end-to-end system",
+        "## Why RRF works\n\n- **Scale-free**: BM25 returns raw scores in [0, 30]; vector similarity\n  returns [0, 1]. Can't average these directly. RRF only uses ranks,\n  which are always 1, 2, 3...\n- **Rank-se",
+        "### 讨论记录\n\n整理了一组设计观察：\n\n1. LLM 本身 stateless，所有\"记忆\"都是 retrieval。\n2. Retrieval 质量 = agent 智商上限。返回错的 chunk = agent 自信地胡说。\n3. 现有方案多是 vector-only RAG，对 CJK 极差，对 exact-keyword 极差。\n4. 没人认真做 hybrid + rerank 这套工",
+        "### 4. Hybrid retrieval 的论文很多但工具很少\n\nIR 会议论文几乎都在做 hybrid + rerank，但 pip install 能用的\nend-to-end 工具寥寥无几。seeklink 的定位就站这个缝里：论文早有，\n好用的 CLI 罕见。",
+        "## Regenerating the index\n\nFrom the seeklink project root:",
+        "Query `Q`, key `K`, value `V` are linear projections of the input.\nScaling by `sqrt(d_k)` prevents softmax saturation at high dimension.\n\nSee [[attention-mechanism]] for why each piece is there.",
+        "### 对 seeklink 的启发\n\nDoto 的观点等于说\"**好搜索 = 不需要目录**\"。这和 [[agent-memory-patterns]]\n里的\"retrieval quality = agent intelligence\"是同一个 insight，只是\n对 human 用户。\n\n如果 seeklink 的搜索够准，你的 vault 可以扁平——logs/ notes/ cards"
+      ],
+      "scores": [
+        0.06454091750396616,
+        0.062349324975892004,
+        0.062296404880360104,
+        0.06216674365571889,
+        0.06069486069486069,
+        0.04715356328259554,
+        0.04554715901558128,
+        0.04437621202327085,
+        0.04348435026184387,
+        0.03007688828584351
+      ],
+      "relevance": {
+        "notes/attention-mechanism.md": 3.0,
+        "notes/vector-embeddings.md": 3.0,
+        "notes/retrieval-augmented-generation.md": 3.0
+      },
+      "latency_ms": 2809.213250176981,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.6,
+      "average_precision_at_10": 0.8055555555555555,
+      "ndcg_at_10": 0.9060254355346823,
+      "last_expected_rank": 4,
+      "rerank_k": "auto",
+      "resolved_rerank_k": null,
+      "rerank_k_reason": null,
+      "first_stage": {},
+      "expansions_used": [
+        "attention reranker cross-encoder",
+        "embedding models in search",
+        "transformer architecture retrieval"
+      ]
+    },
+    {
+      "query": "为什么 hybrid 搜索比纯向量好",
+      "config": "C",
+      "tags": [
+        "cjk-en-mixed",
+        "technical",
+        "long"
+      ],
+      "hits": [
+        "notes/retrieval-augmented-generation.md",
+        "notes/reciprocal-rank-fusion.md",
+        "notes/attention-mechanism.md",
+        "logs/2026-W15.md",
+        "notes/bm25-intuition.md",
+        "logs/2026-W18.md",
+        "notes/agent-memory-patterns.md",
+        "cards/card-attention-formula.md",
+        "notes/vector-embeddings.md",
+        "logs/2026-W16.md"
+      ],
+      "titles": [
+        "Retrieval-augmented generation",
+        "Reciprocal Rank Fusion (RRF)",
+        "Attention mechanism",
+        "2026-W15",
+        "BM25 intuition",
+        "2026-W18",
+        "Agent memory patterns",
+        "Card: Attention formula",
+        "Vector embeddings",
+        "2026-W16"
+      ],
+      "snippets": [
+        "## The hybrid retrieval insight\n\nPure vector retrieval misses exact keyword matches. Pure keyword\n([[BM25]]) misses semantic matches. **Hybrid** combines both channels\nvia a fusion algorithm, typicall",
+        "## Why RRF works\n\n- **Scale-free**: BM25 returns raw scores in [0, 30]; vector similarity\n  returns [0, 1]. Can't average these directly. RRF only uses ranks,\n  which are always 1, 2, 3...\n- **Rank-se",
+        "## Why it works\n\n- **Parallel**: unlike RNNs, all positions compute simultaneously.\n- **Long range**: the softmax over all positions means a token 2000\n  away can still influence the output if its key",
+        "### 检索系统的设计要求\n\n个人 vault + agent 场景需要的不只是\"又一个语义搜索\"，而是把信息检索里\n成熟的 hybrid retrieval 结构做成一个本地工具：\n- BM25 + vector + graph + title 四路召回（[[RRF]] 融合）\n- 可选 cross-encoder 重排（[[attention-mechanism]]）\n- CJK 一等公民（j",
+        "# BM25 intuition\n\nBM25 is the classic keyword-matching ranking function from 1990s IR\nresearch. It scores a (query, document) pair based on how often the\nquery's terms appear in the document, with two",
+        "### 4. Hybrid retrieval 的论文很多但工具很少\n\nIR 会议论文几乎都在做 hybrid + rerank，但 pip install 能用的\nend-to-end 工具寥寥无几。seeklink 的定位就站这个缝里：论文早有，\n好用的 CLI 罕见。",
+        "## Related\n- [[retrieval-augmented-generation]]\n- [[vector-embeddings]]\n- [[RRF]]",
+        "Query `Q`, key `K`, value `V` are linear projections of the input.\nScaling by `sqrt(d_k)` prevents softmax saturation at high dimension.\n\nSee [[attention-mechanism]] for why each piece is there.",
+        "## Bi-encoder vs cross-encoder\n\n- **Bi-encoder**: embed query and document separately, compare via dot\n  product. Fast (~ms per query over millions of docs via approximate\n  nearest neighbor).\n- **Cro",
+        "### 对系统的启示\n\n- search indexes usually rank the current corpus, not what the user has\n  recently recalled\n- 如果想给笔记做 FSRS 式调度，需要存**每次访问时间戳**（现在没存）\n- recency and review scheduling should be optional signa"
+      ],
+      "scores": [
+        0.06557377049180328,
+        0.06042078392621871,
+        0.059761460554371,
+        0.04764267990074442,
+        0.0471386476426799,
+        0.046897546897546896,
+        0.044782770638784684,
+        0.044583251360744966,
+        0.04391088038070517,
+        0.03057889822595705
+      ],
+      "relevance": {
+        "notes/bm25-intuition.md": 3.0,
+        "notes/vector-embeddings.md": 3.0,
+        "notes/retrieval-augmented-generation.md": 3.0
+      },
+      "latency_ms": 7764.537124894559,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.4,
+      "average_precision_at_10": 0.5777777777777777,
+      "ndcg_at_10": 0.7920874914199382,
+      "last_expected_rank": 9,
+      "rerank_k": "auto",
+      "resolved_rerank_k": null,
+      "rerank_k_reason": null,
+      "first_stage": {},
+      "expansions_used": [
+        "hybrid retrieval BM25 vector 融合",
+        "为什么关键词匹配还有用",
+        "dense retrieval 的局限"
+      ]
+    },
+    {
+      "query": "从笔记到 Anki 卡片的流程",
+      "config": "C",
+      "tags": [
+        "cjk-en-mixed",
+        "workflow",
+        "long"
+      ],
+      "hits": [
+        "notes/note-to-card-workflow.md",
+        "logs/2026-W14.md",
+        "notes/atomic-notes.md",
+        "notes/zettelkasten.md",
+        "notes/spaced-repetition.md",
+        "sources/anki-and-flashcards-intro.md",
+        "README.md",
+        "notes/fsrs-algorithm.md",
+        "notes/feynman-technique.md",
+        "notes/deep-work-deliberate-practice.md"
+      ],
+      "titles": [
+        "Note-to-card workflow",
+        "2026-W14",
+        "Atomic notes",
+        "Zettelkasten",
+        "Spaced repetition",
+        "Anki and flashcards — a practical intro",
+        "seeklink test corpus",
+        "FSRS algorithm",
+        "Feynman technique",
+        "Deep work and deliberate practice"
+      ],
+      "snippets": [
+        "# Note-to-card workflow\n\nThe bridge between [[zettelkasten]] (where you *think*) and\n[[spaced-repetition]] (where you *retain*). Permanent notes are too\nlong to review daily. Flashcards are too atomic",
+        "### 当前想法\n\n**三者都要**，但不要求每个想法都进所有三个层。典型生命周期：\n- 读到一个想法 → fleeting note（草）\n- 想清楚了 → permanent note in zettelkasten\n- 想不想持续调用？想 → 蒸馏成 1-3 张 flashcard 进 Anki\n- 不想进 Anki 也 ok，zettelkasten 查得到就行\n\n关键是 **seekli",
+        "## Why atomicity matters\n\n- **Linking**: you can only usefully link to a note if the note has a\n  clear subject. \"My thoughts on memory\" is unlinkable; \"Forgetting\n  curves are empirically power-law, ",
+        "## 三类 zettel\n\n1. **Fleeting notes（灵光笔记）** - 脑子里冒出来的，随手记，几天内整理或丢弃\n2. **Literature notes（文献笔记）** - 读书/看论文时的摘录 + 自己的话复述\n3. **Permanent notes（永久笔记）** - 真正的 zettel，用自己的话写清楚一个\n   原子思想，放进卡片盒，编号，链接到相关卡片\n\nPerm",
+        "## How it works in practice\n\nApps like Anki, SuperMemo, and Mochi implement spaced repetition via\nflashcards. You create a card (question front, answer back), and the app\nschedules it. You rate each r",
+        "## When not to use Anki\n\n- If you haven't understood the material yet. Anki entrenches; it\n  doesn't teach. Understand first (Feynman), then memorize.\n- If the material has a 2-week shelf life. Use a ",
+        "## Layout\n\n| Folder | Purpose | Style |\n|---|---|---|\n| `notes/` | Permanent notes | Strong frontmatter (tags, aliases), clear titles, wikilinks between notes, 300-800 words |\n| `logs/` | Weekly/daily",
+        "## Related\n- [[spaced-repetition]] — the practice that FSRS optimizes\n- [[forgetting-curve]] — the phenomenon being modeled\n- [[note-to-card-workflow]] — how permanent notes become reviewable cards",
+        "## Related\n- [[deep-work-deliberate-practice]] —— 包含费曼技巧的更大框架\n- [[atomic-notes]] —— 产出物",
+        "## Why this matters for learning systems\n\nSpaced repetition, Zettelkasten, and Feynman technique all assume\ndeliberate practice conditions. If you're reviewing Anki cards while\nwatching YouTube, you'r"
+      ],
+      "scores": [
+        0.06478893337698204,
+        0.0625225468975469,
+        0.062084914611005695,
+        0.0616761912736458,
+        0.06061997703788749,
+        0.04841188524590165,
+        0.0432712215320911,
+        0.03076923076923077,
+        0.03057889822595705,
+        0.030303030303030304
+      ],
+      "relevance": {
+        "notes/note-to-card-workflow.md": 3.0,
+        "notes/atomic-notes.md": 3.0,
+        "sources/anki-and-flashcards-intro.md": 3.0
+      },
+      "latency_ms": 8246.747999917716,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.4,
+      "average_precision_at_10": 0.7222222222222222,
+      "ndcg_at_10": 0.8710785440003371,
+      "last_expected_rank": 6,
+      "rerank_k": "auto",
+      "resolved_rerank_k": null,
+      "rerank_k_reason": null,
+      "first_stage": {},
+      "expansions_used": [
+        "note-to-card workflow 蒸馏",
+        "permanent note 转 flashcard",
+        "Anki 卡片制作 从笔记"
+      ]
+    }
+  ]
+}

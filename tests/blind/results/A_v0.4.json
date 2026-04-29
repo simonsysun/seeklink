@@ -1,0 +1,4918 @@
+{
+  "config": "A",
+  "queries_file": "tests/blind/queries.yaml",
+  "vault": "tests/corpus",
+  "n_queries": 22,
+  "with_reranker": true,
+  "reranking": {
+    "enabled": true,
+    "rerank_k": "auto",
+    "resolved_k_counts": {
+      "5": 18,
+      "20": 4
+    },
+    "metadata_expansion": false
+  },
+  "aggregate": {
+    "n_queries": 22,
+    "mean_recall_at_10": 0.9848484848484849,
+    "mean_mrr": 0.9772727272727273,
+    "mean_precision_at_5": 0.4636363636363636,
+    "mean_average_precision_at_10": 0.8044642857142857,
+    "mean_ndcg_at_10": 0.900787321732989,
+    "mean_latency_ms": 689.979617388665,
+    "p50_latency_ms": 454.4194168411195,
+    "p95_latency_ms": 2123.518749838695
+  },
+  "by_tag": {
+    "cjk": {
+      "n_queries": 8,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 1.0,
+      "mean_precision_at_5": 0.45,
+      "mean_average_precision_at_10": 0.8289682539682539,
+      "mean_ndcg_at_10": 0.9182124851461249,
+      "mean_latency_ms": 576.4667708717752,
+      "p50_latency_ms": 455.57920821011066,
+      "p95_latency_ms": 1507.7104999218136
+    },
+    "cjk-en-mixed": {
+      "n_queries": 4,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 1.0,
+      "mean_precision_at_5": 0.55,
+      "mean_average_precision_at_10": 0.8103670634920634,
+      "mean_ndcg_at_10": 0.9108449423747695,
+      "mean_latency_ms": 1627.4328439030796,
+      "p50_latency_ms": 2123.518749838695,
+      "p95_latency_ms": 2124.3579171132296
+    },
+    "common": {
+      "n_queries": 2,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 1.0,
+      "mean_precision_at_5": 0.7,
+      "mean_average_precision_at_10": 0.8999999999999999,
+      "mean_ndcg_at_10": 0.9638048435172528,
+      "mean_latency_ms": 550.7969579193741,
+      "p50_latency_ms": 674.9914579559118,
+      "p95_latency_ms": 674.9914579559118
+    },
+    "conceptual": {
+      "n_queries": 1,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 0.5,
+      "mean_precision_at_5": 0.4,
+      "mean_average_precision_at_10": 0.4444444444444444,
+      "mean_ndcg_at_10": 0.6394562303262419,
+      "mean_latency_ms": 459.66804097406566,
+      "p50_latency_ms": 459.66804097406566,
+      "p95_latency_ms": 459.66804097406566
+    },
+    "english": {
+      "n_queries": 10,
+      "mean_recall_at_10": 0.9666666666666666,
+      "mean_mrr": 0.95,
+      "mean_precision_at_5": 0.44000000000000006,
+      "mean_average_precision_at_10": 0.7825,
+      "mean_ndcg_at_10": 0.8828241427457681,
+      "mean_latency_ms": 405.80860399641097,
+      "p50_latency_ms": 442.2634579241276,
+      "p95_latency_ms": 502.0728330127895
+    },
+    "exact-alias": {
+      "n_queries": 2,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 1.0,
+      "mean_precision_at_5": 0.6,
+      "mean_average_precision_at_10": 0.861111111111111,
+      "mean_ndcg_at_10": 0.9367467095119257,
+      "mean_latency_ms": 322.402979596518,
+      "p50_latency_ms": 364.7692920640111,
+      "p95_latency_ms": 364.7692920640111
+    },
+    "exact-title": {
+      "n_queries": 1,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 1.0,
+      "mean_precision_at_5": 0.4,
+      "mean_average_precision_at_10": 0.6666666666666666,
+      "mean_ndcg_at_10": 0.8385465274895063,
+      "mean_latency_ms": 442.2634579241276,
+      "p50_latency_ms": 442.2634579241276,
+      "p95_latency_ms": 442.2634579241276
+    },
+    "long": {
+      "n_queries": 7,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 0.9285714285714286,
+      "mean_precision_at_5": 0.4571428571428572,
+      "mean_average_precision_at_10": 0.7694444444444445,
+      "mean_ndcg_at_10": 0.8788547657390694,
+      "mean_latency_ms": 865.3258689945297,
+      "p50_latency_ms": 459.66804097406566,
+      "p95_latency_ms": 2124.3579171132296
+    },
+    "methodology": {
+      "n_queries": 2,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 1.0,
+      "mean_precision_at_5": 0.4,
+      "mean_average_precision_at_10": 0.7936507936507937,
+      "mean_ndcg_at_10": 0.8964327114982722,
+      "mean_latency_ms": 471.6230003396049,
+      "p50_latency_ms": 488.8265838380903,
+      "p95_latency_ms": 488.8265838380903
+    },
+    "mid-length": {
+      "n_queries": 3,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 1.0,
+      "mean_precision_at_5": 0.5333333333333333,
+      "mean_average_precision_at_10": 0.7957671957671958,
+      "mean_ndcg_at_10": 0.9068250366770166,
+      "mean_latency_ms": 518.6711108932892,
+      "p50_latency_ms": 454.4194168411195,
+      "p95_latency_ms": 674.9914579559118
+    },
+    "natural-language": {
+      "n_queries": 2,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 1.0,
+      "mean_precision_at_5": 0.5,
+      "mean_average_precision_at_10": 0.7611111111111111,
+      "mean_ndcg_at_10": 0.8932362459962785,
+      "mean_latency_ms": 454.5007289852947,
+      "p50_latency_ms": 458.9643329381943,
+      "p95_latency_ms": 458.9643329381943
+    },
+    "off-topic": {
+      "n_queries": 2,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 1.0,
+      "mean_precision_at_5": 0.2,
+      "mean_average_precision_at_10": 1.0,
+      "mean_ndcg_at_10": 1.0,
+      "mean_latency_ms": 326.32643752731383,
+      "p50_latency_ms": 398.47895805723965,
+      "p95_latency_ms": 398.47895805723965
+    },
+    "scientific": {
+      "n_queries": 1,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 1.0,
+      "mean_precision_at_5": 0.4,
+      "mean_average_precision_at_10": 1.0,
+      "mean_ndcg_at_10": 1.0,
+      "mean_latency_ms": 441.12604204565287,
+      "p50_latency_ms": 441.12604204565287,
+      "p95_latency_ms": 441.12604204565287
+    },
+    "short": {
+      "n_queries": 8,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 1.0,
+      "mean_precision_at_5": 0.45,
+      "mean_average_precision_at_10": 0.8406001984126984,
+      "mean_ndcg_at_10": 0.9251306139778754,
+      "mean_latency_ms": 582.0796041516587,
+      "p50_latency_ms": 398.47895805723965,
+      "p95_latency_ms": 2123.518749838695
+    },
+    "synonym": {
+      "n_queries": 1,
+      "mean_recall_at_10": 0.6666666666666666,
+      "mean_mrr": 1.0,
+      "mean_precision_at_5": 0.4,
+      "mean_average_precision_at_10": 0.6666666666666666,
+      "mean_ndcg_at_10": 0.7653606369886218,
+      "mean_latency_ms": 454.11891699768603,
+      "p50_latency_ms": 454.11891699768603,
+      "p95_latency_ms": 454.11891699768603
+    },
+    "technical": {
+      "n_queries": 6,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 1.0,
+      "mean_precision_at_5": 0.43333333333333335,
+      "mean_average_precision_at_10": 0.7694113756613756,
+      "mean_ndcg_at_10": 0.890098132868879,
+      "mean_latency_ms": 1091.8562984249245,
+      "p50_latency_ms": 1507.7104999218136,
+      "p95_latency_ms": 2123.518749838695
+    },
+    "vocab-mismatch": {
+      "n_queries": 4,
+      "mean_recall_at_10": 0.9166666666666666,
+      "mean_mrr": 1.0,
+      "mean_precision_at_5": 0.4,
+      "mean_average_precision_at_10": 0.7138888888888889,
+      "mean_ndcg_at_10": 0.8458469396412003,
+      "mean_latency_ms": 717.7077187225223,
+      "p50_latency_ms": 458.9643329381943,
+      "p95_latency_ms": 1507.7104999218136
+    },
+    "workflow": {
+      "n_queries": 1,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 1.0,
+      "mean_precision_at_5": 0.6,
+      "mean_average_precision_at_10": 0.9166666666666666,
+      "mean_ndcg_at_10": 0.9674679834891693,
+      "mean_latency_ms": 2124.3579171132296,
+      "p50_latency_ms": 2124.3579171132296,
+      "p95_latency_ms": 2124.3579171132296
+    }
+  },
+  "results": [
+    {
+      "query": "记忆保持力",
+      "config": "A",
+      "tags": [
+        "cjk",
+        "common",
+        "mid-length"
+      ],
+      "hits": [
+        "notes/spaced-repetition.md",
+        "logs/2026-W14.md",
+        "notes/memory-consolidation.md",
+        "notes/zettelkasten.md",
+        "notes/forgetting-curve.md",
+        "sources/wikipedia-forgetting-curve.md",
+        "notes/fsrs-algorithm.md",
+        "logs/2026-W15.md",
+        "logs/2026-W16.md",
+        "sources/wikipedia-spaced-repetition.md"
+      ],
+      "titles": [
+        "Spaced repetition",
+        "2026-W14",
+        "记忆巩固 Memory consolidation",
+        "Zettelkasten",
+        "遗忘曲线 Forgetting curve",
+        "Forgetting curve (Wikipedia summary)",
+        "FSRS algorithm",
+        "2026-W15",
+        "2026-W16",
+        "Spaced repetition (Wikipedia summary)"
+      ],
+      "snippets": [
+        "## The 记忆保持力 problem\n\nThe core question of spaced repetition is: **how do we maximize memory\nretention per hour of study?** Daily re-reading wastes most of the time\non material you already know. One-p",
+        "## 2026-W14 周记\n\n本周主要在想**记忆保持力**这个问题。起因是发现自己读完 [[zettelkasten]] 相关\n的几本书（Ahrens 的《How to Take Smart Notes》，然后 Luhmann 原文的几篇\n论文），真正能\"用\"的想法其实不多。问题不在于没读懂，是没沉淀到能调用的\n程度。\n\n读懂 ≠ 记住 ≠ 会用。这三个之间的落差是学习系统设计的核心。",
+        "# 记忆巩固 Memory consolidation\n\n学习到一个新东西之后，它最初存在海马体（hippocampus）的快速编码系统里。\n如果不干预，这个痕迹几小时内就开始衰减（见 [[forgetting-curve]]）。**记忆\n巩固**指的是大脑把短期痕迹\"烧录\"到长期皮层存储的过程——主要发生在睡眠\n期间，尤其是慢波睡眠（SWS）和 REM 阶段。",
+        "## 与 spaced repetition 的区别\n\nZettelkasten 解决的是**写作 + 思考**问题：怎么让新想法和旧想法碰撞出火花。\n[[spaced-repetition]] 解决的是**记忆保持**问题：怎么让已知的事实留在脑子里。\n\n两者互补，不重复。典型工作流：\n- Zettelkasten 建立理解和结构\n- 从 permanent notes 蒸馏出关键 claims",
+        "## 参考\n- [[spaced-repetition]] —— 对抗遗忘曲线的主要实践\n- [[FSRS]] —— 建模和拟合遗忘曲线的现代算法\n- [[memory-consolidation]] —— 生物学层面的记忆巩固过程",
+        "## Countermeasures\n\nThe forgetting curve can be flattened by:\n\n1. **Active recall** — retrieving the memory, not re-reading. Each\n   retrieval attempt strengthens the trace disproportionately.\n2. **Sp",
+        "## Related\n- [[spaced-repetition]] — the practice that FSRS optimizes\n- [[forgetting-curve]] — the phenomenon being modeled\n- [[note-to-card-workflow]] — how permanent notes become reviewable cards",
+        "## 2026-W15 周记\n\n这周主题：[[agent-memory-patterns]]。很多本地 agent 在长期记忆上卡住，\n问题往往不是模型太弱，而是 retrieval 太差。",
+        "### See also\n- [[FSRS]] — 理论总览\n- [[forgetting-curve]] — 底层现象\n- [[memory-consolidation]] — 生物学层面的解释",
+        "## Applications\n\nMedical education (pharmacology, anatomy), foreign language\nacquisition (vocabulary), bar exam preparation, and programming\ncertification all report significant improvements when swit"
+      ],
+      "scores": [
+        0.9151724782571579,
+        0.67459202106455,
+        0.6195167802414414,
+        0.40222521874825445,
+        0.34347039627094755,
+        0.019384615384615386,
+        0.01920374707259953,
+        0.019150725247004414,
+        0.018659420289855073,
+        0.01865325077399381
+      ],
+      "relevance": {
+        "notes/spaced-repetition.md": 3.0,
+        "notes/forgetting-curve.md": 3.0,
+        "notes/memory-consolidation.md": 3.0,
+        "logs/2026-W14.md": 3.0
+      },
+      "latency_ms": 674.9914579559118,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.8,
+      "average_precision_at_10": 0.95,
+      "ndcg_at_10": 0.9828920819566878,
+      "last_expected_rank": 5,
+      "rerank_k": "auto",
+      "resolved_rerank_k": 5,
+      "rerank_k_reason": "title",
+      "first_stage": {
+        "candidate_count": 16,
+        "channel_source_counts": {
+          "bm25": 2,
+          "vector": 16,
+          "title": 1,
+          "metadata": 0,
+          "indegree": 16
+        },
+        "expected_path_ranks": {
+          "notes/spaced-repetition.md": {
+            "bm25": 1,
+            "vector": 1,
+            "title": 1,
+            "metadata": null,
+            "indegree": 2,
+            "rrf": 1,
+            "rerank_candidate": 1
+          },
+          "notes/forgetting-curve.md": {
+            "bm25": null,
+            "vector": 3,
+            "title": null,
+            "metadata": null,
+            "indegree": 4,
+            "rrf": 3,
+            "rerank_candidate": 3
+          },
+          "notes/memory-consolidation.md": {
+            "bm25": null,
+            "vector": 2,
+            "title": null,
+            "metadata": null,
+            "indegree": 9,
+            "rrf": 4,
+            "rerank_candidate": 4
+          },
+          "logs/2026-W14.md": {
+            "bm25": 2,
+            "vector": 4,
+            "title": null,
+            "metadata": null,
+            "indegree": 10,
+            "rrf": 2,
+            "rerank_candidate": 2
+          }
+        },
+        "hit_channel_ranks": [
+          {
+            "path": "notes/spaced-repetition.md",
+            "bm25": 1,
+            "vector": 1,
+            "title": 1,
+            "metadata": null,
+            "indegree": 2,
+            "rrf": 1,
+            "rerank_candidate": 1
+          },
+          {
+            "path": "logs/2026-W14.md",
+            "bm25": 2,
+            "vector": 4,
+            "title": null,
+            "metadata": null,
+            "indegree": 10,
+            "rrf": 2,
+            "rerank_candidate": 2
+          },
+          {
+            "path": "notes/memory-consolidation.md",
+            "bm25": null,
+            "vector": 2,
+            "title": null,
+            "metadata": null,
+            "indegree": 9,
+            "rrf": 4,
+            "rerank_candidate": 4
+          },
+          {
+            "path": "notes/zettelkasten.md",
+            "bm25": null,
+            "vector": 6,
+            "title": null,
+            "metadata": null,
+            "indegree": 3,
+            "rrf": 5,
+            "rerank_candidate": 5
+          },
+          {
+            "path": "notes/forgetting-curve.md",
+            "bm25": null,
+            "vector": 3,
+            "title": null,
+            "metadata": null,
+            "indegree": 4,
+            "rrf": 3,
+            "rerank_candidate": 3
+          },
+          {
+            "path": "sources/wikipedia-forgetting-curve.md",
+            "bm25": null,
+            "vector": 5,
+            "title": null,
+            "metadata": null,
+            "indegree": 15,
+            "rrf": 6,
+            "rerank_candidate": 6
+          },
+          {
+            "path": "notes/fsrs-algorithm.md",
+            "bm25": null,
+            "vector": 10,
+            "title": null,
+            "metadata": null,
+            "indegree": 1,
+            "rrf": 7,
+            "rerank_candidate": 7
+          },
+          {
+            "path": "logs/2026-W15.md",
+            "bm25": null,
+            "vector": 7,
+            "title": null,
+            "metadata": null,
+            "indegree": 11,
+            "rrf": 8,
+            "rerank_candidate": 8
+          },
+          {
+            "path": "logs/2026-W16.md",
+            "bm25": null,
+            "vector": 9,
+            "title": null,
+            "metadata": null,
+            "indegree": 12,
+            "rrf": 9,
+            "rerank_candidate": 9
+          },
+          {
+            "path": "sources/wikipedia-spaced-repetition.md",
+            "bm25": null,
+            "vector": 8,
+            "title": null,
+            "metadata": null,
+            "indegree": 16,
+            "rrf": 10,
+            "rerank_candidate": 10
+          }
+        ]
+      },
+      "expansions_used": []
+    },
+    {
+      "query": "遗忘规律",
+      "config": "A",
+      "tags": [
+        "cjk",
+        "short"
+      ],
+      "hits": [
+        "notes/forgetting-curve.md",
+        "logs/2026-W16.md",
+        "sources/wikipedia-forgetting-curve.md",
+        "notes/zettelkasten.md",
+        "notes/memory-consolidation.md",
+        "logs/2026-W14.md",
+        "sources/wikipedia-spaced-repetition.md",
+        "notes/spaced-repetition.md",
+        "notes/fsrs-algorithm.md",
+        "logs/2026-W15.md"
+      ],
+      "titles": [
+        "遗忘曲线 Forgetting curve",
+        "2026-W16",
+        "Forgetting curve (Wikipedia summary)",
+        "Zettelkasten",
+        "记忆巩固 Memory consolidation",
+        "2026-W14",
+        "Spaced repetition (Wikipedia summary)",
+        "Spaced repetition",
+        "FSRS algorithm",
+        "2026-W15"
+      ],
+      "snippets": [
+        "# 遗忘曲线 Forgetting curve\n\n赫尔曼·艾宾浩斯（Hermann Ebbinghaus, 1850-1909）在 1880 年代用自己做受试者，\n记忆了一批无意义音节（CVC 结构：WID、ZOF 等），然后在不同时间间隔后测量\n还能回忆多少。他画出的曲线是心理学史上第一条严谨的实验曲线，后来被称为\n**遗忘曲线**（forgetting curve）。\n\n基本形状：记住一个新东",
+        "### 遗忘曲线不是指数\n\n这个是真 surprise。传统教科书都说遗忘是 `e^(-t/τ)`（指数衰减）。但\nEbbinghaus 的原始数据和现代大样本研究都显示是**幂律**：",
+        "## Countermeasures\n\nThe forgetting curve can be flattened by:\n\n1. **Active recall** — retrieving the memory, not re-reading. Each\n   retrieval attempt strengthens the trace disproportionately.\n2. **Sp",
+        "## 与 spaced repetition 的区别\n\nZettelkasten 解决的是**写作 + 思考**问题：怎么让新想法和旧想法碰撞出火花。\n[[spaced-repetition]] 解决的是**记忆保持**问题：怎么让已知的事实留在脑子里。\n\n两者互补，不重复。典型工作流：\n- Zettelkasten 建立理解和结构\n- 从 permanent notes 蒸馏出关键 claims",
+        "## 关键发现\n\n- **睡眠剥夺直接降低新记忆的保留率**。一整晚不睡后学的东西，一周后剩下\n  的比正常睡眠少 30-40%。\n- **巩固不是被动的重放**。睡眠中大脑会主动\"重新体验\"白天的关键片段，\n  这个过程压缩了时间（几十毫秒 → 几秒），并把记忆和旧知识网络建立连接。\n- **间隔重复 + 睡眠 = 最优组合**。[[spaced-repetition]] 的每次复习启动\n  一",
+        "## 2026-W14 周记\n\n本周主要在想**记忆保持力**这个问题。起因是发现自己读完 [[zettelkasten]] 相关\n的几本书（Ahrens 的《How to Take Smart Notes》，然后 Luhmann 原文的几篇\n论文），真正能\"用\"的想法其实不多。问题不在于没读懂，是没沉淀到能调用的\n程度。\n\n读懂 ≠ 记住 ≠ 会用。这三个之间的落差是学习系统设计的核心。",
+        "## History\n\nThe phenomenon was first characterized by **Hermann Ebbinghaus** in\nthe 1880s through experiments on himself using nonsense syllables. He\ndocumented the forgetting curve — retention drops ",
+        "# Spaced repetition\n\nSpaced repetition is the practice of reviewing material at increasing\nintervals, timed to catch you right before you'd forget. It's the single\nmost evidence-backed intervention in",
+        "# FSRS algorithm\n\nFSRS (Free Spaced Repetition Scheduler) is a memory model that replaces\nAnki's SM-2 as the default scheduling algorithm in modern flashcard apps.\nIt predicts how long you'll remember",
+        "## 2026-W15 周记\n\n这周主题：[[agent-memory-patterns]]。很多本地 agent 在长期记忆上卡住，\n问题往往不是模型太弱，而是 retrieval 太差。"
+      ],
+      "scores": [
+        0.9196425311777928,
+        0.7549149868676283,
+        0.665410558746814,
+        0.3486451353339458,
+        0.28140560742914383,
+        0.019437229437229437,
+        0.019331983805668015,
+        0.01933146330060776,
+        0.01920374707259953,
+        0.019150725247004414
+      ],
+      "relevance": {
+        "notes/forgetting-curve.md": 3.0,
+        "sources/wikipedia-forgetting-curve.md": 3.0,
+        "notes/memory-consolidation.md": 3.0
+      },
+      "latency_ms": 455.57920821011066,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.6,
+      "average_precision_at_10": 0.7555555555555555,
+      "ndcg_at_10": 0.8854598815714875,
+      "last_expected_rank": 5,
+      "rerank_k": "auto",
+      "resolved_rerank_k": 5,
+      "rerank_k_reason": "default",
+      "first_stage": {
+        "candidate_count": 16,
+        "channel_source_counts": {
+          "bm25": 0,
+          "vector": 16,
+          "title": 0,
+          "metadata": 0,
+          "indegree": 16
+        },
+        "expected_path_ranks": {
+          "notes/forgetting-curve.md": {
+            "bm25": null,
+            "vector": 1,
+            "title": null,
+            "metadata": null,
+            "indegree": 5,
+            "rrf": 1,
+            "rerank_candidate": 1
+          },
+          "sources/wikipedia-forgetting-curve.md": {
+            "bm25": null,
+            "vector": 2,
+            "title": null,
+            "metadata": null,
+            "indegree": 15,
+            "rrf": 3,
+            "rerank_candidate": 3
+          },
+          "notes/memory-consolidation.md": {
+            "bm25": null,
+            "vector": 3,
+            "title": null,
+            "metadata": null,
+            "indegree": 9,
+            "rrf": 2,
+            "rerank_candidate": 2
+          }
+        },
+        "hit_channel_ranks": [
+          {
+            "path": "notes/forgetting-curve.md",
+            "bm25": null,
+            "vector": 1,
+            "title": null,
+            "metadata": null,
+            "indegree": 5,
+            "rrf": 1,
+            "rerank_candidate": 1
+          },
+          {
+            "path": "logs/2026-W16.md",
+            "bm25": null,
+            "vector": 4,
+            "title": null,
+            "metadata": null,
+            "indegree": 12,
+            "rrf": 4,
+            "rerank_candidate": 4
+          },
+          {
+            "path": "sources/wikipedia-forgetting-curve.md",
+            "bm25": null,
+            "vector": 2,
+            "title": null,
+            "metadata": null,
+            "indegree": 15,
+            "rrf": 3,
+            "rerank_candidate": 3
+          },
+          {
+            "path": "notes/zettelkasten.md",
+            "bm25": null,
+            "vector": 8,
+            "title": null,
+            "metadata": null,
+            "indegree": 3,
+            "rrf": 5,
+            "rerank_candidate": 5
+          },
+          {
+            "path": "notes/memory-consolidation.md",
+            "bm25": null,
+            "vector": 3,
+            "title": null,
+            "metadata": null,
+            "indegree": 9,
+            "rrf": 2,
+            "rerank_candidate": 2
+          },
+          {
+            "path": "logs/2026-W14.md",
+            "bm25": null,
+            "vector": 6,
+            "title": null,
+            "metadata": null,
+            "indegree": 10,
+            "rrf": 6,
+            "rerank_candidate": 6
+          },
+          {
+            "path": "sources/wikipedia-spaced-repetition.md",
+            "bm25": null,
+            "vector": 5,
+            "title": null,
+            "metadata": null,
+            "indegree": 16,
+            "rrf": 7,
+            "rerank_candidate": 7
+          },
+          {
+            "path": "notes/spaced-repetition.md",
+            "bm25": null,
+            "vector": 9,
+            "title": null,
+            "metadata": null,
+            "indegree": 2,
+            "rrf": 8,
+            "rerank_candidate": 8
+          },
+          {
+            "path": "notes/fsrs-algorithm.md",
+            "bm25": null,
+            "vector": 10,
+            "title": null,
+            "metadata": null,
+            "indegree": 1,
+            "rrf": 9,
+            "rerank_candidate": 9
+          },
+          {
+            "path": "logs/2026-W15.md",
+            "bm25": null,
+            "vector": 7,
+            "title": null,
+            "metadata": null,
+            "indegree": 11,
+            "rrf": 10,
+            "rerank_candidate": 10
+          }
+        ]
+      },
+      "expansions_used": []
+    },
+    {
+      "query": "卡片盒笔记法",
+      "config": "A",
+      "tags": [
+        "cjk",
+        "methodology",
+        "mid-length"
+      ],
+      "hits": [
+        "notes/zettelkasten.md",
+        "notes/note-to-card-workflow.md",
+        "logs/2026-W14.md",
+        "notes/spaced-repetition.md",
+        "notes/fsrs-algorithm.md",
+        "sources/niklas-luhmann-zettelkasten.md",
+        "notes/atomic-notes.md",
+        "sources/anki-and-flashcards-intro.md",
+        "logs/2026-W17.md",
+        "notes/deep-work-deliberate-practice.md"
+      ],
+      "titles": [
+        "Zettelkasten",
+        "Note-to-card workflow",
+        "2026-W14",
+        "Spaced repetition",
+        "FSRS algorithm",
+        "Niklas Luhmann's Zettelkasten (essay summary)",
+        "Atomic notes",
+        "Anki and flashcards — a practical intro",
+        "2026-W17",
+        "Deep work and deliberate practice"
+      ],
+      "snippets": [
+        "## 三类 zettel\n\n1. **Fleeting notes（灵光笔记）** - 脑子里冒出来的，随手记，几天内整理或丢弃\n2. **Literature notes（文献笔记）** - 读书/看论文时的摘录 + 自己的话复述\n3. **Permanent notes（永久笔记）** - 真正的 zettel，用自己的话写清楚一个\n   原子思想，放进卡片盒，编号，链接到相关卡片\n\nPerm",
+        "# Note-to-card workflow\n\nThe bridge between [[zettelkasten]] (where you *think*) and\n[[spaced-repetition]] (where you *retain*). Permanent notes are too\nlong to review daily. Flashcards are too atomic",
+        "### 几个候选方案\n\n1. **纯 Zettelkasten**：每个想法写一张 permanent note，用 wikilink 连接。\n   问题：我查找卡片的姿势本来就是搜索，卡片数到 200+ 以后拓扑已经没法靠\n   脑子维护。需要 seeklink 这种工具。\n2. **Anki + FSRS**：把所有 claim 做成卡片喂给 SRS。[[spaced-repetition]]",
+        "## How it works in practice\n\nApps like Anki, SuperMemo, and Mochi implement spaced repetition via\nflashcards. You create a card (question front, answer back), and the app\nschedules it. You rate each r",
+        "## Related\n- [[spaced-repetition]] — the practice that FSRS optimizes\n- [[forgetting-curve]] — the phenomenon being modeled\n- [[note-to-card-workflow]] — how permanent notes become reviewable cards",
+        "## The structure\n\nCards were 14.8 × 10.5 cm (A6). Each card contained one thought,\none quote, or one reference, in his handwriting. Cards were kept in\napproximate topical neighborhoods inside the draw",
+        "## Related\n- [[zettelkasten]] — the note system this serves\n- [[note-to-card-workflow]] — turning atomic notes into SRS cards\n- [[feynman-technique]] — explaining-for-strangers discipline",
+        "## Common mistakes\n\n- **Cloze overuse.** Cloze cards (`The capital of France is {{c1::Paris}}`)\n  are quick to make but often test recognition, not recall.\n- **Same-card images.** If you're memorizing",
+        "### 共识\n\n- 三本书都同意 [[atomic-notes]] 是核心。\n- 三本书都警告**装饰型 vault** 的陷阱——漂亮的目录结构 ≠ 思考工具。\n- 三本都说 permanent note 必须是**自己的话**。",
+        "## Why this matters for learning systems\n\nSpaced repetition, Zettelkasten, and Feynman technique all assume\ndeliberate practice conditions. If you're reviewing Anki cards while\nwatching YouTube, you'r"
+      ],
+      "scores": [
+        0.8972672034449924,
+        0.6103621963370288,
+        0.48967638210344927,
+        0.4186811405420452,
+        0.416871606432732,
+        0.01976911976911977,
+        0.01903820816864295,
+        0.01887274155538099,
+        0.018705882352941176,
+        0.018697478991596638
+      ],
+      "relevance": {
+        "notes/zettelkasten.md": 3.0,
+        "sources/niklas-luhmann-zettelkasten.md": 3.0,
+        "notes/atomic-notes.md": 3.0
+      },
+      "latency_ms": 454.4194168411195,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.2,
+      "average_precision_at_10": 0.5873015873015873,
+      "ndcg_at_10": 0.7928654229965444,
+      "last_expected_rank": 7,
+      "rerank_k": "auto",
+      "resolved_rerank_k": 5,
+      "rerank_k_reason": "title",
+      "first_stage": {
+        "candidate_count": 19,
+        "channel_source_counts": {
+          "bm25": 0,
+          "vector": 19,
+          "title": 1,
+          "metadata": 0,
+          "indegree": 19
+        },
+        "expected_path_ranks": {
+          "notes/zettelkasten.md": {
+            "bm25": null,
+            "vector": 6,
+            "title": 1,
+            "metadata": null,
+            "indegree": 3,
+            "rrf": 1,
+            "rerank_candidate": 1
+          },
+          "sources/niklas-luhmann-zettelkasten.md": {
+            "bm25": null,
+            "vector": 3,
+            "title": null,
+            "metadata": null,
+            "indegree": 17,
+            "rrf": 6,
+            "rerank_candidate": 6
+          },
+          "notes/atomic-notes.md": {
+            "bm25": null,
+            "vector": 9,
+            "title": null,
+            "metadata": null,
+            "indegree": 6,
+            "rrf": 7,
+            "rerank_candidate": 7
+          }
+        },
+        "hit_channel_ranks": [
+          {
+            "path": "notes/zettelkasten.md",
+            "bm25": null,
+            "vector": 6,
+            "title": 1,
+            "metadata": null,
+            "indegree": 3,
+            "rrf": 1,
+            "rerank_candidate": 1
+          },
+          {
+            "path": "notes/note-to-card-workflow.md",
+            "bm25": null,
+            "vector": 2,
+            "title": null,
+            "metadata": null,
+            "indegree": 5,
+            "rrf": 2,
+            "rerank_candidate": 2
+          },
+          {
+            "path": "logs/2026-W14.md",
+            "bm25": null,
+            "vector": 1,
+            "title": null,
+            "metadata": null,
+            "indegree": 12,
+            "rrf": 3,
+            "rerank_candidate": 3
+          },
+          {
+            "path": "notes/spaced-repetition.md",
+            "bm25": null,
+            "vector": 4,
+            "title": null,
+            "metadata": null,
+            "indegree": 2,
+            "rrf": 4,
+            "rerank_candidate": 4
+          },
+          {
+            "path": "notes/fsrs-algorithm.md",
+            "bm25": null,
+            "vector": 5,
+            "title": null,
+            "metadata": null,
+            "indegree": 1,
+            "rrf": 5,
+            "rerank_candidate": 5
+          },
+          {
+            "path": "sources/niklas-luhmann-zettelkasten.md",
+            "bm25": null,
+            "vector": 3,
+            "title": null,
+            "metadata": null,
+            "indegree": 17,
+            "rrf": 6,
+            "rerank_candidate": 6
+          },
+          {
+            "path": "notes/atomic-notes.md",
+            "bm25": null,
+            "vector": 9,
+            "title": null,
+            "metadata": null,
+            "indegree": 6,
+            "rrf": 7,
+            "rerank_candidate": 7
+          },
+          {
+            "path": "sources/anki-and-flashcards-intro.md",
+            "bm25": null,
+            "vector": 7,
+            "title": null,
+            "metadata": null,
+            "indegree": 16,
+            "rrf": 8,
+            "rerank_candidate": 8
+          },
+          {
+            "path": "logs/2026-W17.md",
+            "bm25": null,
+            "vector": 8,
+            "title": null,
+            "metadata": null,
+            "indegree": 15,
+            "rrf": 9,
+            "rerank_candidate": 9
+          },
+          {
+            "path": "notes/deep-work-deliberate-practice.md",
+            "bm25": null,
+            "vector": 10,
+            "title": null,
+            "metadata": null,
+            "indegree": 8,
+            "rrf": 10,
+            "rerank_candidate": 10
+          }
+        ]
+      },
+      "expansions_used": []
+    },
+    {
+      "query": "红烧肉做法",
+      "config": "A",
+      "tags": [
+        "cjk",
+        "off-topic",
+        "short"
+      ],
+      "hits": [
+        "recipes/red-braised-pork.md",
+        "recipes/pad-thai.md",
+        "notes/reciprocal-rank-fusion.md",
+        "cards/card-rrf-formula.md",
+        "README.md",
+        "notes/forgetting-curve.md",
+        "recipes/sourdough-starter.md",
+        "logs/2026-W16.md",
+        "notes/note-to-card-workflow.md",
+        "notes/attention-mechanism.md"
+      ],
+      "titles": [
+        "红烧肉 Red-braised pork",
+        "Pad Thai",
+        "Reciprocal Rank Fusion (RRF)",
+        "Card: RRF formula",
+        "seeklink test corpus",
+        "遗忘曲线 Forgetting curve",
+        "Sourdough starter from scratch",
+        "2026-W16",
+        "Note-to-card workflow",
+        "Attention mechanism"
+      ],
+      "snippets": [
+        "# 红烧肉 Red-braised pork\n\n经典的家常做法，南方版（上海/无锡偏甜）。",
+        "## Ingredients (serves 2)\n\nFor the sauce:\n- 3 tbsp tamarind paste\n- 2 tbsp palm sugar (or brown sugar)\n- 2 tbsp fish sauce\n- 1 tbsp soy sauce\n\nFor the stir-fry:\n- 200g flat rice noodles, soaked in roo",
+        "```\nscore(c) = Σ_i w_i / (k + rank_i(c))\n```\n",
+        "```\nscore(c) = Σ_i w_i / (k + rank_i(c))\n```\n",
+        "```bash\nSEEKLINK_VAULT=tests/corpus python -m seeklink index\n```\n",
+        "```\nR(t) = 1 / (1 + (t / S) ^ c)\n```\n",
+        "## What can go wrong\n\n- **Pink/orange streaks**: contamination. Throw it out, start over.\n- **Harsh ammonia smell**: starving. Feed more frequently.\n- **Liquid on top (\"hooch\")**: hungry but not dange",
+        "```\nR(t) = 1 / (1 + (t/S)^c)\n```\n",
+        "## The distillation step\n\nFor each permanent note worth retaining:\n\n1. Identify the **claim** the note argues for. One sentence.\n2. Write it as a question whose answer is that claim. Front side.\n3. Wr",
+        "## Why it works\n\n- **Parallel**: unlike RNNs, all positions compute simultaneously.\n- **Long range**: the softmax over all positions means a token 2000\n  away can still influence the output if its key"
+      ],
+      "scores": [
+        0.8080672135527632,
+        0.0675466911396291,
+        0.0018675659778932803,
+        0.0018675659778932803,
+        0.0015011822567369915,
+        0.019402985074626865,
+        0.01894898350594553,
+        0.018705882352941176,
+        0.018697478991596638,
+        0.018434343434343435
+      ],
+      "relevance": {
+        "recipes/red-braised-pork.md": 3.0
+      },
+      "latency_ms": 254.173916997388,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.2,
+      "average_precision_at_10": 1.0,
+      "ndcg_at_10": 1.0,
+      "last_expected_rank": 1,
+      "rerank_k": "auto",
+      "resolved_rerank_k": 5,
+      "rerank_k_reason": "default",
+      "first_stage": {
+        "candidate_count": 20,
+        "channel_source_counts": {
+          "bm25": 0,
+          "vector": 20,
+          "title": 0,
+          "metadata": 0,
+          "indegree": 20
+        },
+        "expected_path_ranks": {
+          "recipes/red-braised-pork.md": {
+            "bm25": null,
+            "vector": 1,
+            "title": null,
+            "metadata": null,
+            "indegree": 18,
+            "rrf": 2,
+            "rerank_candidate": 2
+          }
+        },
+        "hit_channel_ranks": [
+          {
+            "path": "recipes/red-braised-pork.md",
+            "bm25": null,
+            "vector": 1,
+            "title": null,
+            "metadata": null,
+            "indegree": 18,
+            "rrf": 2,
+            "rerank_candidate": 2
+          },
+          {
+            "path": "recipes/pad-thai.md",
+            "bm25": null,
+            "vector": 2,
+            "title": null,
+            "metadata": null,
+            "indegree": 17,
+            "rrf": 4,
+            "rerank_candidate": 4
+          },
+          {
+            "path": "notes/reciprocal-rank-fusion.md",
+            "bm25": null,
+            "vector": 4,
+            "title": null,
+            "metadata": null,
+            "indegree": 3,
+            "rrf": 1,
+            "rerank_candidate": 1
+          },
+          {
+            "path": "cards/card-rrf-formula.md",
+            "bm25": null,
+            "vector": 5,
+            "title": null,
+            "metadata": null,
+            "indegree": 13,
+            "rrf": 5,
+            "rerank_candidate": 5
+          },
+          {
+            "path": "README.md",
+            "bm25": null,
+            "vector": 3,
+            "title": null,
+            "metadata": null,
+            "indegree": 11,
+            "rrf": 3,
+            "rerank_candidate": 3
+          },
+          {
+            "path": "notes/forgetting-curve.md",
+            "bm25": null,
+            "vector": 7,
+            "title": null,
+            "metadata": null,
+            "indegree": 7,
+            "rrf": 6,
+            "rerank_candidate": 6
+          },
+          {
+            "path": "recipes/sourdough-starter.md",
+            "bm25": null,
+            "vector": 6,
+            "title": null,
+            "metadata": null,
+            "indegree": 19,
+            "rrf": 7,
+            "rerank_candidate": 7
+          },
+          {
+            "path": "logs/2026-W16.md",
+            "bm25": null,
+            "vector": 8,
+            "title": null,
+            "metadata": null,
+            "indegree": 15,
+            "rrf": 8,
+            "rerank_candidate": 8
+          },
+          {
+            "path": "notes/note-to-card-workflow.md",
+            "bm25": null,
+            "vector": 10,
+            "title": null,
+            "metadata": null,
+            "indegree": 8,
+            "rrf": 9,
+            "rerank_candidate": 9
+          },
+          {
+            "path": "notes/attention-mechanism.md",
+            "bm25": null,
+            "vector": 12,
+            "title": null,
+            "metadata": null,
+            "indegree": 6,
+            "rrf": 10,
+            "rerank_candidate": 10
+          }
+        ]
+      },
+      "expansions_used": []
+    },
+    {
+      "query": "睡眠对记忆的影响",
+      "config": "A",
+      "tags": [
+        "cjk",
+        "scientific",
+        "long"
+      ],
+      "hits": [
+        "notes/memory-consolidation.md",
+        "sources/wikipedia-forgetting-curve.md",
+        "notes/spaced-repetition.md",
+        "sources/wikipedia-spaced-repetition.md",
+        "notes/forgetting-curve.md",
+        "notes/fsrs-algorithm.md",
+        "logs/2026-W16.md",
+        "logs/2026-W14.md",
+        "notes/zettelkasten.md",
+        "logs/2026-W15.md"
+      ],
+      "titles": [
+        "记忆巩固 Memory consolidation",
+        "Forgetting curve (Wikipedia summary)",
+        "Spaced repetition",
+        "Spaced repetition (Wikipedia summary)",
+        "遗忘曲线 Forgetting curve",
+        "FSRS algorithm",
+        "2026-W16",
+        "2026-W14",
+        "Zettelkasten",
+        "2026-W15"
+      ],
+      "snippets": [
+        "## 关键发现\n\n- **睡眠剥夺直接降低新记忆的保留率**。一整晚不睡后学的东西，一周后剩下\n  的比正常睡眠少 30-40%。\n- **巩固不是被动的重放**。睡眠中大脑会主动\"重新体验\"白天的关键片段，\n  这个过程压缩了时间（几十毫秒 → 几秒），并把记忆和旧知识网络建立连接。\n- **间隔重复 + 睡眠 = 最优组合**。[[spaced-repetition]] 的每次复习启动\n  一",
+        "## Countermeasures\n\nThe forgetting curve can be flattened by:\n\n1. **Active recall** — retrieving the memory, not re-reading. Each\n   retrieval attempt strengthens the trace disproportionately.\n2. **Sp",
+        "## The 记忆保持力 problem\n\nThe core question of spaced repetition is: **how do we maximize memory\nretention per hour of study?** Daily re-reading wastes most of the time\non material you already know. One-p",
+        "## History\n\nThe phenomenon was first characterized by **Hermann Ebbinghaus** in\nthe 1880s through experiments on himself using nonsense syllables. He\ndocumented the forgetting curve — retention drops ",
+        "## 实践启示\n\n- 学习后**当天晚上**做一次短复习比三天后多一次复习效果更好。\n- 长间隔不等于懒复习——只要每次都\"踩\"在曲线下降的关键点。\n- 课堂教学的一次性讲授，如果没有后续复习机制，从遗忘曲线看基本是浪费。",
+        "## Why FSRS beats SM-2\n\nSM-2 uses a fixed formula tied to a user-reported \"ease factor\" per card.\nIt doesn't learn from population data, and its intervals tend to grow\ntoo fast for hard cards and too ",
+        "### See also\n- [[FSRS]] — 理论总览\n- [[forgetting-curve]] — 底层现象\n- [[memory-consolidation]] — 生物学层面的解释",
+        "## 2026-W14 周记\n\n本周主要在想**记忆保持力**这个问题。起因是发现自己读完 [[zettelkasten]] 相关\n的几本书（Ahrens 的《How to Take Smart Notes》，然后 Luhmann 原文的几篇\n论文），真正能\"用\"的想法其实不多。问题不在于没读懂，是没沉淀到能调用的\n程度。\n\n读懂 ≠ 记住 ≠ 会用。这三个之间的落差是学习系统设计的核心。",
+        "## 与 spaced repetition 的区别\n\nZettelkasten 解决的是**写作 + 思考**问题：怎么让新想法和旧想法碰撞出火花。\n[[spaced-repetition]] 解决的是**记忆保持**问题：怎么让已知的事实留在脑子里。\n\n两者互补，不重复。典型工作流：\n- Zettelkasten 建立理解和结构\n- 从 permanent notes 蒸馏出关键 claims",
+        "## 2026-W15 周记\n\n这周主题：[[agent-memory-patterns]]。很多本地 agent 在长期记忆上卡住，\n问题往往不是模型太弱，而是 retrieval 太差。"
+      ],
+      "scores": [
+        0.7549149868676284,
+        0.5621765008857981,
+        0.05033063259747688,
+        0.03210070671700819,
+        0.03021458706739398,
+        0.01941078641007365,
+        0.019205569205569206,
+        0.019092039800995025,
+        0.019047619047619046,
+        0.018815471394037067
+      ],
+      "relevance": {
+        "notes/memory-consolidation.md": 3.0,
+        "sources/wikipedia-forgetting-curve.md": 3.0
+      },
+      "latency_ms": 441.12604204565287,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.4,
+      "average_precision_at_10": 1.0,
+      "ndcg_at_10": 1.0,
+      "last_expected_rank": 2,
+      "rerank_k": "auto",
+      "resolved_rerank_k": 5,
+      "rerank_k_reason": "default",
+      "first_stage": {
+        "candidate_count": 17,
+        "channel_source_counts": {
+          "bm25": 0,
+          "vector": 17,
+          "title": 0,
+          "metadata": 0,
+          "indegree": 17
+        },
+        "expected_path_ranks": {
+          "notes/memory-consolidation.md": {
+            "bm25": null,
+            "vector": 1,
+            "title": null,
+            "metadata": null,
+            "indegree": 9,
+            "rrf": 1,
+            "rerank_candidate": 1
+          },
+          "sources/wikipedia-forgetting-curve.md": {
+            "bm25": null,
+            "vector": 2,
+            "title": null,
+            "metadata": null,
+            "indegree": 16,
+            "rrf": 4,
+            "rerank_candidate": 4
+          }
+        },
+        "hit_channel_ranks": [
+          {
+            "path": "notes/memory-consolidation.md",
+            "bm25": null,
+            "vector": 1,
+            "title": null,
+            "metadata": null,
+            "indegree": 9,
+            "rrf": 1,
+            "rerank_candidate": 1
+          },
+          {
+            "path": "sources/wikipedia-forgetting-curve.md",
+            "bm25": null,
+            "vector": 2,
+            "title": null,
+            "metadata": null,
+            "indegree": 16,
+            "rrf": 4,
+            "rerank_candidate": 4
+          },
+          {
+            "path": "notes/spaced-repetition.md",
+            "bm25": null,
+            "vector": 5,
+            "title": null,
+            "metadata": null,
+            "indegree": 2,
+            "rrf": 3,
+            "rerank_candidate": 3
+          },
+          {
+            "path": "sources/wikipedia-spaced-repetition.md",
+            "bm25": null,
+            "vector": 4,
+            "title": null,
+            "metadata": null,
+            "indegree": 17,
+            "rrf": 5,
+            "rerank_candidate": 5
+          },
+          {
+            "path": "notes/forgetting-curve.md",
+            "bm25": null,
+            "vector": 3,
+            "title": null,
+            "metadata": null,
+            "indegree": 4,
+            "rrf": 2,
+            "rerank_candidate": 2
+          },
+          {
+            "path": "notes/fsrs-algorithm.md",
+            "bm25": null,
+            "vector": 9,
+            "title": null,
+            "metadata": null,
+            "indegree": 1,
+            "rrf": 6,
+            "rerank_candidate": 6
+          },
+          {
+            "path": "logs/2026-W16.md",
+            "bm25": null,
+            "vector": 6,
+            "title": null,
+            "metadata": null,
+            "indegree": 14,
+            "rrf": 7,
+            "rerank_candidate": 7
+          },
+          {
+            "path": "logs/2026-W14.md",
+            "bm25": null,
+            "vector": 7,
+            "title": null,
+            "metadata": null,
+            "indegree": 12,
+            "rrf": 8,
+            "rerank_candidate": 8
+          },
+          {
+            "path": "notes/zettelkasten.md",
+            "bm25": null,
+            "vector": 10,
+            "title": null,
+            "metadata": null,
+            "indegree": 3,
+            "rrf": 9,
+            "rerank_candidate": 9
+          },
+          {
+            "path": "logs/2026-W15.md",
+            "bm25": null,
+            "vector": 8,
+            "title": null,
+            "metadata": null,
+            "indegree": 13,
+            "rrf": 10,
+            "rerank_candidate": 10
+          }
+        ]
+      },
+      "expansions_used": []
+    },
+    {
+      "query": "spaced repetition algorithm",
+      "config": "A",
+      "tags": [
+        "english",
+        "common",
+        "mid-length"
+      ],
+      "hits": [
+        "notes/fsrs-algorithm.md",
+        "sources/wikipedia-spaced-repetition.md",
+        "notes/spaced-repetition.md",
+        "notes/forgetting-curve.md",
+        "notes/zettelkasten.md",
+        "notes/memory-consolidation.md",
+        "notes/reciprocal-rank-fusion.md",
+        "notes/agent-memory-patterns.md",
+        "notes/vector-embeddings.md",
+        "logs/2026-W16.md"
+      ],
+      "titles": [
+        "FSRS algorithm",
+        "Spaced repetition (Wikipedia summary)",
+        "Spaced repetition",
+        "遗忘曲线 Forgetting curve",
+        "Zettelkasten",
+        "记忆巩固 Memory consolidation",
+        "Reciprocal Rank Fusion (RRF)",
+        "Agent memory patterns",
+        "Vector embeddings",
+        "2026-W16"
+      ],
+      "snippets": [
+        "# FSRS algorithm\n\nFSRS (Free Spaced Repetition Scheduler) is a memory model that replaces\nAnki's SM-2 as the default scheduling algorithm in modern flashcard apps.\nIt predicts how long you'll remember",
+        "## Modern implementations\n\nThe first computer-based spaced repetition system was **SuperMemo**,\ndeveloped by Piotr Wozniak starting in 1985. SuperMemo introduced the\nSM-2 algorithm, which is still wid",
+        "## How it works in practice\n\nApps like Anki, SuperMemo, and Mochi implement spaced repetition via\nflashcards. You create a card (question front, answer back), and the app\nschedules it. You rate each r",
+        "## 参考\n- [[spaced-repetition]] —— 对抗遗忘曲线的主要实践\n- [[FSRS]] —— 建模和拟合遗忘曲线的现代算法\n- [[memory-consolidation]] —— 生物学层面的记忆巩固过程",
+        "## 与 spaced repetition 的区别\n\nZettelkasten 解决的是**写作 + 思考**问题：怎么让新想法和旧想法碰撞出火花。\n[[spaced-repetition]] 解决的是**记忆保持**问题：怎么让已知的事实留在脑子里。\n\n两者互补，不重复。典型工作流：\n- Zettelkasten 建立理解和结构\n- 从 permanent notes 蒸馏出关键 claims",
+        "## Related\n- [[forgetting-curve]] —— 如果不巩固的衰减曲线\n- [[spaced-repetition]] —— 利用巩固窗口的实践",
+        "## Related\n- [[bm25-intuition]]\n- [[vector-embeddings]]\n- [[retrieval-augmented-generation]]",
+        "## Related\n- [[retrieval-augmented-generation]]\n- [[vector-embeddings]]\n- [[RRF]]",
+        "```\nsim(a, b) = (a · b) / (|a| * |b|)\n```\n",
+        "```\nR(t) = 1 / (1 + (t/S)^c)\n```\n"
+      ],
+      "scores": [
+        0.9407811207873242,
+        0.7033277088394014,
+        0.6878468069876034,
+        0.4573823003179698,
+        0.34813272149985885,
+        0.019261104192611043,
+        0.019254658385093167,
+        0.019150725247004414,
+        0.018901098901098902,
+        0.018503350707371555
+      ],
+      "relevance": {
+        "notes/fsrs-algorithm.md": 3.0,
+        "notes/spaced-repetition.md": 3.0,
+        "sources/wikipedia-spaced-repetition.md": 3.0,
+        "logs/2026-W16.md": 3.0
+      },
+      "latency_ms": 426.60245788283646,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.6,
+      "average_precision_at_10": 0.85,
+      "ndcg_at_10": 0.9447176050778179,
+      "last_expected_rank": 10,
+      "rerank_k": "auto",
+      "resolved_rerank_k": 5,
+      "rerank_k_reason": "title",
+      "first_stage": {
+        "candidate_count": 23,
+        "channel_source_counts": {
+          "bm25": 3,
+          "vector": 23,
+          "title": 1,
+          "metadata": 0,
+          "indegree": 23
+        },
+        "expected_path_ranks": {
+          "notes/fsrs-algorithm.md": {
+            "bm25": 2,
+            "vector": 4,
+            "title": 1,
+            "metadata": null,
+            "indegree": 1,
+            "rrf": 1,
+            "rerank_candidate": 1
+          },
+          "notes/spaced-repetition.md": {
+            "bm25": 3,
+            "vector": 2,
+            "title": null,
+            "metadata": null,
+            "indegree": 2,
+            "rrf": 2,
+            "rerank_candidate": 2
+          },
+          "sources/wikipedia-spaced-repetition.md": {
+            "bm25": 1,
+            "vector": 1,
+            "title": null,
+            "metadata": null,
+            "indegree": 23,
+            "rrf": 3,
+            "rerank_candidate": 3
+          },
+          "logs/2026-W16.md": {
+            "bm25": null,
+            "vector": 8,
+            "title": null,
+            "metadata": null,
+            "indegree": 19,
+            "rrf": 10,
+            "rerank_candidate": 10
+          }
+        },
+        "hit_channel_ranks": [
+          {
+            "path": "notes/fsrs-algorithm.md",
+            "bm25": 2,
+            "vector": 4,
+            "title": 1,
+            "metadata": null,
+            "indegree": 1,
+            "rrf": 1,
+            "rerank_candidate": 1
+          },
+          {
+            "path": "sources/wikipedia-spaced-repetition.md",
+            "bm25": 1,
+            "vector": 1,
+            "title": null,
+            "metadata": null,
+            "indegree": 23,
+            "rrf": 3,
+            "rerank_candidate": 3
+          },
+          {
+            "path": "notes/spaced-repetition.md",
+            "bm25": 3,
+            "vector": 2,
+            "title": null,
+            "metadata": null,
+            "indegree": 2,
+            "rrf": 2,
+            "rerank_candidate": 2
+          },
+          {
+            "path": "notes/forgetting-curve.md",
+            "bm25": null,
+            "vector": 5,
+            "title": null,
+            "metadata": null,
+            "indegree": 9,
+            "rrf": 5,
+            "rerank_candidate": 5
+          },
+          {
+            "path": "notes/zettelkasten.md",
+            "bm25": null,
+            "vector": 3,
+            "title": null,
+            "metadata": null,
+            "indegree": 6,
+            "rrf": 4,
+            "rerank_candidate": 4
+          },
+          {
+            "path": "notes/memory-consolidation.md",
+            "bm25": null,
+            "vector": 6,
+            "title": null,
+            "metadata": null,
+            "indegree": 13,
+            "rrf": 6,
+            "rerank_candidate": 6
+          },
+          {
+            "path": "notes/reciprocal-rank-fusion.md",
+            "bm25": null,
+            "vector": 9,
+            "title": null,
+            "metadata": null,
+            "indegree": 3,
+            "rrf": 7,
+            "rerank_candidate": 7
+          },
+          {
+            "path": "notes/agent-memory-patterns.md",
+            "bm25": null,
+            "vector": 7,
+            "title": null,
+            "metadata": null,
+            "indegree": 11,
+            "rrf": 8,
+            "rerank_candidate": 8
+          },
+          {
+            "path": "notes/vector-embeddings.md",
+            "bm25": null,
+            "vector": 10,
+            "title": null,
+            "metadata": null,
+            "indegree": 5,
+            "rrf": 9,
+            "rerank_candidate": 9
+          },
+          {
+            "path": "logs/2026-W16.md",
+            "bm25": null,
+            "vector": 8,
+            "title": null,
+            "metadata": null,
+            "indegree": 19,
+            "rrf": 10,
+            "rerank_candidate": 10
+          }
+        ]
+      },
+      "expansions_used": []
+    },
+    {
+      "query": "why is BM25 still useful",
+      "config": "A",
+      "tags": [
+        "english",
+        "technical",
+        "long"
+      ],
+      "hits": [
+        "notes/bm25-intuition.md",
+        "notes/reciprocal-rank-fusion.md",
+        "notes/sqlite-fts5-cjk.md",
+        "notes/note-to-card-workflow.md",
+        "notes/fsrs-algorithm.md",
+        "notes/vector-embeddings.md",
+        "notes/zettelkasten.md",
+        "notes/retrieval-augmented-generation.md",
+        "cards/card-fsrs-core-idea.md",
+        "sources/wikipedia-spaced-repetition.md"
+      ],
+      "titles": [
+        "BM25 intuition",
+        "Reciprocal Rank Fusion (RRF)",
+        "SQLite FTS5 + CJK (jieba)",
+        "Note-to-card workflow",
+        "FSRS algorithm",
+        "Vector embeddings",
+        "Zettelkasten",
+        "Retrieval-augmented generation",
+        "Card: FSRS core idea",
+        "Spaced repetition (Wikipedia summary)"
+      ],
+      "snippets": [
+        "# BM25 intuition\n\nBM25 is the classic keyword-matching ranking function from 1990s IR\nresearch. It scores a (query, document) pair based on how often the\nquery's terms appear in the document, with two",
+        "## Why RRF works\n\n- **Scale-free**: BM25 returns raw scores in [0, 30]; vector similarity\n  returns [0, 1]. Can't average these directly. RRF only uses ranks,\n  which are always 1, 2, 3...\n- **Rank-se",
+        "## Related\n- [[bm25-intuition]] — BM25 is what runs on this index\n- [[RRF]] — how the BM25 channel gets combined with vector",
+        "## Example\n\n**Note** ([[FSRS]]): argues FSRS beats SM-2 because it models\npopulation-fitted stability instead of per-card ease.\n\n**Card front**: \"Why does FSRS outperform SM-2 at the same retention\nta",
+        "## Why FSRS beats SM-2\n\nSM-2 uses a fixed formula tied to a user-reported \"ease factor\" per card.\nIt doesn't learn from population data, and its intervals tend to grow\ntoo fast for hard cards and too ",
+        "## Related\n- [[BM25]] — sparse retrieval counterpart\n- [[attention-mechanism]] — what the embedder is doing internally\n- [[retrieval-augmented-generation]] — end-to-end system",
+        "## 为什么大多数人学不会\n\nZettelkasten 不是\"写得漂亮\"或\"分类清楚\"。它要求你每张卡都**重新用自己\n的话组织一个想法**，而不是引用别人的原话。这种 reformulation 非常累。\n大多数人最后的 vault 变成装饰性的 library，不是 thinking tool。\n\nLuhmann 的卡片盒能工作，是因为他每天写 6 小时、持续 40 年。工具再好，\n也代替不了",
+        "## Related\n- [[BM25]] — keyword retrieval channel\n- [[RRF]] — fusion\n- [[vector-embeddings]] — semantic channel\n- [[attention-mechanism]] — reranker internals\n- [[agent-memory-patterns]] — RAG as memo",
+        "# Card: FSRS core idea\n\n**Q**: What does FSRS do differently from SM-2?\n\n**A**: FSRS fits a **17-parameter power-law memory model** on\npopulation review data, outputting per-card intervals that target",
+        "## Modern implementations\n\nThe first computer-based spaced repetition system was **SuperMemo**,\ndeveloped by Piotr Wozniak starting in 1985. SuperMemo introduced the\nSM-2 algorithm, which is still wid"
+      ],
+      "scores": [
+        0.7310585786300049,
+        0.21206880435710532,
+        0.14804719803168948,
+        0.008577485413711986,
+        0.0066928509242848554,
+        0.01932126696832579,
+        0.01903820816864295,
+        0.018973214285714284,
+        0.018925373134328356,
+        0.018722943722943725
+      ],
+      "relevance": {
+        "notes/bm25-intuition.md": 3.0,
+        "notes/retrieval-augmented-generation.md": 3.0,
+        "notes/reciprocal-rank-fusion.md": 3.0
+      },
+      "latency_ms": 502.0728330127895,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.4,
+      "average_precision_at_10": 0.7916666666666666,
+      "ndcg_at_10": 0.9134015924715543,
+      "last_expected_rank": 8,
+      "rerank_k": "auto",
+      "resolved_rerank_k": 5,
+      "rerank_k_reason": "default",
+      "first_stage": {
+        "candidate_count": 24,
+        "channel_source_counts": {
+          "bm25": 0,
+          "vector": 24,
+          "title": 0,
+          "metadata": 0,
+          "indegree": 24
+        },
+        "expected_path_ranks": {
+          "notes/bm25-intuition.md": {
+            "bm25": null,
+            "vector": 1,
+            "title": null,
+            "metadata": null,
+            "indegree": 8,
+            "rrf": 1,
+            "rerank_candidate": 1
+          },
+          "notes/retrieval-augmented-generation.md": {
+            "bm25": null,
+            "vector": 10,
+            "title": null,
+            "metadata": null,
+            "indegree": 4,
+            "rrf": 8,
+            "rerank_candidate": 8
+          },
+          "notes/reciprocal-rank-fusion.md": {
+            "bm25": null,
+            "vector": 3,
+            "title": null,
+            "metadata": null,
+            "indegree": 3,
+            "rrf": 2,
+            "rerank_candidate": 2
+          }
+        },
+        "hit_channel_ranks": [
+          {
+            "path": "notes/bm25-intuition.md",
+            "bm25": null,
+            "vector": 1,
+            "title": null,
+            "metadata": null,
+            "indegree": 8,
+            "rrf": 1,
+            "rerank_candidate": 1
+          },
+          {
+            "path": "notes/reciprocal-rank-fusion.md",
+            "bm25": null,
+            "vector": 3,
+            "title": null,
+            "metadata": null,
+            "indegree": 3,
+            "rrf": 2,
+            "rerank_candidate": 2
+          },
+          {
+            "path": "notes/sqlite-fts5-cjk.md",
+            "bm25": null,
+            "vector": 2,
+            "title": null,
+            "metadata": null,
+            "indegree": 14,
+            "rrf": 4,
+            "rerank_candidate": 4
+          },
+          {
+            "path": "notes/note-to-card-workflow.md",
+            "bm25": null,
+            "vector": 5,
+            "title": null,
+            "metadata": null,
+            "indegree": 10,
+            "rrf": 5,
+            "rerank_candidate": 5
+          },
+          {
+            "path": "notes/fsrs-algorithm.md",
+            "bm25": null,
+            "vector": 4,
+            "title": null,
+            "metadata": null,
+            "indegree": 1,
+            "rrf": 3,
+            "rerank_candidate": 3
+          },
+          {
+            "path": "notes/vector-embeddings.md",
+            "bm25": null,
+            "vector": 8,
+            "title": null,
+            "metadata": null,
+            "indegree": 5,
+            "rrf": 6,
+            "rerank_candidate": 6
+          },
+          {
+            "path": "notes/zettelkasten.md",
+            "bm25": null,
+            "vector": 9,
+            "title": null,
+            "metadata": null,
+            "indegree": 6,
+            "rrf": 7,
+            "rerank_candidate": 7
+          },
+          {
+            "path": "notes/retrieval-augmented-generation.md",
+            "bm25": null,
+            "vector": 10,
+            "title": null,
+            "metadata": null,
+            "indegree": 4,
+            "rrf": 8,
+            "rerank_candidate": 8
+          },
+          {
+            "path": "cards/card-fsrs-core-idea.md",
+            "bm25": null,
+            "vector": 7,
+            "title": null,
+            "metadata": null,
+            "indegree": 15,
+            "rrf": 9,
+            "rerank_candidate": 9
+          },
+          {
+            "path": "sources/wikipedia-spaced-repetition.md",
+            "bm25": null,
+            "vector": 6,
+            "title": null,
+            "metadata": null,
+            "indegree": 24,
+            "rrf": 10,
+            "rerank_candidate": 10
+          }
+        ]
+      },
+      "expansions_used": []
+    },
+    {
+      "query": "agent memory architectures",
+      "config": "A",
+      "tags": [
+        "english",
+        "technical",
+        "long"
+      ],
+      "hits": [
+        "notes/agent-memory-patterns.md",
+        "logs/2026-W15.md",
+        "notes/retrieval-augmented-generation.md",
+        "notes/attention-mechanism.md",
+        "notes/spaced-repetition.md",
+        "sources/niklas-luhmann-zettelkasten.md",
+        "notes/fsrs-algorithm.md",
+        "notes/forgetting-curve.md",
+        "logs/2026-W18.md",
+        "notes/vector-embeddings.md"
+      ],
+      "titles": [
+        "Agent memory patterns",
+        "2026-W15",
+        "Retrieval-augmented generation",
+        "Attention mechanism",
+        "Spaced repetition",
+        "Niklas Luhmann's Zettelkasten (essay summary)",
+        "FSRS algorithm",
+        "遗忘曲线 Forgetting curve",
+        "2026-W18",
+        "Vector embeddings"
+      ],
+      "snippets": [
+        "# Agent memory patterns\n\nLLMs are stateless between calls. Any \"memory\" an agent exhibits comes\nfrom something external that persists across invocations. A few patterns\nin current practice:",
+        "## 2026-W15 周记\n\n这周主题：[[agent-memory-patterns]]。很多本地 agent 在长期记忆上卡住，\n问题往往不是模型太弱，而是 retrieval 太差。",
+        "## Related\n- [[BM25]] — keyword retrieval channel\n- [[RRF]] — fusion\n- [[vector-embeddings]] — semantic channel\n- [[attention-mechanism]] — reranker internals\n- [[agent-memory-patterns]] — RAG as memo",
+        "# Attention mechanism\n\nThe operation at the core of Transformer architectures. Given a sequence\nof tokens, attention lets every position look at every other position\nwith learnable weights. For the ou",
+        "## Related\n- [[FSRS]] — state-of-the-art scheduler\n- [[forgetting-curve]] — what the spacing fights against\n- [[feynman-technique]] — complementary practice for deep understanding\n- [[zettelkasten]] —",
+        "## Contemporary inheritors\n\nDigital Zettelkasten-inspired tools include Obsidian, Roam Research,\nLogseq, and various plain-markdown vault systems. They share Luhmann's\natomic-note + wikilink pattern b",
+        "# FSRS algorithm\n\nFSRS (Free Spaced Repetition Scheduler) is a memory model that replaces\nAnki's SM-2 as the default scheduling algorithm in modern flashcard apps.\nIt predicts how long you'll remember",
+        "## 参考\n- [[spaced-repetition]] —— 对抗遗忘曲线的主要实践\n- [[FSRS]] —— 建模和拟合遗忘曲线的现代算法\n- [[memory-consolidation]] —— 生物学层面的记忆巩固过程",
+        "### 2. Query expansion ≈ 用户搜索前的多角度自问自答\n\nAgent 自己会做。人不会。这就是为什么笔记软件 UI 需要内置 expansion，\nCLI agent 场景可以跳过。见 [[retrieval-augmented-generation]]。",
+        "## Related\n- [[BM25]] — sparse retrieval counterpart\n- [[attention-mechanism]] — what the embedder is doing internally\n- [[retrieval-augmented-generation]] — end-to-end system"
+      ],
+      "scores": [
+        0.9706877692486436,
+        0.6224593312018546,
+        0.320821300824607,
+        0.14804719803168945,
+        0.03732688734412946,
+        0.019328703703703702,
+        0.019002539829138767,
+        0.01884057971014493,
+        0.01872284148875874,
+        0.018504273504273503
+      ],
+      "relevance": {
+        "notes/agent-memory-patterns.md": 3.0,
+        "notes/retrieval-augmented-generation.md": 3.0,
+        "logs/2026-W15.md": 3.0
+      },
+      "latency_ms": 306.9909999612719,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.6,
+      "average_precision_at_10": 1.0,
+      "ndcg_at_10": 1.0,
+      "last_expected_rank": 3,
+      "rerank_k": "auto",
+      "resolved_rerank_k": 5,
+      "rerank_k_reason": "default",
+      "first_stage": {
+        "candidate_count": 23,
+        "channel_source_counts": {
+          "bm25": 0,
+          "vector": 23,
+          "title": 0,
+          "metadata": 0,
+          "indegree": 23
+        },
+        "expected_path_ranks": {
+          "notes/agent-memory-patterns.md": {
+            "bm25": null,
+            "vector": 1,
+            "title": null,
+            "metadata": null,
+            "indegree": 11,
+            "rrf": 1,
+            "rerank_candidate": 1
+          },
+          "notes/retrieval-augmented-generation.md": {
+            "bm25": null,
+            "vector": 3,
+            "title": null,
+            "metadata": null,
+            "indegree": 4,
+            "rrf": 2,
+            "rerank_candidate": 2
+          },
+          "logs/2026-W15.md": {
+            "bm25": null,
+            "vector": 2,
+            "title": null,
+            "metadata": null,
+            "indegree": 16,
+            "rrf": 4,
+            "rerank_candidate": 4
+          }
+        },
+        "hit_channel_ranks": [
+          {
+            "path": "notes/agent-memory-patterns.md",
+            "bm25": null,
+            "vector": 1,
+            "title": null,
+            "metadata": null,
+            "indegree": 11,
+            "rrf": 1,
+            "rerank_candidate": 1
+          },
+          {
+            "path": "logs/2026-W15.md",
+            "bm25": null,
+            "vector": 2,
+            "title": null,
+            "metadata": null,
+            "indegree": 16,
+            "rrf": 4,
+            "rerank_candidate": 4
+          },
+          {
+            "path": "notes/retrieval-augmented-generation.md",
+            "bm25": null,
+            "vector": 3,
+            "title": null,
+            "metadata": null,
+            "indegree": 4,
+            "rrf": 2,
+            "rerank_candidate": 2
+          },
+          {
+            "path": "notes/attention-mechanism.md",
+            "bm25": null,
+            "vector": 6,
+            "title": null,
+            "metadata": null,
+            "indegree": 7,
+            "rrf": 5,
+            "rerank_candidate": 5
+          },
+          {
+            "path": "notes/spaced-repetition.md",
+            "bm25": null,
+            "vector": 5,
+            "title": null,
+            "metadata": null,
+            "indegree": 2,
+            "rrf": 3,
+            "rerank_candidate": 3
+          },
+          {
+            "path": "sources/niklas-luhmann-zettelkasten.md",
+            "bm25": null,
+            "vector": 4,
+            "title": null,
+            "metadata": null,
+            "indegree": 21,
+            "rrf": 6,
+            "rerank_candidate": 6
+          },
+          {
+            "path": "notes/fsrs-algorithm.md",
+            "bm25": null,
+            "vector": 11,
+            "title": null,
+            "metadata": null,
+            "indegree": 1,
+            "rrf": 7,
+            "rerank_candidate": 7
+          },
+          {
+            "path": "notes/forgetting-curve.md",
+            "bm25": null,
+            "vector": 9,
+            "title": null,
+            "metadata": null,
+            "indegree": 9,
+            "rrf": 8,
+            "rerank_candidate": 8
+          },
+          {
+            "path": "logs/2026-W18.md",
+            "bm25": null,
+            "vector": 7,
+            "title": null,
+            "metadata": null,
+            "indegree": 19,
+            "rrf": 9,
+            "rerank_candidate": 9
+          },
+          {
+            "path": "notes/vector-embeddings.md",
+            "bm25": null,
+            "vector": 12,
+            "title": null,
+            "metadata": null,
+            "indegree": 5,
+            "rrf": 10,
+            "rerank_candidate": 10
+          }
+        ]
+      },
+      "expansions_used": []
+    },
+    {
+      "query": "attention mechanism",
+      "config": "A",
+      "tags": [
+        "english",
+        "technical",
+        "short"
+      ],
+      "hits": [
+        "notes/attention-mechanism.md",
+        "notes/agent-memory-patterns.md",
+        "cards/card-attention-formula.md",
+        "notes/vector-embeddings.md",
+        "notes/retrieval-augmented-generation.md",
+        "logs/2026-W15.md",
+        "logs/2026-W14.md",
+        "notes/zettelkasten.md",
+        "logs/2026-W16.md",
+        "notes/forgetting-curve.md"
+      ],
+      "titles": [
+        "Attention mechanism",
+        "Agent memory patterns",
+        "Card: Attention formula",
+        "Vector embeddings",
+        "Retrieval-augmented generation",
+        "2026-W15",
+        "2026-W14",
+        "Zettelkasten",
+        "2026-W16",
+        "遗忘曲线 Forgetting curve"
+      ],
+      "snippets": [
+        "# Attention mechanism\n\nThe operation at the core of Transformer architectures. Given a sequence\nof tokens, attention lets every position look at every other position\nwith learnable weights. For the ou",
+        "## Search quality dominates\n\nIn all RAG-based memory systems, **the agent is only as smart as its\nsearch layer**. If seeklink returns the wrong three chunks, the agent\nanswers wrong with confidence. R",
+        "Query `Q`, key `K`, value `V` are linear projections of the input.\nScaling by `sqrt(d_k)` prevents softmax saturation at high dimension.\n\nSee [[attention-mechanism]] for why each piece is there.",
+        "## Related\n- [[BM25]] — sparse retrieval counterpart\n- [[attention-mechanism]] — what the embedder is doing internally\n- [[retrieval-augmented-generation]] — end-to-end system",
+        "## Related\n- [[BM25]] — keyword retrieval channel\n- [[RRF]] — fusion\n- [[vector-embeddings]] — semantic channel\n- [[attention-mechanism]] — reranker internals\n- [[agent-memory-patterns]] — RAG as memo",
+        "### 检索系统的设计要求\n\n个人 vault + agent 场景需要的不只是\"又一个语义搜索\"，而是把信息检索里\n成熟的 hybrid retrieval 结构做成一个本地工具：\n- BM25 + vector + graph + title 四路召回（[[RRF]] 融合）\n- 可选 cross-encoder 重排（[[attention-mechanism]]）\n- CJK 一等公民（j",
+        "### 下周计划\n\n- 再读一遍 [[FSRS]] paper，理解它的 90% retrievability 目标是怎么校的\n- 调查 [[forgetting-curve]] 对\"会用\"的影响（不是\"还记得\"）\n- 比较纯关键词、向量搜索、混合检索在个人笔记里的召回差异",
+        "## 与 spaced repetition 的区别\n\nZettelkasten 解决的是**写作 + 思考**问题：怎么让新想法和旧想法碰撞出火花。\n[[spaced-repetition]] 解决的是**记忆保持**问题：怎么让已知的事实留在脑子里。\n\n两者互补，不重复。典型工作流：\n- Zettelkasten 建立理解和结构\n- 从 permanent notes 蒸馏出关键 claims",
+        "### 对系统的启示\n\n- search indexes usually rank the current corpus, not what the user has\n  recently recalled\n- 如果想给笔记做 FSRS 式调度，需要存**每次访问时间戳**（现在没存）\n- recency and review scheduling should be optional signa",
+        "## 参考\n- [[spaced-repetition]] —— 对抗遗忘曲线的主要实践\n- [[FSRS]] —— 建模和拟合遗忘曲线的现代算法\n- [[memory-consolidation]] —— 生物学层面的记忆巩固过程"
+      ],
+      "scores": [
+        0.8430652679331566,
+        0.6147624156844824,
+        0.5033660323433204,
+        0.4989134921262053,
+        0.433539530404496,
+        0.03459018459018459,
+        0.019261104192611043,
+        0.01910813823857302,
+        0.018705882352941176,
+        0.018366500829187397
+      ],
+      "relevance": {
+        "notes/attention-mechanism.md": 3.0,
+        "cards/card-attention-formula.md": 3.0
+      },
+      "latency_ms": 337.8165829926729,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.4,
+      "average_precision_at_10": 0.8333333333333333,
+      "ndcg_at_10": 0.9197207891481876,
+      "last_expected_rank": 3,
+      "rerank_k": "auto",
+      "resolved_rerank_k": 5,
+      "rerank_k_reason": "title",
+      "first_stage": {
+        "candidate_count": 20,
+        "channel_source_counts": {
+          "bm25": 6,
+          "vector": 20,
+          "title": 1,
+          "metadata": 0,
+          "indegree": 20
+        },
+        "expected_path_ranks": {
+          "notes/attention-mechanism.md": {
+            "bm25": 4,
+            "vector": 1,
+            "title": 1,
+            "metadata": null,
+            "indegree": 6,
+            "rrf": 1,
+            "rerank_candidate": 1
+          },
+          "cards/card-attention-formula.md": {
+            "bm25": 3,
+            "vector": 3,
+            "title": null,
+            "metadata": null,
+            "indegree": 12,
+            "rrf": 3,
+            "rerank_candidate": 3
+          }
+        },
+        "hit_channel_ranks": [
+          {
+            "path": "notes/attention-mechanism.md",
+            "bm25": 4,
+            "vector": 1,
+            "title": 1,
+            "metadata": null,
+            "indegree": 6,
+            "rrf": 1,
+            "rerank_candidate": 1
+          },
+          {
+            "path": "notes/agent-memory-patterns.md",
+            "bm25": 5,
+            "vector": 4,
+            "title": null,
+            "metadata": null,
+            "indegree": 9,
+            "rrf": 5,
+            "rerank_candidate": 5
+          },
+          {
+            "path": "cards/card-attention-formula.md",
+            "bm25": 3,
+            "vector": 3,
+            "title": null,
+            "metadata": null,
+            "indegree": 12,
+            "rrf": 3,
+            "rerank_candidate": 3
+          },
+          {
+            "path": "notes/vector-embeddings.md",
+            "bm25": 1,
+            "vector": 2,
+            "title": null,
+            "metadata": null,
+            "indegree": 4,
+            "rrf": 2,
+            "rerank_candidate": 2
+          },
+          {
+            "path": "notes/retrieval-augmented-generation.md",
+            "bm25": 2,
+            "vector": 7,
+            "title": null,
+            "metadata": null,
+            "indegree": 3,
+            "rrf": 4,
+            "rerank_candidate": 4
+          },
+          {
+            "path": "logs/2026-W15.md",
+            "bm25": 6,
+            "vector": 5,
+            "title": null,
+            "metadata": null,
+            "indegree": 14,
+            "rrf": 6,
+            "rerank_candidate": 6
+          },
+          {
+            "path": "logs/2026-W14.md",
+            "bm25": null,
+            "vector": 6,
+            "title": null,
+            "metadata": null,
+            "indegree": 13,
+            "rrf": 7,
+            "rerank_candidate": 7
+          },
+          {
+            "path": "notes/zettelkasten.md",
+            "bm25": null,
+            "vector": 9,
+            "title": null,
+            "metadata": null,
+            "indegree": 5,
+            "rrf": 8,
+            "rerank_candidate": 8
+          },
+          {
+            "path": "logs/2026-W16.md",
+            "bm25": null,
+            "vector": 8,
+            "title": null,
+            "metadata": null,
+            "indegree": 15,
+            "rrf": 9,
+            "rerank_candidate": 9
+          },
+          {
+            "path": "notes/forgetting-curve.md",
+            "bm25": null,
+            "vector": 12,
+            "title": null,
+            "metadata": null,
+            "indegree": 7,
+            "rrf": 10,
+            "rerank_candidate": 10
+          }
+        ]
+      },
+      "expansions_used": []
+    },
+    {
+      "query": "sourdough bread starter",
+      "config": "A",
+      "tags": [
+        "english",
+        "off-topic",
+        "short"
+      ],
+      "hits": [
+        "recipes/sourdough-starter.md",
+        "README.md",
+        "notes/reciprocal-rank-fusion.md",
+        "logs/2026-W15.md",
+        "notes/note-to-card-workflow.md",
+        "recipes/pad-thai.md",
+        "logs/2026-W18.md",
+        "notes/agent-memory-patterns.md",
+        "notes/sqlite-fts5-cjk.md",
+        "notes/feynman-technique.md"
+      ],
+      "titles": [
+        "Sourdough starter from scratch",
+        "seeklink test corpus",
+        "Reciprocal Rank Fusion (RRF)",
+        "2026-W15",
+        "Note-to-card workflow",
+        "Pad Thai",
+        "2026-W18",
+        "Agent memory patterns",
+        "SQLite FTS5 + CJK (jieba)",
+        "Feynman technique"
+      ],
+      "snippets": [
+        "# Sourdough starter from scratch\n\nTakes 7-10 days to build a viable starter. No yeast, no commercial\ncultures. Just flour, water, and wild yeast from the air.",
+        "## Layout\n\n| Folder | Purpose | Style |\n|---|---|---|\n| `notes/` | Permanent notes | Strong frontmatter (tags, aliases), clear titles, wikilinks between notes, 300-800 words |\n| `logs/` | Weekly/daily",
+        "```\nbm25:    1.0\nvector:  1.0\nindegree: 0.3\ntitle:   1.5\n```\n",
+        "### 下周\n\n用小型双语 fixture 验证 reranking、line ranges、title/alias queries。",
+        "## Related\n- [[FSRS]] — scheduler that processes the cards\n- [[atomic-notes]] — what you're distilling from\n- [[spaced-repetition]] — why distillation is worth doing",
+        "## Method\n\n1. **Make sauce**: whisk tamarind, palm sugar, fish sauce, soy sauce in\n   a bowl until sugar dissolves. Taste — should be equal parts sweet,\n   salty, sour. Adjust.\n2. **Prep**: have all i",
+        "## 2026-W18 — 关于 RAG pipeline 的几个碎片\n\nrandom notes this week, 没打算写成完整论证。",
+        "## Hybrid patterns in production\n\nMost capable agents today combine several:\n- Conversation summary for recent context\n- RAG over long-term document store\n- File-based scratchpad for working memory\n- ",
+        "## The fix: jieba as custom tokenizer\n\n[jieba](https://github.com/fxsjy/jieba) is the standard Chinese word\nsegmenter. It uses a dictionary + HMM to split `语义搜索的研究` into\n`[语义, 搜索, 的, 研究]`. Plugging ji",
+        "## 与 Zettelkasten 的关系\n\n写 permanent note 的过程基本就是一次 Feynman pass：你在用自己的话重新\n组织一个想法。如果你的 zettel 是复制粘贴 + 摘录，它就不是一张工作型\nzettel，它是装饰品。见 [[zettelkasten]] 对 reformulation 的讨论。"
+      ],
+      "scores": [
+        0.7057850278370112,
+        0.036220055864974746,
+        0.02931223075135632,
+        0.002800926967120973,
+        0.0005884088185569388,
+        0.019280719280719283,
+        0.019098883572567782,
+        0.019053708439897697,
+        0.018778467908902693,
+        0.018496271748135874
+      ],
+      "relevance": {
+        "recipes/sourdough-starter.md": 3.0
+      },
+      "latency_ms": 398.47895805723965,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.2,
+      "average_precision_at_10": 1.0,
+      "ndcg_at_10": 1.0,
+      "last_expected_rank": 1,
+      "rerank_k": "auto",
+      "resolved_rerank_k": 5,
+      "rerank_k_reason": "default",
+      "first_stage": {
+        "candidate_count": 21,
+        "channel_source_counts": {
+          "bm25": 0,
+          "vector": 21,
+          "title": 0,
+          "metadata": 0,
+          "indegree": 21
+        },
+        "expected_path_ranks": {
+          "recipes/sourdough-starter.md": {
+            "bm25": null,
+            "vector": 1,
+            "title": null,
+            "metadata": null,
+            "indegree": 19,
+            "rrf": 2,
+            "rerank_candidate": 2
+          }
+        },
+        "hit_channel_ranks": [
+          {
+            "path": "recipes/sourdough-starter.md",
+            "bm25": null,
+            "vector": 1,
+            "title": null,
+            "metadata": null,
+            "indegree": 19,
+            "rrf": 2,
+            "rerank_candidate": 2
+          },
+          {
+            "path": "README.md",
+            "bm25": null,
+            "vector": 2,
+            "title": null,
+            "metadata": null,
+            "indegree": 11,
+            "rrf": 1,
+            "rerank_candidate": 1
+          },
+          {
+            "path": "notes/reciprocal-rank-fusion.md",
+            "bm25": null,
+            "vector": 7,
+            "title": null,
+            "metadata": null,
+            "indegree": 2,
+            "rrf": 5,
+            "rerank_candidate": 5
+          },
+          {
+            "path": "logs/2026-W15.md",
+            "bm25": null,
+            "vector": 3,
+            "title": null,
+            "metadata": null,
+            "indegree": 14,
+            "rrf": 4,
+            "rerank_candidate": 4
+          },
+          {
+            "path": "notes/note-to-card-workflow.md",
+            "bm25": null,
+            "vector": 4,
+            "title": null,
+            "metadata": null,
+            "indegree": 7,
+            "rrf": 3,
+            "rerank_candidate": 3
+          },
+          {
+            "path": "recipes/pad-thai.md",
+            "bm25": null,
+            "vector": 5,
+            "title": null,
+            "metadata": null,
+            "indegree": 17,
+            "rrf": 6,
+            "rerank_candidate": 6
+          },
+          {
+            "path": "logs/2026-W18.md",
+            "bm25": null,
+            "vector": 6,
+            "title": null,
+            "metadata": null,
+            "indegree": 16,
+            "rrf": 7,
+            "rerank_candidate": 7
+          },
+          {
+            "path": "notes/agent-memory-patterns.md",
+            "bm25": null,
+            "vector": 8,
+            "title": null,
+            "metadata": null,
+            "indegree": 9,
+            "rrf": 8,
+            "rerank_candidate": 8
+          },
+          {
+            "path": "notes/sqlite-fts5-cjk.md",
+            "bm25": null,
+            "vector": 9,
+            "title": null,
+            "metadata": null,
+            "indegree": 10,
+            "rrf": 9,
+            "rerank_candidate": 9
+          },
+          {
+            "path": "notes/feynman-technique.md",
+            "bm25": null,
+            "vector": 11,
+            "title": null,
+            "metadata": null,
+            "indegree": 8,
+            "rrf": 10,
+            "rerank_candidate": 10
+          }
+        ]
+      },
+      "expansions_used": []
+    },
+    {
+      "query": "how to stop forgetting things I study",
+      "config": "A",
+      "tags": [
+        "english",
+        "vocab-mismatch",
+        "long",
+        "natural-language"
+      ],
+      "hits": [
+        "notes/spaced-repetition.md",
+        "notes/memory-consolidation.md",
+        "notes/forgetting-curve.md",
+        "logs/2026-W14.md",
+        "sources/wikipedia-forgetting-curve.md",
+        "sources/anki-and-flashcards-intro.md",
+        "notes/deep-work-deliberate-practice.md",
+        "logs/2026-W15.md",
+        "notes/fsrs-algorithm.md",
+        "sources/wikipedia-spaced-repetition.md"
+      ],
+      "titles": [
+        "Spaced repetition",
+        "记忆巩固 Memory consolidation",
+        "遗忘曲线 Forgetting curve",
+        "2026-W14",
+        "Forgetting curve (Wikipedia summary)",
+        "Anki and flashcards — a practical intro",
+        "Deep work and deliberate practice",
+        "2026-W15",
+        "FSRS algorithm",
+        "Spaced repetition (Wikipedia summary)"
+      ],
+      "snippets": [
+        "## The 记忆保持力 problem\n\nThe core question of spaced repetition is: **how do we maximize memory\nretention per hour of study?** Daily re-reading wastes most of the time\non material you already know. One-p",
+        "## 关键发现\n\n- **睡眠剥夺直接降低新记忆的保留率**。一整晚不睡后学的东西，一周后剩下\n  的比正常睡眠少 30-40%。\n- **巩固不是被动的重放**。睡眠中大脑会主动\"重新体验\"白天的关键片段，\n  这个过程压缩了时间（几十毫秒 → 几秒），并把记忆和旧知识网络建立连接。\n- **间隔重复 + 睡眠 = 最优组合**。[[spaced-repetition]] 的每次复习启动\n  一",
+        "## 实践启示\n\n- 学习后**当天晚上**做一次短复习比三天后多一次复习效果更好。\n- 长间隔不等于懒复习——只要每次都\"踩\"在曲线下降的关键点。\n- 课堂教学的一次性讲授，如果没有后续复习机制，从遗忘曲线看基本是浪费。",
+        "## 2026-W14 周记\n\n本周主要在想**记忆保持力**这个问题。起因是发现自己读完 [[zettelkasten]] 相关\n的几本书（Ahrens 的《How to Take Smart Notes》，然后 Luhmann 原文的几篇\n论文），真正能\"用\"的想法其实不多。问题不在于没读懂，是没沉淀到能调用的\n程度。\n\n读懂 ≠ 记住 ≠ 会用。这三个之间的落差是学习系统设计的核心。",
+        "## Implications for learners\n\nWithout systematic review, most of any study session is forgotten\nwithin a month. With a review pattern tuned to catch each item near\nthe retrievability threshold (typica",
+        "## When not to use Anki\n\n- If you haven't understood the material yet. Anki entrenches; it\n  doesn't teach. Understand first (Feynman), then memorize.\n- If the material has a 2-week shelf life. Use a ",
+        "## Why this matters for learning systems\n\nSpaced repetition, Zettelkasten, and Feynman technique all assume\ndeliberate practice conditions. If you're reviewing Anki cards while\nwatching YouTube, you'r",
+        "## 2026-W15 周记\n\n这周主题：[[agent-memory-patterns]]。很多本地 agent 在长期记忆上卡住，\n问题往往不是模型太弱，而是 retrieval 太差。",
+        "## Related\n- [[spaced-repetition]] — the practice that FSRS optimizes\n- [[forgetting-curve]] — the phenomenon being modeled\n- [[note-to-card-workflow]] — how permanent notes become reviewable cards",
+        "## Applications\n\nMedical education (pharmacology, anatomy), foreign language\nacquisition (vocabulary), bar exam preparation, and programming\ncertification all report significant improvements when swit"
+      ],
+      "scores": [
+        0.4687906266262437,
+        0.24508501313237172,
+        0.07159119944455247,
+        0.055005288293454156,
+        0.05033063259747688,
+        0.019098883572567782,
+        0.01884057971014493,
+        0.018815471394037067,
+        0.018806921675774135,
+        0.018771526980482203
+      ],
+      "relevance": {
+        "notes/spaced-repetition.md": 3.0,
+        "sources/wikipedia-spaced-repetition.md": 3.0,
+        "notes/forgetting-curve.md": 3.0
+      },
+      "latency_ms": 450.0371250323951,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.4,
+      "average_precision_at_10": 0.6555555555555556,
+      "ndcg_at_10": 0.8395700624665825,
+      "last_expected_rank": 10,
+      "rerank_k": "auto",
+      "resolved_rerank_k": 5,
+      "rerank_k_reason": "default",
+      "first_stage": {
+        "candidate_count": 18,
+        "channel_source_counts": {
+          "bm25": 0,
+          "vector": 18,
+          "title": 0,
+          "metadata": 0,
+          "indegree": 18
+        },
+        "expected_path_ranks": {
+          "notes/spaced-repetition.md": {
+            "bm25": null,
+            "vector": 4,
+            "title": null,
+            "metadata": null,
+            "indegree": 2,
+            "rrf": 3,
+            "rerank_candidate": 3
+          },
+          "sources/wikipedia-spaced-repetition.md": {
+            "bm25": null,
+            "vector": 7,
+            "title": null,
+            "metadata": null,
+            "indegree": 18,
+            "rrf": 10,
+            "rerank_candidate": 10
+          },
+          "notes/forgetting-curve.md": {
+            "bm25": null,
+            "vector": 2,
+            "title": null,
+            "metadata": null,
+            "indegree": 5,
+            "rrf": 1,
+            "rerank_candidate": 1
+          }
+        },
+        "hit_channel_ranks": [
+          {
+            "path": "notes/spaced-repetition.md",
+            "bm25": null,
+            "vector": 4,
+            "title": null,
+            "metadata": null,
+            "indegree": 2,
+            "rrf": 3,
+            "rerank_candidate": 3
+          },
+          {
+            "path": "notes/memory-consolidation.md",
+            "bm25": null,
+            "vector": 1,
+            "title": null,
+            "metadata": null,
+            "indegree": 10,
+            "rrf": 2,
+            "rerank_candidate": 2
+          },
+          {
+            "path": "notes/forgetting-curve.md",
+            "bm25": null,
+            "vector": 2,
+            "title": null,
+            "metadata": null,
+            "indegree": 5,
+            "rrf": 1,
+            "rerank_candidate": 1
+          },
+          {
+            "path": "logs/2026-W14.md",
+            "bm25": null,
+            "vector": 3,
+            "title": null,
+            "metadata": null,
+            "indegree": 12,
+            "rrf": 4,
+            "rerank_candidate": 4
+          },
+          {
+            "path": "sources/wikipedia-forgetting-curve.md",
+            "bm25": null,
+            "vector": 5,
+            "title": null,
+            "metadata": null,
+            "indegree": 17,
+            "rrf": 5,
+            "rerank_candidate": 5
+          },
+          {
+            "path": "sources/anki-and-flashcards-intro.md",
+            "bm25": null,
+            "vector": 6,
+            "title": null,
+            "metadata": null,
+            "indegree": 16,
+            "rrf": 6,
+            "rerank_candidate": 6
+          },
+          {
+            "path": "notes/deep-work-deliberate-practice.md",
+            "bm25": null,
+            "vector": 9,
+            "title": null,
+            "metadata": null,
+            "indegree": 9,
+            "rrf": 7,
+            "rerank_candidate": 7
+          },
+          {
+            "path": "logs/2026-W15.md",
+            "bm25": null,
+            "vector": 8,
+            "title": null,
+            "metadata": null,
+            "indegree": 13,
+            "rrf": 8,
+            "rerank_candidate": 8
+          },
+          {
+            "path": "notes/fsrs-algorithm.md",
+            "bm25": null,
+            "vector": 12,
+            "title": null,
+            "metadata": null,
+            "indegree": 1,
+            "rrf": 9,
+            "rerank_candidate": 9
+          },
+          {
+            "path": "sources/wikipedia-spaced-repetition.md",
+            "bm25": null,
+            "vector": 7,
+            "title": null,
+            "metadata": null,
+            "indegree": 18,
+            "rrf": 10,
+            "rerank_candidate": 10
+          }
+        ]
+      },
+      "expansions_used": []
+    },
+    {
+      "query": "学完就忘怎么办",
+      "config": "A",
+      "tags": [
+        "cjk",
+        "vocab-mismatch",
+        "natural-language"
+      ],
+      "hits": [
+        "notes/spaced-repetition.md",
+        "notes/forgetting-curve.md",
+        "sources/wikipedia-forgetting-curve.md",
+        "notes/memory-consolidation.md",
+        "logs/2026-W14.md",
+        "sources/anki-and-flashcards-intro.md",
+        "notes/deep-work-deliberate-practice.md",
+        "notes/zettelkasten.md",
+        "sources/wikipedia-spaced-repetition.md",
+        "logs/2026-W16.md"
+      ],
+      "titles": [
+        "Spaced repetition",
+        "遗忘曲线 Forgetting curve",
+        "Forgetting curve (Wikipedia summary)",
+        "记忆巩固 Memory consolidation",
+        "2026-W14",
+        "Anki and flashcards — a practical intro",
+        "Deep work and deliberate practice",
+        "Zettelkasten",
+        "Spaced repetition (Wikipedia summary)",
+        "2026-W16"
+      ],
+      "snippets": [
+        "## The 记忆保持力 problem\n\nThe core question of spaced repetition is: **how do we maximize memory\nretention per hour of study?** Daily re-reading wastes most of the time\non material you already know. One-p",
+        "## 实践启示\n\n- 学习后**当天晚上**做一次短复习比三天后多一次复习效果更好。\n- 长间隔不等于懒复习——只要每次都\"踩\"在曲线下降的关键点。\n- 课堂教学的一次性讲授，如果没有后续复习机制，从遗忘曲线看基本是浪费。",
+        "## Implications for learners\n\nWithout systematic review, most of any study session is forgotten\nwithin a month. With a review pattern tuned to catch each item near\nthe retrievability threshold (typica",
+        "## 关键发现\n\n- **睡眠剥夺直接降低新记忆的保留率**。一整晚不睡后学的东西，一周后剩下\n  的比正常睡眠少 30-40%。\n- **巩固不是被动的重放**。睡眠中大脑会主动\"重新体验\"白天的关键片段，\n  这个过程压缩了时间（几十毫秒 → 几秒），并把记忆和旧知识网络建立连接。\n- **间隔重复 + 睡眠 = 最优组合**。[[spaced-repetition]] 的每次复习启动\n  一",
+        "## 2026-W14 周记\n\n本周主要在想**记忆保持力**这个问题。起因是发现自己读完 [[zettelkasten]] 相关\n的几本书（Ahrens 的《How to Take Smart Notes》，然后 Luhmann 原文的几篇\n论文），真正能\"用\"的想法其实不多。问题不在于没读懂，是没沉淀到能调用的\n程度。\n\n读懂 ≠ 记住 ≠ 会用。这三个之间的落差是学习系统设计的核心。",
+        "## When not to use Anki\n\n- If you haven't understood the material yet. Anki entrenches; it\n  doesn't teach. Understand first (Feynman), then memorize.\n- If the material has a 2-week shelf life. Use a ",
+        "## Why this matters for learning systems\n\nSpaced repetition, Zettelkasten, and Feynman technique all assume\ndeliberate practice conditions. If you're reviewing Anki cards while\nwatching YouTube, you'r",
+        "## 与 spaced repetition 的区别\n\nZettelkasten 解决的是**写作 + 思考**问题：怎么让新想法和旧想法碰撞出火花。\n[[spaced-repetition]] 解决的是**记忆保持**问题：怎么让已知的事实留在脑子里。\n\n两者互补，不重复。典型工作流：\n- Zettelkasten 建立理解和结构\n- 从 permanent notes 蒸馏出关键 claims",
+        "## History\n\nThe phenomenon was first characterized by **Hermann Ebbinghaus** in\nthe 1880s through experiments on himself using nonsense syllables. He\ndocumented the forgetting curve — retention drops ",
+        "### 遗忘曲线不是指数\n\n这个是真 surprise。传统教科书都说遗忘是 `e^(-t/τ)`（指数衰减）。但\nEbbinghaus 的原始数据和现代大样本研究都显示是**幂律**："
+      ],
+      "scores": [
+        0.2689414213699951,
+        0.21206880435710534,
+        0.1561048974454574,
+        0.12592276483513232,
+        0.05033063259747688,
+        0.019205569205569206,
+        0.019183494293239685,
+        0.019047619047619046,
+        0.01887274155538099,
+        0.018659420289855073
+      ],
+      "relevance": {
+        "notes/spaced-repetition.md": 3.0,
+        "notes/forgetting-curve.md": 3.0,
+        "logs/2026-W14.md": 3.0
+      },
+      "latency_ms": 458.9643329381943,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.6,
+      "average_precision_at_10": 0.8666666666666667,
+      "ndcg_at_10": 0.9469024295259745,
+      "last_expected_rank": 5,
+      "rerank_k": "auto",
+      "resolved_rerank_k": 5,
+      "rerank_k_reason": "default",
+      "first_stage": {
+        "candidate_count": 16,
+        "channel_source_counts": {
+          "bm25": 0,
+          "vector": 16,
+          "title": 0,
+          "metadata": 0,
+          "indegree": 16
+        },
+        "expected_path_ranks": {
+          "notes/spaced-repetition.md": {
+            "bm25": null,
+            "vector": 5,
+            "title": null,
+            "metadata": null,
+            "indegree": 2,
+            "rrf": 3,
+            "rerank_candidate": 3
+          },
+          "notes/forgetting-curve.md": {
+            "bm25": null,
+            "vector": 1,
+            "title": null,
+            "metadata": null,
+            "indegree": 5,
+            "rrf": 1,
+            "rerank_candidate": 1
+          },
+          "logs/2026-W14.md": {
+            "bm25": null,
+            "vector": 3,
+            "title": null,
+            "metadata": null,
+            "indegree": 10,
+            "rrf": 4,
+            "rerank_candidate": 4
+          }
+        },
+        "hit_channel_ranks": [
+          {
+            "path": "notes/spaced-repetition.md",
+            "bm25": null,
+            "vector": 5,
+            "title": null,
+            "metadata": null,
+            "indegree": 2,
+            "rrf": 3,
+            "rerank_candidate": 3
+          },
+          {
+            "path": "notes/forgetting-curve.md",
+            "bm25": null,
+            "vector": 1,
+            "title": null,
+            "metadata": null,
+            "indegree": 5,
+            "rrf": 1,
+            "rerank_candidate": 1
+          },
+          {
+            "path": "sources/wikipedia-forgetting-curve.md",
+            "bm25": null,
+            "vector": 4,
+            "title": null,
+            "metadata": null,
+            "indegree": 15,
+            "rrf": 5,
+            "rerank_candidate": 5
+          },
+          {
+            "path": "notes/memory-consolidation.md",
+            "bm25": null,
+            "vector": 2,
+            "title": null,
+            "metadata": null,
+            "indegree": 8,
+            "rrf": 2,
+            "rerank_candidate": 2
+          },
+          {
+            "path": "logs/2026-W14.md",
+            "bm25": null,
+            "vector": 3,
+            "title": null,
+            "metadata": null,
+            "indegree": 10,
+            "rrf": 4,
+            "rerank_candidate": 4
+          },
+          {
+            "path": "sources/anki-and-flashcards-intro.md",
+            "bm25": null,
+            "vector": 6,
+            "title": null,
+            "metadata": null,
+            "indegree": 14,
+            "rrf": 6,
+            "rerank_candidate": 6
+          },
+          {
+            "path": "notes/deep-work-deliberate-practice.md",
+            "bm25": null,
+            "vector": 8,
+            "title": null,
+            "metadata": null,
+            "indegree": 7,
+            "rrf": 7,
+            "rerank_candidate": 7
+          },
+          {
+            "path": "notes/zettelkasten.md",
+            "bm25": null,
+            "vector": 10,
+            "title": null,
+            "metadata": null,
+            "indegree": 3,
+            "rrf": 8,
+            "rerank_candidate": 8
+          },
+          {
+            "path": "sources/wikipedia-spaced-repetition.md",
+            "bm25": null,
+            "vector": 7,
+            "title": null,
+            "metadata": null,
+            "indegree": 16,
+            "rrf": 9,
+            "rerank_candidate": 9
+          },
+          {
+            "path": "logs/2026-W16.md",
+            "bm25": null,
+            "vector": 9,
+            "title": null,
+            "metadata": null,
+            "indegree": 12,
+            "rrf": 10,
+            "rerank_candidate": 10
+          }
+        ]
+      },
+      "expansions_used": []
+    },
+    {
+      "query": "second brain slip box",
+      "config": "A",
+      "tags": [
+        "english",
+        "vocab-mismatch",
+        "synonym"
+      ],
+      "hits": [
+        "notes/zettelkasten.md",
+        "sources/niklas-luhmann-zettelkasten.md",
+        "logs/2026-W14.md",
+        "logs/2026-W16.md",
+        "notes/spaced-repetition.md",
+        "notes/fsrs-algorithm.md",
+        "notes/forgetting-curve.md",
+        "sources/wikipedia-forgetting-curve.md",
+        "notes/memory-consolidation.md",
+        "notes/attention-mechanism.md"
+      ],
+      "titles": [
+        "Zettelkasten",
+        "Niklas Luhmann's Zettelkasten (essay summary)",
+        "2026-W14",
+        "2026-W16",
+        "Spaced repetition",
+        "FSRS algorithm",
+        "遗忘曲线 Forgetting curve",
+        "Forgetting curve (Wikipedia summary)",
+        "记忆巩固 Memory consolidation",
+        "Attention mechanism"
+      ],
+      "snippets": [
+        "# Zettelkasten\n\nZettelkasten (德语：\"卡片盒\")是德国社会学家 Niklas Luhmann 在 1960-90 年代\n使用的个人知识系统，他用它在 30 年里写了 70 多本书、400 多篇论文。核心是一\n堆编号索引卡（约 9 万张），每张一个原子想法，卡片之间通过编号互相引用。\n\n关键不是卡片，是**原子性 + 引用**。每张卡只讲一件事；卡片之间的链接形成\n一张",
+        "## Contemporary inheritors\n\nDigital Zettelkasten-inspired tools include Obsidian, Roam Research,\nLogseq, and various plain-markdown vault systems. They share Luhmann's\natomic-note + wikilink pattern b",
+        "### 当前想法\n\n**三者都要**，但不要求每个想法都进所有三个层。典型生命周期：\n- 读到一个想法 → fleeting note（草）\n- 想清楚了 → permanent note in zettelkasten\n- 想不想持续调用？想 → 蒸馏成 1-3 张 flashcard 进 Anki\n- 不想进 Anki 也 ok，zettelkasten 查得到就行\n\n关键是 **seekli",
+        "### See also\n- [[FSRS]] — 理论总览\n- [[forgetting-curve]] — 底层现象\n- [[memory-consolidation]] — 生物学层面的解释",
+        "## Related\n- [[FSRS]] — state-of-the-art scheduler\n- [[forgetting-curve]] — what the spacing fights against\n- [[feynman-technique]] — complementary practice for deep understanding\n- [[zettelkasten]] —",
+        "## Why FSRS beats SM-2\n\nSM-2 uses a fixed formula tied to a user-reported \"ease factor\" per card.\nIt doesn't learn from population data, and its intervals tend to grow\ntoo fast for hard cards and too ",
+        "## 参考\n- [[spaced-repetition]] —— 对抗遗忘曲线的主要实践\n- [[FSRS]] —— 建模和拟合遗忘曲线的现代算法\n- [[memory-consolidation]] —— 生物学层面的记忆巩固过程",
+        "## Countermeasures\n\nThe forgetting curve can be flattened by:\n\n1. **Active recall** — retrieving the memory, not re-reading. Each\n   retrieval attempt strengthens the trace disproportionately.\n2. **Sp",
+        "# 记忆巩固 Memory consolidation\n\n学习到一个新东西之后，它最初存在海马体（hippocampus）的快速编码系统里。\n如果不干预，这个痕迹几小时内就开始衰减（见 [[forgetting-curve]]）。**记忆\n巩固**指的是大脑把短期痕迹\"烧录\"到长期皮层存储的过程——主要发生在睡眠\n期间，尤其是慢波睡眠（SWS）和 REM 阶段。",
+        "## The quadratic cost\n\nThe softmax is over the full sequence length `n`, giving `O(n^2)` time\nand memory. For long contexts, this dominates training cost. Recent\nwork (FlashAttention, Mamba-style stat"
+      ],
+      "scores": [
+        0.7981867777396212,
+        0.060086650174007626,
+        0.02297736991002562,
+        0.008061991528271641,
+        0.006692850924284855,
+        0.01920374707259953,
+        0.01911764705882353,
+        0.018999073215940687,
+        0.018979427188382414,
+        0.018970365563486913
+      ],
+      "relevance": {
+        "notes/zettelkasten.md": 3.0,
+        "sources/niklas-luhmann-zettelkasten.md": 3.0,
+        "notes/atomic-notes.md": 3.0
+      },
+      "latency_ms": 454.11891699768603,
+      "reranker_active": true,
+      "recall_at_10": 0.6666666666666666,
+      "mrr": 1.0,
+      "precision_at_5": 0.4,
+      "average_precision_at_10": 0.6666666666666666,
+      "ndcg_at_10": 0.7653606369886218,
+      "last_expected_rank": 2,
+      "rerank_k": "auto",
+      "resolved_rerank_k": 5,
+      "rerank_k_reason": "default",
+      "first_stage": {
+        "candidate_count": 24,
+        "channel_source_counts": {
+          "bm25": 0,
+          "vector": 24,
+          "title": 0,
+          "metadata": 0,
+          "indegree": 24
+        },
+        "expected_path_ranks": {
+          "notes/zettelkasten.md": {
+            "bm25": null,
+            "vector": 6,
+            "title": null,
+            "metadata": null,
+            "indegree": 6,
+            "rrf": 4,
+            "rerank_candidate": 4
+          },
+          "sources/niklas-luhmann-zettelkasten.md": {
+            "bm25": null,
+            "vector": 3,
+            "title": null,
+            "metadata": null,
+            "indegree": 22,
+            "rrf": 5,
+            "rerank_candidate": 5
+          },
+          "notes/atomic-notes.md": {
+            "bm25": null,
+            "vector": 15,
+            "title": null,
+            "metadata": null,
+            "indegree": 10,
+            "rrf": 13,
+            "rerank_candidate": null
+          }
+        },
+        "hit_channel_ranks": [
+          {
+            "path": "notes/zettelkasten.md",
+            "bm25": null,
+            "vector": 6,
+            "title": null,
+            "metadata": null,
+            "indegree": 6,
+            "rrf": 4,
+            "rerank_candidate": 4
+          },
+          {
+            "path": "sources/niklas-luhmann-zettelkasten.md",
+            "bm25": null,
+            "vector": 3,
+            "title": null,
+            "metadata": null,
+            "indegree": 22,
+            "rrf": 5,
+            "rerank_candidate": 5
+          },
+          {
+            "path": "logs/2026-W14.md",
+            "bm25": null,
+            "vector": 1,
+            "title": null,
+            "metadata": null,
+            "indegree": 16,
+            "rrf": 2,
+            "rerank_candidate": 2
+          },
+          {
+            "path": "logs/2026-W16.md",
+            "bm25": null,
+            "vector": 2,
+            "title": null,
+            "metadata": null,
+            "indegree": 18,
+            "rrf": 3,
+            "rerank_candidate": 3
+          },
+          {
+            "path": "notes/spaced-repetition.md",
+            "bm25": null,
+            "vector": 4,
+            "title": null,
+            "metadata": null,
+            "indegree": 2,
+            "rrf": 1,
+            "rerank_candidate": 1
+          },
+          {
+            "path": "notes/fsrs-algorithm.md",
+            "bm25": null,
+            "vector": 10,
+            "title": null,
+            "metadata": null,
+            "indegree": 1,
+            "rrf": 6,
+            "rerank_candidate": 6
+          },
+          {
+            "path": "notes/forgetting-curve.md",
+            "bm25": null,
+            "vector": 8,
+            "title": null,
+            "metadata": null,
+            "indegree": 8,
+            "rrf": 7,
+            "rerank_candidate": 7
+          },
+          {
+            "path": "sources/wikipedia-forgetting-curve.md",
+            "bm25": null,
+            "vector": 5,
+            "title": null,
+            "metadata": null,
+            "indegree": 23,
+            "rrf": 8,
+            "rerank_candidate": 8
+          },
+          {
+            "path": "notes/memory-consolidation.md",
+            "bm25": null,
+            "vector": 7,
+            "title": null,
+            "metadata": null,
+            "indegree": 14,
+            "rrf": 9,
+            "rerank_candidate": 9
+          },
+          {
+            "path": "notes/attention-mechanism.md",
+            "bm25": null,
+            "vector": 9,
+            "title": null,
+            "metadata": null,
+            "indegree": 7,
+            "rrf": 10,
+            "rerank_candidate": 10
+          }
+        ]
+      },
+      "expansions_used": []
+    },
+    {
+      "query": "把文档切块放进向量库",
+      "config": "A",
+      "tags": [
+        "cjk",
+        "vocab-mismatch",
+        "technical"
+      ],
+      "hits": [
+        "notes/vector-embeddings.md",
+        "notes/attention-mechanism.md",
+        "logs/2026-W15.md",
+        "logs/2026-W18.md",
+        "notes/agent-memory-patterns.md",
+        "notes/retrieval-augmented-generation.md",
+        "cards/card-attention-formula.md",
+        "notes/reciprocal-rank-fusion.md",
+        "notes/bm25-intuition.md",
+        "logs/2026-W17.md"
+      ],
+      "titles": [
+        "Vector embeddings",
+        "Attention mechanism",
+        "2026-W15",
+        "2026-W18",
+        "Agent memory patterns",
+        "Retrieval-augmented generation",
+        "Card: Attention formula",
+        "Reciprocal Rank Fusion (RRF)",
+        "BM25 intuition",
+        "2026-W17"
+      ],
+      "snippets": [
+        "# Vector embeddings\n\nAn embedding is a fixed-length numeric vector that represents a piece\nof text (or image, or code) in a geometric space where **semantic\nsimilarity maps to geometric proximity**. T",
+        "where `Q`, `K`, `V` are linear projections of the input (queries, keys,\nvalues), and `d_k` is the key dimension (scaling prevents softmax\nsaturation at large dims).",
+        "### 检索系统的设计要求\n\n个人 vault + agent 场景需要的不只是\"又一个语义搜索\"，而是把信息检索里\n成熟的 hybrid retrieval 结构做成一个本地工具：\n- BM25 + vector + graph + title 四路召回（[[RRF]] 融合）\n- 可选 cross-encoder 重排（[[attention-mechanism]]）\n- CJK 一等公民（j",
+        "### 3. CJK 处理上 seeklink 的 unfair advantage\n\n国内做 RAG 的产品都用 openai 的 embedder 或者 BGE-large。jina-v2-zh\n是 2024 年做中文 embedder 做得最细的一家，但英文场景少人用所以没\nlisticle 报道。对 CJK-first vault 是 underappreciated 的好东西。\n见 [[",
+        "## 3. Retrieval-based (RAG)\n\nStore turns, notes, and tool outputs as documents; index them with\n[[vector-embeddings]] + [[BM25]]; retrieve relevant ones at each turn.\nSee [[retrieval-augmented-generat",
+        "## Related\n- [[BM25]] — keyword retrieval channel\n- [[RRF]] — fusion\n- [[vector-embeddings]] — semantic channel\n- [[attention-mechanism]] — reranker internals\n- [[agent-memory-patterns]] — RAG as memo",
+        "```\nAttention(Q, K, V) = softmax(Q @ K.T / sqrt(d_k)) @ V\n```\n",
+        "## Related\n- [[bm25-intuition]]\n- [[vector-embeddings]]\n- [[retrieval-augmented-generation]]",
+        "## Related\n- [[RRF]] — how BM25 and vector channels are combined\n- [[sqlite-fts5-cjk]] — seeklink's implementation\n- [[vector-embeddings]] — semantic counterpart",
+        "### 对 seeklink 的启发\n\nDoto 的观点等于说\"**好搜索 = 不需要目录**\"。这和 [[agent-memory-patterns]]\n里的\"retrieval quality = agent intelligence\"是同一个 insight，只是\n对 human 用户。\n\n如果 seeklink 的搜索够准，你的 vault 可以扁平——logs/ notes/ cards"
+      ],
+      "scores": [
+        0.14804719803168948,
+        0.09534946489910949,
+        0.058345840611681056,
+        0.03622005586497474,
+        0.029312230751356323,
+        0.028436033044852663,
+        0.02758528222678999,
+        0.02595735719779685,
+        0.022286185539225494,
+        0.017442484736205337
+      ],
+      "relevance": {
+        "notes/retrieval-augmented-generation.md": 3.0,
+        "notes/vector-embeddings.md": 3.0
+      },
+      "latency_ms": 1507.7104999218136,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.2,
+      "average_precision_at_10": 0.6666666666666666,
+      "ndcg_at_10": 0.8315546295836226,
+      "last_expected_rank": 6,
+      "rerank_k": "auto",
+      "resolved_rerank_k": 20,
+      "rerank_k_reason": "cjk_technical",
+      "first_stage": {
+        "candidate_count": 21,
+        "channel_source_counts": {
+          "bm25": 0,
+          "vector": 21,
+          "title": 0,
+          "metadata": 0,
+          "indegree": 21
+        },
+        "expected_path_ranks": {
+          "notes/retrieval-augmented-generation.md": {
+            "bm25": null,
+            "vector": 17,
+            "title": null,
+            "metadata": null,
+            "indegree": 3,
+            "rrf": 15,
+            "rerank_candidate": 15
+          },
+          "notes/vector-embeddings.md": {
+            "bm25": null,
+            "vector": 12,
+            "title": null,
+            "metadata": null,
+            "indegree": 4,
+            "rrf": 11,
+            "rerank_candidate": 11
+          }
+        },
+        "hit_channel_ranks": [
+          {
+            "path": "notes/vector-embeddings.md",
+            "bm25": null,
+            "vector": 12,
+            "title": null,
+            "metadata": null,
+            "indegree": 4,
+            "rrf": 11,
+            "rerank_candidate": 11
+          },
+          {
+            "path": "notes/attention-mechanism.md",
+            "bm25": null,
+            "vector": 9,
+            "title": null,
+            "metadata": null,
+            "indegree": 6,
+            "rrf": 8,
+            "rerank_candidate": 8
+          },
+          {
+            "path": "logs/2026-W15.md",
+            "bm25": null,
+            "vector": 3,
+            "title": null,
+            "metadata": null,
+            "indegree": 18,
+            "rrf": 5,
+            "rerank_candidate": 5
+          },
+          {
+            "path": "logs/2026-W18.md",
+            "bm25": null,
+            "vector": 6,
+            "title": null,
+            "metadata": null,
+            "indegree": 21,
+            "rrf": 10,
+            "rerank_candidate": 10
+          },
+          {
+            "path": "notes/agent-memory-patterns.md",
+            "bm25": null,
+            "vector": 4,
+            "title": null,
+            "metadata": null,
+            "indegree": 12,
+            "rrf": 4,
+            "rerank_candidate": 4
+          },
+          {
+            "path": "notes/retrieval-augmented-generation.md",
+            "bm25": null,
+            "vector": 17,
+            "title": null,
+            "metadata": null,
+            "indegree": 3,
+            "rrf": 15,
+            "rerank_candidate": 15
+          },
+          {
+            "path": "cards/card-attention-formula.md",
+            "bm25": null,
+            "vector": 11,
+            "title": null,
+            "metadata": null,
+            "indegree": 16,
+            "rrf": 13,
+            "rerank_candidate": 13
+          },
+          {
+            "path": "notes/reciprocal-rank-fusion.md",
+            "bm25": null,
+            "vector": 8,
+            "title": null,
+            "metadata": null,
+            "indegree": 2,
+            "rrf": 6,
+            "rerank_candidate": 6
+          },
+          {
+            "path": "notes/bm25-intuition.md",
+            "bm25": null,
+            "vector": 5,
+            "title": null,
+            "metadata": null,
+            "indegree": 7,
+            "rrf": 3,
+            "rerank_candidate": 3
+          },
+          {
+            "path": "logs/2026-W17.md",
+            "bm25": null,
+            "vector": 2,
+            "title": null,
+            "metadata": null,
+            "indegree": 20,
+            "rrf": 2,
+            "rerank_candidate": 2
+          }
+        ]
+      },
+      "expansions_used": []
+    },
+    {
+      "query": "Luhmann 原子笔记",
+      "config": "A",
+      "tags": [
+        "cjk-en-mixed",
+        "methodology"
+      ],
+      "hits": [
+        "sources/niklas-luhmann-zettelkasten.md",
+        "notes/atomic-notes.md",
+        "notes/zettelkasten.md",
+        "logs/2026-W17.md",
+        "notes/feynman-technique.md",
+        "logs/2026-W14.md",
+        "README.md",
+        "notes/note-to-card-workflow.md",
+        "logs/2026-W16.md",
+        "notes/forgetting-curve.md"
+      ],
+      "titles": [
+        "Niklas Luhmann's Zettelkasten (essay summary)",
+        "Atomic notes",
+        "Zettelkasten",
+        "2026-W17",
+        "Feynman technique",
+        "2026-W14",
+        "seeklink test corpus",
+        "Note-to-card workflow",
+        "2026-W16",
+        "遗忘曲线 Forgetting curve"
+      ],
+      "snippets": [
+        "# Niklas Luhmann's Zettelkasten (essay summary)\n\n*Paraphrased summary of Luhmann's 1981 essay \"Communicating with Slip\nBoxes\" and surrounding interviews, for the test corpus.*\n\nLuhmann (1927-1998) was",
+        "## Why atomicity matters\n\n- **Linking**: you can only usefully link to a note if the note has a\n  clear subject. \"My thoughts on memory\" is unlinkable; \"Forgetting\n  curves are empirically power-law, ",
+        "## 引用\n- [[atomic-notes]] —— 原子性的深度讨论\n- [[note-to-card-workflow]] —— 从 zettel 到 flashcard 的蒸馏\n- [[deep-work-deliberate-practice]] —— 配套的工作姿态",
+        "### 共识\n\n- 三本书都同意 [[atomic-notes]] 是核心。\n- 三本书都警告**装饰型 vault** 的陷阱——漂亮的目录结构 ≠ 思考工具。\n- 三本都说 permanent note 必须是**自己的话**。",
+        "## Related\n- [[deep-work-deliberate-practice]] —— 包含费曼技巧的更大框架\n- [[atomic-notes]] —— 产出物",
+        "## 2026-W14 周记\n\n本周主要在想**记忆保持力**这个问题。起因是发现自己读完 [[zettelkasten]] 相关\n的几本书（Ahrens 的《How to Take Smart Notes》，然后 Luhmann 原文的几篇\n论文），真正能\"用\"的想法其实不多。问题不在于没读懂，是没沉淀到能调用的\n程度。\n\n读懂 ≠ 记住 ≠ 会用。这三个之间的落差是学习系统设计的核心。",
+        "## Layout\n\n| Folder | Purpose | Style |\n|---|---|---|\n| `notes/` | Permanent notes | Strong frontmatter (tags, aliases), clear titles, wikilinks between notes, 300-800 words |\n| `logs/` | Weekly/daily",
+        "## Related\n- [[FSRS]] — scheduler that processes the cards\n- [[atomic-notes]] — what you're distilling from\n- [[spaced-repetition]] — why distillation is worth doing",
+        "### 对系统的启示\n\n- search indexes usually rank the current corpus, not what the user has\n  recently recalled\n- 如果想给笔记做 FSRS 式调度，需要存**每次访问时间戳**（现在没存）\n- recency and review scheduling should be optional signa",
+        "# 遗忘曲线 Forgetting curve\n\n赫尔曼·艾宾浩斯（Hermann Ebbinghaus, 1850-1909）在 1880 年代用自己做受试者，\n记忆了一批无意义音节（CVC 结构：WID、ZOF 等），然后在不同时间间隔后测量\n还能回忆多少。他画出的曲线是心理学史上第一条严谨的实验曲线，后来被称为\n**遗忘曲线**（forgetting curve）。\n\n基本形状：记住一个新东"
+      ],
+      "scores": [
+        0.8175744761936437,
+        0.334589441253186,
+        0.30735801686526387,
+        0.23370635691404032,
+        0.20181322226037882,
+        0.019437229437229437,
+        0.01927319922128488,
+        0.018901098901098902,
+        0.018872549019607842,
+        0.01857638888888889
+      ],
+      "relevance": {
+        "notes/atomic-notes.md": 3.0,
+        "notes/zettelkasten.md": 3.0,
+        "sources/niklas-luhmann-zettelkasten.md": 3.0
+      },
+      "latency_ms": 488.8265838380903,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.6,
+      "average_precision_at_10": 1.0,
+      "ndcg_at_10": 1.0,
+      "last_expected_rank": 3,
+      "rerank_k": "auto",
+      "resolved_rerank_k": 5,
+      "rerank_k_reason": "default",
+      "first_stage": {
+        "candidate_count": 16,
+        "channel_source_counts": {
+          "bm25": 0,
+          "vector": 16,
+          "title": 0,
+          "metadata": 0,
+          "indegree": 16
+        },
+        "expected_path_ranks": {
+          "notes/atomic-notes.md": {
+            "bm25": null,
+            "vector": 5,
+            "title": null,
+            "metadata": null,
+            "indegree": 6,
+            "rrf": 4,
+            "rerank_candidate": 4
+          },
+          "notes/zettelkasten.md": {
+            "bm25": null,
+            "vector": 1,
+            "title": null,
+            "metadata": null,
+            "indegree": 3,
+            "rrf": 1,
+            "rerank_candidate": 1
+          },
+          "sources/niklas-luhmann-zettelkasten.md": {
+            "bm25": null,
+            "vector": 3,
+            "title": null,
+            "metadata": null,
+            "indegree": 15,
+            "rrf": 5,
+            "rerank_candidate": 5
+          }
+        },
+        "hit_channel_ranks": [
+          {
+            "path": "sources/niklas-luhmann-zettelkasten.md",
+            "bm25": null,
+            "vector": 3,
+            "title": null,
+            "metadata": null,
+            "indegree": 15,
+            "rrf": 5,
+            "rerank_candidate": 5
+          },
+          {
+            "path": "notes/atomic-notes.md",
+            "bm25": null,
+            "vector": 5,
+            "title": null,
+            "metadata": null,
+            "indegree": 6,
+            "rrf": 4,
+            "rerank_candidate": 4
+          },
+          {
+            "path": "notes/zettelkasten.md",
+            "bm25": null,
+            "vector": 1,
+            "title": null,
+            "metadata": null,
+            "indegree": 3,
+            "rrf": 1,
+            "rerank_candidate": 1
+          },
+          {
+            "path": "logs/2026-W17.md",
+            "bm25": null,
+            "vector": 2,
+            "title": null,
+            "metadata": null,
+            "indegree": 13,
+            "rrf": 2,
+            "rerank_candidate": 2
+          },
+          {
+            "path": "notes/feynman-technique.md",
+            "bm25": null,
+            "vector": 4,
+            "title": null,
+            "metadata": null,
+            "indegree": 7,
+            "rrf": 3,
+            "rerank_candidate": 3
+          },
+          {
+            "path": "logs/2026-W14.md",
+            "bm25": null,
+            "vector": 6,
+            "title": null,
+            "metadata": null,
+            "indegree": 10,
+            "rrf": 6,
+            "rerank_candidate": 6
+          },
+          {
+            "path": "README.md",
+            "bm25": null,
+            "vector": 7,
+            "title": null,
+            "metadata": null,
+            "indegree": 9,
+            "rrf": 7,
+            "rerank_candidate": 7
+          },
+          {
+            "path": "notes/note-to-card-workflow.md",
+            "bm25": null,
+            "vector": 10,
+            "title": null,
+            "metadata": null,
+            "indegree": 5,
+            "rrf": 8,
+            "rerank_candidate": 8
+          },
+          {
+            "path": "logs/2026-W16.md",
+            "bm25": null,
+            "vector": 8,
+            "title": null,
+            "metadata": null,
+            "indegree": 12,
+            "rrf": 9,
+            "rerank_candidate": 9
+          },
+          {
+            "path": "notes/forgetting-curve.md",
+            "bm25": null,
+            "vector": 12,
+            "title": null,
+            "metadata": null,
+            "indegree": 4,
+            "rrf": 10,
+            "rerank_candidate": 10
+          }
+        ]
+      },
+      "expansions_used": []
+    },
+    {
+      "query": "FSRS 算法原理",
+      "config": "A",
+      "tags": [
+        "cjk-en-mixed",
+        "technical",
+        "short"
+      ],
+      "hits": [
+        "notes/fsrs-algorithm.md",
+        "sources/wikipedia-forgetting-curve.md",
+        "cards/card-fsrs-core-idea.md",
+        "sources/anki-and-flashcards-intro.md",
+        "sources/wikipedia-spaced-repetition.md",
+        "notes/forgetting-curve.md",
+        "logs/2026-W16.md",
+        "notes/memory-consolidation.md",
+        "notes/note-to-card-workflow.md",
+        "notes/bm25-intuition.md"
+      ],
+      "titles": [
+        "FSRS algorithm",
+        "Forgetting curve (Wikipedia summary)",
+        "Card: FSRS core idea",
+        "Anki and flashcards — a practical intro",
+        "Spaced repetition (Wikipedia summary)",
+        "遗忘曲线 Forgetting curve",
+        "2026-W16",
+        "记忆巩固 Memory consolidation",
+        "Note-to-card workflow",
+        "BM25 intuition"
+      ],
+      "snippets": [
+        "# FSRS algorithm\n\nFSRS (Free Spaced Repetition Scheduler) is a memory model that replaces\nAnki's SM-2 as the default scheduling algorithm in modern flashcard apps.\nIt predicts how long you'll remember",
+        "## Mathematical models\n\n- **Ebbinghaus (1885)**: proposed an exponential-decay-like form with\n  decreasing marginal rate.\n- **Wickelgren (1972)**: power-function memory trace model.\n- **Wixted & Ebbes",
+        "# Card: FSRS core idea\n\n**Q**: What does FSRS do differently from SM-2?\n\n**A**: FSRS fits a **17-parameter power-law memory model** on\npopulation review data, outputting per-card intervals that target",
+        "## Algorithms\n\nAnki's default scheduler has been **SM-2** (derived from SuperMemo's\n1985 algorithm) for most of its history. Since 2024, **FSRS** is\nshipped as an optional (now default on 2.1.66+) rep",
+        "## Modern implementations\n\nThe first computer-based spaced repetition system was **SuperMemo**,\ndeveloped by Piotr Wozniak starting in 1985. SuperMemo introduced the\nSM-2 algorithm, which is still wid",
+        "其中 `R(t)` 是时间 `t` 后的 retrievability（可回忆概率），`S` 是 stability\n（保持期常数），`c` 是经验指数。现代模型（如 FSRS）用类似的幂律或指数衰减，\n并让 `S` 随每次复习增长——这就是**间隔重复**的理论基础。",
+        "### FSRS 不是\"黑盒算法\"\n\n以为 FSRS 是某种神经网络。其实不是——它是一个**17 参数的经验公式**，\n通过在 11M 条真实 review log 上 L-BFGS 拟合出来的。每个参数都有物理\n含义（stability growth, difficulty decay, etc.），可以逐个解读。\n\n这意味着：\n- 可以在**你自己的 review log** 上重新拟合参数",
+        "## 和 FSRS 的关系\n\n[[FSRS]] 不建模睡眠——它只建模时间。但实际使用中，规律睡眠的人能在\nFSRS 的 90% 目标上稳定超出，睡眠紊乱的人会稳定低 5-10%。这不是算法的\n锅，是生理的锅。",
+        "## Example\n\n**Note** ([[FSRS]]): argues FSRS beats SM-2 because it models\npopulation-fitted stability instead of per-card ease.\n\n**Card front**: \"Why does FSRS outperform SM-2 at the same retention\nta",
+        "## Why it still matters in 2026\n\nVector embedders are strong at semantic match, but they lose on exact\nvocabulary. \"FSRS\" is a proper noun that means one thing; if the\nembedder maps it near general \"s"
+      ],
+      "scores": [
+        0.9496693674025231,
+        0.9046505351008904,
+        0.8807970779778824,
+        0.8596637505099167,
+        0.7772998611746912,
+        0.7772998611746911,
+        0.7549149868676284,
+        0.6370307944803831,
+        0.6076631698328916,
+        0.4378234991142018
+      ],
+      "relevance": {
+        "notes/fsrs-algorithm.md": 3.0,
+        "cards/card-fsrs-core-idea.md": 3.0,
+        "logs/2026-W16.md": 3.0,
+        "sources/anki-and-flashcards-intro.md": 3.0
+      },
+      "latency_ms": 2123.518749838695,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.6,
+      "average_precision_at_10": 0.7470238095238095,
+      "ndcg_at_10": 0.8838242945899706,
+      "last_expected_rank": 7,
+      "rerank_k": "auto",
+      "resolved_rerank_k": 20,
+      "rerank_k_reason": "cjk_technical",
+      "first_stage": {
+        "candidate_count": 24,
+        "channel_source_counts": {
+          "bm25": 0,
+          "vector": 24,
+          "title": 0,
+          "metadata": 0,
+          "indegree": 24
+        },
+        "expected_path_ranks": {
+          "notes/fsrs-algorithm.md": {
+            "bm25": null,
+            "vector": 1,
+            "title": null,
+            "metadata": null,
+            "indegree": 1,
+            "rrf": 1,
+            "rerank_candidate": 1
+          },
+          "cards/card-fsrs-core-idea.md": {
+            "bm25": null,
+            "vector": 4,
+            "title": null,
+            "metadata": null,
+            "indegree": 16,
+            "rrf": 4,
+            "rerank_candidate": 4
+          },
+          "logs/2026-W16.md": {
+            "bm25": null,
+            "vector": 2,
+            "title": null,
+            "metadata": null,
+            "indegree": 20,
+            "rrf": 3,
+            "rerank_candidate": 3
+          },
+          "sources/anki-and-flashcards-intro.md": {
+            "bm25": null,
+            "vector": 7,
+            "title": null,
+            "metadata": null,
+            "indegree": 22,
+            "rrf": 10,
+            "rerank_candidate": 10
+          }
+        },
+        "hit_channel_ranks": [
+          {
+            "path": "notes/fsrs-algorithm.md",
+            "bm25": null,
+            "vector": 1,
+            "title": null,
+            "metadata": null,
+            "indegree": 1,
+            "rrf": 1,
+            "rerank_candidate": 1
+          },
+          {
+            "path": "sources/wikipedia-forgetting-curve.md",
+            "bm25": null,
+            "vector": 5,
+            "title": null,
+            "metadata": null,
+            "indegree": 23,
+            "rrf": 6,
+            "rerank_candidate": 6
+          },
+          {
+            "path": "cards/card-fsrs-core-idea.md",
+            "bm25": null,
+            "vector": 4,
+            "title": null,
+            "metadata": null,
+            "indegree": 16,
+            "rrf": 4,
+            "rerank_candidate": 4
+          },
+          {
+            "path": "sources/anki-and-flashcards-intro.md",
+            "bm25": null,
+            "vector": 7,
+            "title": null,
+            "metadata": null,
+            "indegree": 22,
+            "rrf": 10,
+            "rerank_candidate": 10
+          },
+          {
+            "path": "sources/wikipedia-spaced-repetition.md",
+            "bm25": null,
+            "vector": 14,
+            "title": null,
+            "metadata": null,
+            "indegree": 24,
+            "rrf": 17,
+            "rerank_candidate": 17
+          },
+          {
+            "path": "notes/forgetting-curve.md",
+            "bm25": null,
+            "vector": 3,
+            "title": null,
+            "metadata": null,
+            "indegree": 9,
+            "rrf": 2,
+            "rerank_candidate": 2
+          },
+          {
+            "path": "logs/2026-W16.md",
+            "bm25": null,
+            "vector": 2,
+            "title": null,
+            "metadata": null,
+            "indegree": 20,
+            "rrf": 3,
+            "rerank_candidate": 3
+          },
+          {
+            "path": "notes/memory-consolidation.md",
+            "bm25": null,
+            "vector": 6,
+            "title": null,
+            "metadata": null,
+            "indegree": 13,
+            "rrf": 5,
+            "rerank_candidate": 5
+          },
+          {
+            "path": "notes/note-to-card-workflow.md",
+            "bm25": null,
+            "vector": 10,
+            "title": null,
+            "metadata": null,
+            "indegree": 10,
+            "rrf": 11,
+            "rerank_candidate": 11
+          },
+          {
+            "path": "notes/bm25-intuition.md",
+            "bm25": null,
+            "vector": 9,
+            "title": null,
+            "metadata": null,
+            "indegree": 8,
+            "rrf": 8,
+            "rerank_candidate": 8
+          }
+        ]
+      },
+      "expansions_used": []
+    },
+    {
+      "query": "Zettelkasten",
+      "config": "A",
+      "tags": [
+        "english",
+        "exact-title",
+        "short"
+      ],
+      "hits": [
+        "notes/zettelkasten.md",
+        "notes/feynman-technique.md",
+        "logs/2026-W17.md",
+        "sources/niklas-luhmann-zettelkasten.md",
+        "notes/deep-work-deliberate-practice.md",
+        "notes/atomic-notes.md",
+        "notes/spaced-repetition.md",
+        "logs/2026-W14.md",
+        "notes/note-to-card-workflow.md",
+        "README.md"
+      ],
+      "titles": [
+        "Zettelkasten",
+        "Feynman technique",
+        "2026-W17",
+        "Niklas Luhmann's Zettelkasten (essay summary)",
+        "Deep work and deliberate practice",
+        "Atomic notes",
+        "Spaced repetition",
+        "2026-W14",
+        "Note-to-card workflow",
+        "seeklink test corpus"
+      ],
+      "snippets": [
+        "## 与 spaced repetition 的区别\n\nZettelkasten 解决的是**写作 + 思考**问题：怎么让新想法和旧想法碰撞出火花。\n[[spaced-repetition]] 解决的是**记忆保持**问题：怎么让已知的事实留在脑子里。\n\n两者互补，不重复。典型工作流：\n- Zettelkasten 建立理解和结构\n- 从 permanent notes 蒸馏出关键 claims",
+        "## 与 Zettelkasten 的关系\n\n写 permanent note 的过程基本就是一次 Feynman pass：你在用自己的话重新\n组织一个想法。如果你的 zettel 是复制粘贴 + 摘录，它就不是一张工作型\nzettel，它是装饰品。见 [[zettelkasten]] 对 reformulation 的讨论。",
+        "## 2026-W17 — Zettelkasten 几本书的交叉笔记\n\n这周读完三本 zettelkasten 相关的：\n\n1. **Sönke Ahrens, How to Take Smart Notes (2017)** — 最流行的入门\n2. **Niklas Luhmann, Communicating with Slip Boxes (1981)** — Luhmann 自己写的方法",
+        "## Contemporary inheritors\n\nDigital Zettelkasten-inspired tools include Obsidian, Roam Research,\nLogseq, and various plain-markdown vault systems. They share Luhmann's\natomic-note + wikilink pattern b",
+        "## Related\n- [[feynman-technique]]\n- [[zettelkasten]] — benefits from deep work, suffers without",
+        "## Related\n- [[zettelkasten]] — the note system this serves\n- [[note-to-card-workflow]] — turning atomic notes into SRS cards\n- [[feynman-technique]] — explaining-for-strangers discipline",
+        "## Related\n- [[FSRS]] — state-of-the-art scheduler\n- [[forgetting-curve]] — what the spacing fights against\n- [[feynman-technique]] — complementary practice for deep understanding\n- [[zettelkasten]] —",
+        "### 当前想法\n\n**三者都要**，但不要求每个想法都进所有三个层。典型生命周期：\n- 读到一个想法 → fleeting note（草）\n- 想清楚了 → permanent note in zettelkasten\n- 想不想持续调用？想 → 蒸馏成 1-3 张 flashcard 进 Anki\n- 不想进 Anki 也 ok，zettelkasten 查得到就行\n\n关键是 **seekli",
+        "# Note-to-card workflow\n\nThe bridge between [[zettelkasten]] (where you *think*) and\n[[spaced-repetition]] (where you *retain*). Permanent notes are too\nlong to review daily. Flashcards are too atomic",
+        "## Topics\n\nThree semantic clusters:\n\n1. **Learning science / PKM** — FSRS, spaced repetition, Zettelkasten,\n   Feynman technique, forgetting curve. Heavily cross-linked.\n2. **ML / IR / agents** — atte"
+      ],
+      "scores": [
+        0.83095068007792,
+        0.83095067907792,
+        0.7526949330173954,
+        0.7456957252736658,
+        0.5802074836788451,
+        0.035124341238471676,
+        0.034469965164688886,
+        0.03420609241504764,
+        0.03300653594771242,
+        0.032060321190755976
+      ],
+      "relevance": {
+        "notes/zettelkasten.md": 3.0,
+        "sources/niklas-luhmann-zettelkasten.md": 3.0,
+        "notes/atomic-notes.md": 3.0
+      },
+      "latency_ms": 442.2634579241276,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.4,
+      "average_precision_at_10": 0.6666666666666666,
+      "ndcg_at_10": 0.8385465274895063,
+      "last_expected_rank": 6,
+      "rerank_k": "auto",
+      "resolved_rerank_k": 5,
+      "rerank_k_reason": "title",
+      "first_stage": {
+        "candidate_count": 24,
+        "channel_source_counts": {
+          "bm25": 10,
+          "vector": 24,
+          "title": 4,
+          "metadata": 0,
+          "indegree": 24
+        },
+        "expected_path_ranks": {
+          "notes/zettelkasten.md": {
+            "bm25": 6,
+            "vector": 2,
+            "title": 1,
+            "metadata": null,
+            "indegree": 5,
+            "rrf": 1,
+            "rerank_candidate": 1
+          },
+          "sources/niklas-luhmann-zettelkasten.md": {
+            "bm25": 10,
+            "vector": 5,
+            "title": 3,
+            "metadata": null,
+            "indegree": 22,
+            "rrf": 4,
+            "rerank_candidate": 4
+          },
+          "notes/atomic-notes.md": {
+            "bm25": 4,
+            "vector": 6,
+            "title": null,
+            "metadata": null,
+            "indegree": 9,
+            "rrf": 6,
+            "rerank_candidate": 6
+          }
+        },
+        "hit_channel_ranks": [
+          {
+            "path": "notes/zettelkasten.md",
+            "bm25": 6,
+            "vector": 2,
+            "title": 1,
+            "metadata": null,
+            "indegree": 5,
+            "rrf": 1,
+            "rerank_candidate": 1
+          },
+          {
+            "path": "notes/feynman-technique.md",
+            "bm25": 2,
+            "vector": 3,
+            "title": 2,
+            "metadata": null,
+            "indegree": 10,
+            "rrf": 2,
+            "rerank_candidate": 2
+          },
+          {
+            "path": "logs/2026-W17.md",
+            "bm25": 3,
+            "vector": 1,
+            "title": 4,
+            "metadata": null,
+            "indegree": 20,
+            "rrf": 3,
+            "rerank_candidate": 3
+          },
+          {
+            "path": "sources/niklas-luhmann-zettelkasten.md",
+            "bm25": 10,
+            "vector": 5,
+            "title": 3,
+            "metadata": null,
+            "indegree": 22,
+            "rrf": 4,
+            "rerank_candidate": 4
+          },
+          {
+            "path": "notes/deep-work-deliberate-practice.md",
+            "bm25": 1,
+            "vector": 4,
+            "title": null,
+            "metadata": null,
+            "indegree": 12,
+            "rrf": 5,
+            "rerank_candidate": 5
+          },
+          {
+            "path": "notes/atomic-notes.md",
+            "bm25": 4,
+            "vector": 6,
+            "title": null,
+            "metadata": null,
+            "indegree": 9,
+            "rrf": 6,
+            "rerank_candidate": 6
+          },
+          {
+            "path": "notes/spaced-repetition.md",
+            "bm25": 7,
+            "vector": 8,
+            "title": null,
+            "metadata": null,
+            "indegree": 2,
+            "rrf": 7,
+            "rerank_candidate": 7
+          },
+          {
+            "path": "logs/2026-W14.md",
+            "bm25": 5,
+            "vector": 7,
+            "title": null,
+            "metadata": null,
+            "indegree": 17,
+            "rrf": 8,
+            "rerank_candidate": 8
+          },
+          {
+            "path": "notes/note-to-card-workflow.md",
+            "bm25": 8,
+            "vector": 12,
+            "title": null,
+            "metadata": null,
+            "indegree": 8,
+            "rrf": 9,
+            "rerank_candidate": 9
+          },
+          {
+            "path": "README.md",
+            "bm25": 9,
+            "vector": 14,
+            "title": null,
+            "metadata": null,
+            "indegree": 14,
+            "rrf": 10,
+            "rerank_candidate": 10
+          }
+        ]
+      },
+      "expansions_used": []
+    },
+    {
+      "query": "RRF",
+      "config": "A",
+      "tags": [
+        "english",
+        "exact-alias",
+        "short"
+      ],
+      "hits": [
+        "notes/reciprocal-rank-fusion.md",
+        "cards/card-rrf-formula.md",
+        "notes/bm25-intuition.md",
+        "notes/retrieval-augmented-generation.md",
+        "notes/agent-memory-patterns.md",
+        "notes/sqlite-fts5-cjk.md",
+        "logs/2026-W15.md",
+        "README.md",
+        "notes/fsrs-algorithm.md",
+        "logs/2026-W14.md"
+      ],
+      "titles": [
+        "Reciprocal Rank Fusion (RRF)",
+        "Card: RRF formula",
+        "BM25 intuition",
+        "Retrieval-augmented generation",
+        "Agent memory patterns",
+        "SQLite FTS5 + CJK (jieba)",
+        "2026-W15",
+        "seeklink test corpus",
+        "FSRS algorithm",
+        "2026-W14"
+      ],
+      "snippets": [
+        "# Reciprocal Rank Fusion (RRF)\n\nA simple algorithm for combining ranked lists from multiple retrieval\nsystems into a single ranked list. Given `N` channels, each producing\nits own ranking of the same ",
+        "# Card: RRF formula\n\n**Q**: How does Reciprocal Rank Fusion combine rankings from multiple\nretrieval channels?\n\n**A**:",
+        "## Related\n- [[RRF]] — how BM25 and vector channels are combined\n- [[sqlite-fts5-cjk]] — seeklink's implementation\n- [[vector-embeddings]] — semantic counterpart",
+        "## Related\n- [[BM25]] — keyword retrieval channel\n- [[RRF]] — fusion\n- [[vector-embeddings]] — semantic channel\n- [[attention-mechanism]] — reranker internals\n- [[agent-memory-patterns]] — RAG as memo",
+        "## Related\n- [[retrieval-augmented-generation]]\n- [[vector-embeddings]]\n- [[RRF]]",
+        "## Related\n- [[bm25-intuition]] — BM25 is what runs on this index\n- [[RRF]] — how the BM25 channel gets combined with vector",
+        "### 检索系统的设计要求\n\n个人 vault + agent 场景需要的不只是\"又一个语义搜索\"，而是把信息检索里\n成熟的 hybrid retrieval 结构做成一个本地工具：\n- BM25 + vector + graph + title 四路召回（[[RRF]] 融合）\n- 可选 cross-encoder 重排（[[attention-mechanism]]）\n- CJK 一等公民（j",
+        "## Topics\n\nThree semantic clusters:\n\n1. **Learning science / PKM** — FSRS, spaced repetition, Zettelkasten,\n   Feynman technique, forgetting curve. Heavily cross-linked.\n2. **ML / IR / agents** — atte",
+        "where `D` is difficulty, `R` is current retrievability computed from\nelapsed time, and `w_0..w_16` are the 17 free parameters fitted from\ntraining data.\n\nThe practitioner doesn't need to care about th",
+        "### 下周计划\n\n- 再读一遍 [[FSRS]] paper，理解它的 90% retrievability 目标是怎么校的\n- 调查 [[forgetting-curve]] 对\"会用\"的影响（不是\"还记得\"）\n- 比较纯关键词、向量搜索、混合检索在个人笔记里的召回差异"
+      ],
+      "scores": [
+        0.9407811207873242,
+        0.8013711403905721,
+        0.6184605552749493,
+        0.5521847008665652,
+        0.5481999601281151,
+        0.03447665518561041,
+        0.03268649329129859,
+        0.03202197516243723,
+        0.0200695479384004,
+        0.01865325077399381
+      ],
+      "relevance": {
+        "notes/reciprocal-rank-fusion.md": 3.0,
+        "cards/card-rrf-formula.md": 3.0,
+        "notes/retrieval-augmented-generation.md": 3.0
+      },
+      "latency_ms": 280.03666712902486,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.6,
+      "average_precision_at_10": 0.9166666666666666,
+      "ndcg_at_10": 0.9674679834891693,
+      "last_expected_rank": 4,
+      "rerank_k": "auto",
+      "resolved_rerank_k": 5,
+      "rerank_k_reason": "title",
+      "first_stage": {
+        "candidate_count": 21,
+        "channel_source_counts": {
+          "bm25": 8,
+          "vector": 21,
+          "title": 2,
+          "metadata": 0,
+          "indegree": 21
+        },
+        "expected_path_ranks": {
+          "notes/reciprocal-rank-fusion.md": {
+            "bm25": 2,
+            "vector": 1,
+            "title": 1,
+            "metadata": null,
+            "indegree": 3,
+            "rrf": 1,
+            "rerank_candidate": 1
+          },
+          "cards/card-rrf-formula.md": {
+            "bm25": 3,
+            "vector": 5,
+            "title": 2,
+            "metadata": null,
+            "indegree": 15,
+            "rrf": 2,
+            "rerank_candidate": 2
+          },
+          "notes/retrieval-augmented-generation.md": {
+            "bm25": 6,
+            "vector": 4,
+            "title": null,
+            "metadata": null,
+            "indegree": 4,
+            "rrf": 5,
+            "rerank_candidate": 5
+          }
+        },
+        "hit_channel_ranks": [
+          {
+            "path": "notes/reciprocal-rank-fusion.md",
+            "bm25": 2,
+            "vector": 1,
+            "title": 1,
+            "metadata": null,
+            "indegree": 3,
+            "rrf": 1,
+            "rerank_candidate": 1
+          },
+          {
+            "path": "cards/card-rrf-formula.md",
+            "bm25": 3,
+            "vector": 5,
+            "title": 2,
+            "metadata": null,
+            "indegree": 15,
+            "rrf": 2,
+            "rerank_candidate": 2
+          },
+          {
+            "path": "notes/bm25-intuition.md",
+            "bm25": 4,
+            "vector": 2,
+            "title": null,
+            "metadata": null,
+            "indegree": 7,
+            "rrf": 4,
+            "rerank_candidate": 4
+          },
+          {
+            "path": "notes/retrieval-augmented-generation.md",
+            "bm25": 6,
+            "vector": 4,
+            "title": null,
+            "metadata": null,
+            "indegree": 4,
+            "rrf": 5,
+            "rerank_candidate": 5
+          },
+          {
+            "path": "notes/agent-memory-patterns.md",
+            "bm25": 1,
+            "vector": 3,
+            "title": null,
+            "metadata": null,
+            "indegree": 10,
+            "rrf": 3,
+            "rerank_candidate": 3
+          },
+          {
+            "path": "notes/sqlite-fts5-cjk.md",
+            "bm25": 5,
+            "vector": 7,
+            "title": null,
+            "metadata": null,
+            "indegree": 12,
+            "rrf": 6,
+            "rerank_candidate": 6
+          },
+          {
+            "path": "logs/2026-W15.md",
+            "bm25": 8,
+            "vector": 11,
+            "title": null,
+            "metadata": null,
+            "indegree": 17,
+            "rrf": 7,
+            "rerank_candidate": 7
+          },
+          {
+            "path": "README.md",
+            "bm25": 7,
+            "vector": 17,
+            "title": null,
+            "metadata": null,
+            "indegree": 13,
+            "rrf": 8,
+            "rerank_candidate": 8
+          },
+          {
+            "path": "notes/fsrs-algorithm.md",
+            "bm25": null,
+            "vector": 6,
+            "title": null,
+            "metadata": null,
+            "indegree": 1,
+            "rrf": 9,
+            "rerank_candidate": 9
+          },
+          {
+            "path": "logs/2026-W14.md",
+            "bm25": null,
+            "vector": 8,
+            "title": null,
+            "metadata": null,
+            "indegree": 16,
+            "rrf": 10,
+            "rerank_candidate": 10
+          }
+        ]
+      },
+      "expansions_used": []
+    },
+    {
+      "query": "遗忘曲线",
+      "config": "A",
+      "tags": [
+        "cjk",
+        "exact-alias",
+        "short"
+      ],
+      "hits": [
+        "notes/forgetting-curve.md",
+        "logs/2026-W16.md",
+        "sources/wikipedia-forgetting-curve.md",
+        "notes/memory-consolidation.md",
+        "notes/fsrs-algorithm.md",
+        "logs/2026-W14.md",
+        "sources/wikipedia-spaced-repetition.md",
+        "notes/spaced-repetition.md",
+        "logs/2026-W15.md",
+        "notes/zettelkasten.md"
+      ],
+      "titles": [
+        "遗忘曲线 Forgetting curve",
+        "2026-W16",
+        "Forgetting curve (Wikipedia summary)",
+        "记忆巩固 Memory consolidation",
+        "FSRS algorithm",
+        "2026-W14",
+        "Spaced repetition (Wikipedia summary)",
+        "Spaced repetition",
+        "2026-W15",
+        "Zettelkasten"
+      ],
+      "snippets": [
+        "## 参考\n- [[spaced-repetition]] —— 对抗遗忘曲线的主要实践\n- [[FSRS]] —— 建模和拟合遗忘曲线的现代算法\n- [[memory-consolidation]] —— 生物学层面的记忆巩固过程",
+        "### 遗忘曲线不是指数\n\n这个是真 surprise。传统教科书都说遗忘是 `e^(-t/τ)`（指数衰减）。但\nEbbinghaus 的原始数据和现代大样本研究都显示是**幂律**：",
+        "# Forgetting curve (Wikipedia summary)\n\n*Summary paraphrased from the Wikipedia article.*\n\nThe forgetting curve describes the decrease in retention of information\nover time when there is no attempt at",
+        "## Related\n- [[forgetting-curve]] —— 如果不巩固的衰减曲线\n- [[spaced-repetition]] —— 利用巩固窗口的实践",
+        "## Why FSRS beats SM-2\n\nSM-2 uses a fixed formula tied to a user-reported \"ease factor\" per card.\nIt doesn't learn from population data, and its intervals tend to grow\ntoo fast for hard cards and too ",
+        "### 下周计划\n\n- 再读一遍 [[FSRS]] paper，理解它的 90% retrievability 目标是怎么校的\n- 调查 [[forgetting-curve]] 对\"会用\"的影响（不是\"还记得\"）\n- 比较纯关键词、向量搜索、混合检索在个人笔记里的召回差异",
+        "## History\n\nThe phenomenon was first characterized by **Hermann Ebbinghaus** in\nthe 1880s through experiments on himself using nonsense syllables. He\ndocumented the forgetting curve — retention drops ",
+        "## Related\n- [[FSRS]] — state-of-the-art scheduler\n- [[forgetting-curve]] — what the spacing fights against\n- [[feynman-technique]] — complementary practice for deep understanding\n- [[zettelkasten]] —",
+        "### 讨论记录\n\n整理了一组设计观察：\n\n1. LLM 本身 stateless，所有\"记忆\"都是 retrieval。\n2. Retrieval 质量 = agent 智商上限。返回错的 chunk = agent 自信地胡说。\n3. 现有方案多是 vector-only RAG，对 CJK 极差，对 exact-keyword 极差。\n4. 没人认真做 hybrid + rerank 这套工",
+        "## 与 spaced repetition 的区别\n\nZettelkasten 解决的是**写作 + 思考**问题：怎么让新想法和旧想法碰撞出火花。\n[[spaced-repetition]] 解决的是**记忆保持**问题：怎么让已知的事实留在脑子里。\n\n两者互补，不重复。典型工作流：\n- Zettelkasten 建立理解和结构\n- 从 permanent notes 蒸馏出关键 claims"
+      ],
+      "scores": [
+        0.9441021411416358,
+        0.9441021401416358,
+        0.6184228751894602,
+        0.5837244125787023,
+        0.5200297519248498,
+        0.019437229437229437,
+        0.019331983805668015,
+        0.01933146330060776,
+        0.01893123446561723,
+        0.018846411804158282
+      ],
+      "relevance": {
+        "notes/forgetting-curve.md": 3.0,
+        "sources/wikipedia-forgetting-curve.md": 3.0,
+        "notes/memory-consolidation.md": 3.0
+      },
+      "latency_ms": 364.7692920640111,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.6,
+      "average_precision_at_10": 0.8055555555555555,
+      "ndcg_at_10": 0.9060254355346823,
+      "last_expected_rank": 4,
+      "rerank_k": "auto",
+      "resolved_rerank_k": 5,
+      "rerank_k_reason": "title",
+      "first_stage": {
+        "candidate_count": 16,
+        "channel_source_counts": {
+          "bm25": 2,
+          "vector": 16,
+          "title": 2,
+          "metadata": 0,
+          "indegree": 16
+        },
+        "expected_path_ranks": {
+          "notes/forgetting-curve.md": {
+            "bm25": 1,
+            "vector": 2,
+            "title": 1,
+            "metadata": null,
+            "indegree": 5,
+            "rrf": 1,
+            "rerank_candidate": 1
+          },
+          "sources/wikipedia-forgetting-curve.md": {
+            "bm25": null,
+            "vector": 3,
+            "title": null,
+            "metadata": null,
+            "indegree": 15,
+            "rrf": 4,
+            "rerank_candidate": 4
+          },
+          "notes/memory-consolidation.md": {
+            "bm25": null,
+            "vector": 4,
+            "title": null,
+            "metadata": null,
+            "indegree": 8,
+            "rrf": 3,
+            "rerank_candidate": 3
+          }
+        },
+        "hit_channel_ranks": [
+          {
+            "path": "notes/forgetting-curve.md",
+            "bm25": 1,
+            "vector": 2,
+            "title": 1,
+            "metadata": null,
+            "indegree": 5,
+            "rrf": 1,
+            "rerank_candidate": 1
+          },
+          {
+            "path": "logs/2026-W16.md",
+            "bm25": 2,
+            "vector": 1,
+            "title": 2,
+            "metadata": null,
+            "indegree": 12,
+            "rrf": 2,
+            "rerank_candidate": 2
+          },
+          {
+            "path": "sources/wikipedia-forgetting-curve.md",
+            "bm25": null,
+            "vector": 3,
+            "title": null,
+            "metadata": null,
+            "indegree": 15,
+            "rrf": 4,
+            "rerank_candidate": 4
+          },
+          {
+            "path": "notes/memory-consolidation.md",
+            "bm25": null,
+            "vector": 4,
+            "title": null,
+            "metadata": null,
+            "indegree": 8,
+            "rrf": 3,
+            "rerank_candidate": 3
+          },
+          {
+            "path": "notes/fsrs-algorithm.md",
+            "bm25": null,
+            "vector": 7,
+            "title": null,
+            "metadata": null,
+            "indegree": 1,
+            "rrf": 5,
+            "rerank_candidate": 5
+          },
+          {
+            "path": "logs/2026-W14.md",
+            "bm25": null,
+            "vector": 6,
+            "title": null,
+            "metadata": null,
+            "indegree": 10,
+            "rrf": 6,
+            "rerank_candidate": 6
+          },
+          {
+            "path": "sources/wikipedia-spaced-repetition.md",
+            "bm25": null,
+            "vector": 5,
+            "title": null,
+            "metadata": null,
+            "indegree": 16,
+            "rrf": 7,
+            "rerank_candidate": 7
+          },
+          {
+            "path": "notes/spaced-repetition.md",
+            "bm25": null,
+            "vector": 9,
+            "title": null,
+            "metadata": null,
+            "indegree": 2,
+            "rrf": 8,
+            "rerank_candidate": 8
+          },
+          {
+            "path": "logs/2026-W15.md",
+            "bm25": null,
+            "vector": 8,
+            "title": null,
+            "metadata": null,
+            "indegree": 11,
+            "rrf": 9,
+            "rerank_candidate": 9
+          },
+          {
+            "path": "notes/zettelkasten.md",
+            "bm25": null,
+            "vector": 11,
+            "title": null,
+            "metadata": null,
+            "indegree": 3,
+            "rrf": 10,
+            "rerank_candidate": 10
+          }
+        ]
+      },
+      "expansions_used": []
+    },
+    {
+      "query": "how transformers relate to information retrieval",
+      "config": "A",
+      "tags": [
+        "english",
+        "conceptual",
+        "long"
+      ],
+      "hits": [
+        "notes/agent-memory-patterns.md",
+        "notes/attention-mechanism.md",
+        "logs/2026-W15.md",
+        "notes/retrieval-augmented-generation.md",
+        "logs/2026-W16.md",
+        "logs/2026-W17.md",
+        "logs/2026-W14.md",
+        "cards/card-attention-formula.md",
+        "notes/vector-embeddings.md",
+        "notes/reciprocal-rank-fusion.md"
+      ],
+      "titles": [
+        "Agent memory patterns",
+        "Attention mechanism",
+        "2026-W15",
+        "Retrieval-augmented generation",
+        "2026-W16",
+        "2026-W17",
+        "2026-W14",
+        "Card: Attention formula",
+        "Vector embeddings",
+        "Reciprocal Rank Fusion (RRF)"
+      ],
+      "snippets": [
+        "## 3. Retrieval-based (RAG)\n\nStore turns, notes, and tool outputs as documents; index them with\n[[vector-embeddings]] + [[BM25]]; retrieve relevant ones at each turn.\nSee [[retrieval-augmented-generat",
+        "# Attention mechanism\n\nThe operation at the core of Transformer architectures. Given a sequence\nof tokens, attention lets every position look at every other position\nwith learnable weights. For the ou",
+        "### 讨论记录\n\n整理了一组设计观察：\n\n1. LLM 本身 stateless，所有\"记忆\"都是 retrieval。\n2. Retrieval 质量 = agent 智商上限。返回错的 chunk = agent 自信地胡说。\n3. 现有方案多是 vector-only RAG，对 CJK 极差，对 exact-keyword 极差。\n4. 没人认真做 hybrid + rerank 这套工",
+        "## The hybrid retrieval insight\n\nPure vector retrieval misses exact keyword matches. Pure keyword\n([[BM25]]) misses semantic matches. **Hybrid** combines both channels\nvia a fusion algorithm, typicall",
+        "### 对系统的启示\n\n- search indexes usually rank the current corpus, not what the user has\n  recently recalled\n- 如果想给笔记做 FSRS 式调度，需要存**每次访问时间戳**（现在没存）\n- recency and review scheduling should be optional signa",
+        "### 对 seeklink 的启发\n\nDoto 的观点等于说\"**好搜索 = 不需要目录**\"。这和 [[agent-memory-patterns]]\n里的\"retrieval quality = agent intelligence\"是同一个 insight，只是\n对 human 用户。\n\n如果 seeklink 的搜索够准，你的 vault 可以扁平——logs/ notes/ cards",
+        "### 下周计划\n\n- 再读一遍 [[FSRS]] paper，理解它的 90% retrievability 目标是怎么校的\n- 调查 [[forgetting-curve]] 对\"会用\"的影响（不是\"还记得\"）\n- 比较纯关键词、向量搜索、混合检索在个人笔记里的召回差异",
+        "Query `Q`, key `K`, value `V` are linear projections of the input.\nScaling by `sqrt(d_k)` prevents softmax saturation at high dimension.\n\nSee [[attention-mechanism]] for why each piece is there.",
+        "## Related\n- [[BM25]] — sparse retrieval counterpart\n- [[attention-mechanism]] — what the embedder is doing internally\n- [[retrieval-augmented-generation]] — end-to-end system",
+        "## Why RRF works\n\n- **Scale-free**: BM25 returns raw scores in [0, 30]; vector similarity\n  returns [0, 1]. Can't average these directly. RRF only uses ranks,\n  which are always 1, 2, 3...\n- **Rank-se"
+      ],
+      "scores": [
+        0.5312093733737563,
+        0.14804719803168948,
+        0.07159119944455247,
+        0.05665242530797383,
+        0.01744248473620534,
+        0.01904761904761905,
+        0.018979427188382414,
+        0.018872549019607842,
+        0.01877200704225352,
+        0.018537339814405654
+      ],
+      "relevance": {
+        "notes/attention-mechanism.md": 3.0,
+        "notes/vector-embeddings.md": 3.0,
+        "notes/retrieval-augmented-generation.md": 3.0
+      },
+      "latency_ms": 459.66804097406566,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 0.5,
+      "precision_at_5": 0.4,
+      "average_precision_at_10": 0.4444444444444444,
+      "ndcg_at_10": 0.6394562303262419,
+      "last_expected_rank": 9,
+      "rerank_k": "auto",
+      "resolved_rerank_k": 5,
+      "rerank_k_reason": "default",
+      "first_stage": {
+        "candidate_count": 19,
+        "channel_source_counts": {
+          "bm25": 0,
+          "vector": 19,
+          "title": 0,
+          "metadata": 0,
+          "indegree": 19
+        },
+        "expected_path_ranks": {
+          "notes/attention-mechanism.md": {
+            "bm25": null,
+            "vector": 4,
+            "title": null,
+            "metadata": null,
+            "indegree": 6,
+            "rrf": 3,
+            "rerank_candidate": 3
+          },
+          "notes/vector-embeddings.md": {
+            "bm25": null,
+            "vector": 11,
+            "title": null,
+            "metadata": null,
+            "indegree": 4,
+            "rrf": 9,
+            "rerank_candidate": 9
+          },
+          "notes/retrieval-augmented-generation.md": {
+            "bm25": null,
+            "vector": 3,
+            "title": null,
+            "metadata": null,
+            "indegree": 3,
+            "rrf": 2,
+            "rerank_candidate": 2
+          }
+        },
+        "hit_channel_ranks": [
+          {
+            "path": "notes/agent-memory-patterns.md",
+            "bm25": null,
+            "vector": 1,
+            "title": null,
+            "metadata": null,
+            "indegree": 10,
+            "rrf": 1,
+            "rerank_candidate": 1
+          },
+          {
+            "path": "notes/attention-mechanism.md",
+            "bm25": null,
+            "vector": 4,
+            "title": null,
+            "metadata": null,
+            "indegree": 6,
+            "rrf": 3,
+            "rerank_candidate": 3
+          },
+          {
+            "path": "logs/2026-W15.md",
+            "bm25": null,
+            "vector": 2,
+            "title": null,
+            "metadata": null,
+            "indegree": 15,
+            "rrf": 4,
+            "rerank_candidate": 4
+          },
+          {
+            "path": "notes/retrieval-augmented-generation.md",
+            "bm25": null,
+            "vector": 3,
+            "title": null,
+            "metadata": null,
+            "indegree": 3,
+            "rrf": 2,
+            "rerank_candidate": 2
+          },
+          {
+            "path": "logs/2026-W16.md",
+            "bm25": null,
+            "vector": 5,
+            "title": null,
+            "metadata": null,
+            "indegree": 16,
+            "rrf": 5,
+            "rerank_candidate": 5
+          },
+          {
+            "path": "logs/2026-W17.md",
+            "bm25": null,
+            "vector": 6,
+            "title": null,
+            "metadata": null,
+            "indegree": 17,
+            "rrf": 6,
+            "rerank_candidate": 6
+          },
+          {
+            "path": "logs/2026-W14.md",
+            "bm25": null,
+            "vector": 7,
+            "title": null,
+            "metadata": null,
+            "indegree": 14,
+            "rrf": 7,
+            "rerank_candidate": 7
+          },
+          {
+            "path": "cards/card-attention-formula.md",
+            "bm25": null,
+            "vector": 8,
+            "title": null,
+            "metadata": null,
+            "indegree": 12,
+            "rrf": 8,
+            "rerank_candidate": 8
+          },
+          {
+            "path": "notes/vector-embeddings.md",
+            "bm25": null,
+            "vector": 11,
+            "title": null,
+            "metadata": null,
+            "indegree": 4,
+            "rrf": 9,
+            "rerank_candidate": 9
+          },
+          {
+            "path": "notes/reciprocal-rank-fusion.md",
+            "bm25": null,
+            "vector": 13,
+            "title": null,
+            "metadata": null,
+            "indegree": 2,
+            "rrf": 10,
+            "rerank_candidate": 10
+          }
+        ]
+      },
+      "expansions_used": []
+    },
+    {
+      "query": "为什么 hybrid 搜索比纯向量好",
+      "config": "A",
+      "tags": [
+        "cjk-en-mixed",
+        "technical",
+        "long"
+      ],
+      "hits": [
+        "notes/retrieval-augmented-generation.md",
+        "logs/2026-W15.md",
+        "logs/2026-W18.md",
+        "logs/2026-W14.md",
+        "notes/bm25-intuition.md",
+        "notes/reciprocal-rank-fusion.md",
+        "notes/attention-mechanism.md",
+        "cards/card-attention-formula.md",
+        "notes/vector-embeddings.md",
+        "notes/spaced-repetition.md"
+      ],
+      "titles": [
+        "Retrieval-augmented generation",
+        "2026-W15",
+        "2026-W18",
+        "2026-W14",
+        "BM25 intuition",
+        "Reciprocal Rank Fusion (RRF)",
+        "Attention mechanism",
+        "Card: Attention formula",
+        "Vector embeddings",
+        "Spaced repetition"
+      ],
+      "snippets": [
+        "## The hybrid retrieval insight\n\nPure vector retrieval misses exact keyword matches. Pure keyword\n([[BM25]]) misses semantic matches. **Hybrid** combines both channels\nvia a fusion algorithm, typicall",
+        "### 检索系统的设计要求\n\n个人 vault + agent 场景需要的不只是\"又一个语义搜索\"，而是把信息检索里\n成熟的 hybrid retrieval 结构做成一个本地工具：\n- BM25 + vector + graph + title 四路召回（[[RRF]] 融合）\n- 可选 cross-encoder 重排（[[attention-mechanism]]）\n- CJK 一等公民（j",
+        "### 4. Hybrid retrieval 的论文很多但工具很少\n\nIR 会议论文几乎都在做 hybrid + rerank，但 pip install 能用的\nend-to-end 工具寥寥无几。seeklink 的定位就站这个缝里：论文早有，\n好用的 CLI 罕见。",
+        "### 下周计划\n\n- 再读一遍 [[FSRS]] paper，理解它的 90% retrievability 目标是怎么校的\n- 调查 [[forgetting-curve]] 对\"会用\"的影响（不是\"还记得\"）\n- 比较纯关键词、向量搜索、混合检索在个人笔记里的召回差异",
+        "# BM25 intuition\n\nBM25 is the classic keyword-matching ranking function from 1990s IR\nresearch. It scores a (query, document) pair based on how often the\nquery's terms appear in the document, with two",
+        "## Why RRF works\n\n- **Scale-free**: BM25 returns raw scores in [0, 30]; vector similarity\n  returns [0, 1]. Can't average these directly. RRF only uses ranks,\n  which are always 1, 2, 3...\n- **Rank-se",
+        "## Why it works\n\n- **Parallel**: unlike RNNs, all positions compute simultaneously.\n- **Long range**: the softmax over all positions means a token 2000\n  away can still influence the output if its key",
+        "Query `Q`, key `K`, value `V` are linear projections of the input.\nScaling by `sqrt(d_k)` prevents softmax saturation at high dimension.\n\nSee [[attention-mechanism]] for why each piece is there.",
+        "## Bi-encoder vs cross-encoder\n\n- **Bi-encoder**: embed query and document separately, compare via dot\n  product. Fast (~ms per query over millions of docs via approximate\n  nearest neighbor).\n- **Cro",
+        "## Why it's under-used\n\nSpaced repetition is boring. It demands honest self-assessment (\"did I\nreally remember, or did I recognize the answer?\"), it punishes you for\nmissed days, and it surfaces your "
+      ],
+      "scores": [
+        0.8267117940706734,
+        0.09009299396195182,
+        0.07585818002124356,
+        0.04742587317756678,
+        0.03514484640079327,
+        0.031143830534778462,
+        0.016914913266726513,
+        0.015424552081841137,
+        0.013636835281429878,
+        0.009412589587609823
+      ],
+      "relevance": {
+        "notes/bm25-intuition.md": 3.0,
+        "notes/vector-embeddings.md": 3.0,
+        "notes/retrieval-augmented-generation.md": 3.0
+      },
+      "latency_ms": 1773.0281248223037,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.4,
+      "average_precision_at_10": 0.5777777777777777,
+      "ndcg_at_10": 0.7920874914199382,
+      "last_expected_rank": 9,
+      "rerank_k": "auto",
+      "resolved_rerank_k": 20,
+      "rerank_k_reason": "cjk_technical",
+      "first_stage": {
+        "candidate_count": 18,
+        "channel_source_counts": {
+          "bm25": 0,
+          "vector": 18,
+          "title": 0,
+          "metadata": 0,
+          "indegree": 18
+        },
+        "expected_path_ranks": {
+          "notes/bm25-intuition.md": {
+            "bm25": null,
+            "vector": 10,
+            "title": null,
+            "metadata": null,
+            "indegree": 7,
+            "rrf": 8,
+            "rerank_candidate": 8
+          },
+          "notes/vector-embeddings.md": {
+            "bm25": null,
+            "vector": 4,
+            "title": null,
+            "metadata": null,
+            "indegree": 4,
+            "rrf": 3,
+            "rerank_candidate": 3
+          },
+          "notes/retrieval-augmented-generation.md": {
+            "bm25": null,
+            "vector": 1,
+            "title": null,
+            "metadata": null,
+            "indegree": 3,
+            "rrf": 1,
+            "rerank_candidate": 1
+          }
+        },
+        "hit_channel_ranks": [
+          {
+            "path": "notes/retrieval-augmented-generation.md",
+            "bm25": null,
+            "vector": 1,
+            "title": null,
+            "metadata": null,
+            "indegree": 3,
+            "rrf": 1,
+            "rerank_candidate": 1
+          },
+          {
+            "path": "logs/2026-W15.md",
+            "bm25": null,
+            "vector": 6,
+            "title": null,
+            "metadata": null,
+            "indegree": 15,
+            "rrf": 7,
+            "rerank_candidate": 7
+          },
+          {
+            "path": "logs/2026-W18.md",
+            "bm25": null,
+            "vector": 2,
+            "title": null,
+            "metadata": null,
+            "indegree": 18,
+            "rrf": 5,
+            "rerank_candidate": 5
+          },
+          {
+            "path": "logs/2026-W14.md",
+            "bm25": null,
+            "vector": 12,
+            "title": null,
+            "metadata": null,
+            "indegree": 14,
+            "rrf": 12,
+            "rerank_candidate": 12
+          },
+          {
+            "path": "notes/bm25-intuition.md",
+            "bm25": null,
+            "vector": 10,
+            "title": null,
+            "metadata": null,
+            "indegree": 7,
+            "rrf": 8,
+            "rerank_candidate": 8
+          },
+          {
+            "path": "notes/reciprocal-rank-fusion.md",
+            "bm25": null,
+            "vector": 5,
+            "title": null,
+            "metadata": null,
+            "indegree": 2,
+            "rrf": 4,
+            "rerank_candidate": 4
+          },
+          {
+            "path": "notes/attention-mechanism.md",
+            "bm25": null,
+            "vector": 3,
+            "title": null,
+            "metadata": null,
+            "indegree": 6,
+            "rrf": 2,
+            "rerank_candidate": 2
+          },
+          {
+            "path": "cards/card-attention-formula.md",
+            "bm25": null,
+            "vector": 9,
+            "title": null,
+            "metadata": null,
+            "indegree": 13,
+            "rrf": 9,
+            "rerank_candidate": 9
+          },
+          {
+            "path": "notes/vector-embeddings.md",
+            "bm25": null,
+            "vector": 4,
+            "title": null,
+            "metadata": null,
+            "indegree": 4,
+            "rrf": 3,
+            "rerank_candidate": 3
+          },
+          {
+            "path": "notes/spaced-repetition.md",
+            "bm25": null,
+            "vector": 17,
+            "title": null,
+            "metadata": null,
+            "indegree": 1,
+            "rrf": 15,
+            "rerank_candidate": 15
+          }
+        ]
+      },
+      "expansions_used": []
+    },
+    {
+      "query": "从笔记到 Anki 卡片的流程",
+      "config": "A",
+      "tags": [
+        "cjk-en-mixed",
+        "workflow",
+        "long"
+      ],
+      "hits": [
+        "sources/anki-and-flashcards-intro.md",
+        "notes/note-to-card-workflow.md",
+        "logs/2026-W14.md",
+        "notes/atomic-notes.md",
+        "notes/spaced-repetition.md",
+        "notes/deep-work-deliberate-practice.md",
+        "sources/wikipedia-spaced-repetition.md",
+        "notes/memory-consolidation.md",
+        "notes/zettelkasten.md",
+        "README.md"
+      ],
+      "titles": [
+        "Anki and flashcards — a practical intro",
+        "Note-to-card workflow",
+        "2026-W14",
+        "Atomic notes",
+        "Spaced repetition",
+        "Deep work and deliberate practice",
+        "Spaced repetition (Wikipedia summary)",
+        "记忆巩固 Memory consolidation",
+        "Zettelkasten",
+        "seeklink test corpus"
+      ],
+      "snippets": [
+        "## When not to use Anki\n\n- If you haven't understood the material yet. Anki entrenches; it\n  doesn't teach. Understand first (Feynman), then memorize.\n- If the material has a 2-week shelf life. Use a ",
+        "# Note-to-card workflow\n\nThe bridge between [[zettelkasten]] (where you *think*) and\n[[spaced-repetition]] (where you *retain*). Permanent notes are too\nlong to review daily. Flashcards are too atomic",
+        "### 当前想法\n\n**三者都要**，但不要求每个想法都进所有三个层。典型生命周期：\n- 读到一个想法 → fleeting note（草）\n- 想清楚了 → permanent note in zettelkasten\n- 想不想持续调用？想 → 蒸馏成 1-3 张 flashcard 进 Anki\n- 不想进 Anki 也 ok，zettelkasten 查得到就行\n\n关键是 **seekli",
+        "## Why atomicity matters\n\n- **Linking**: you can only usefully link to a note if the note has a\n  clear subject. \"My thoughts on memory\" is unlinkable; \"Forgetting\n  curves are empirically power-law, ",
+        "## How it works in practice\n\nApps like Anki, SuperMemo, and Mochi implement spaced repetition via\nflashcards. You create a card (question front, answer back), and the app\nschedules it. You rate each r",
+        "## Why this matters for learning systems\n\nSpaced repetition, Zettelkasten, and Feynman technique all assume\ndeliberate practice conditions. If you're reviewing Anki cards while\nwatching YouTube, you'r",
+        "## Modern implementations\n\nThe first computer-based spaced repetition system was **SuperMemo**,\ndeveloped by Piotr Wozniak starting in 1985. SuperMemo introduced the\nSM-2 algorithm, which is still wid",
+        "## 关键发现\n\n- **睡眠剥夺直接降低新记忆的保留率**。一整晚不睡后学的东西，一周后剩下\n  的比正常睡眠少 30-40%。\n- **巩固不是被动的重放**。睡眠中大脑会主动\"重新体验\"白天的关键片段，\n  这个过程压缩了时间（几十毫秒 → 几秒），并把记忆和旧知识网络建立连接。\n- **间隔重复 + 睡眠 = 最优组合**。[[spaced-repetition]] 的每次复习启动\n  一",
+        "## 三类 zettel\n\n1. **Fleeting notes（灵光笔记）** - 脑子里冒出来的，随手记，几天内整理或丢弃\n2. **Literature notes（文献笔记）** - 读书/看论文时的摘录 + 自己的话复述\n3. **Permanent notes（永久笔记）** - 真正的 zettel，用自己的话写清楚一个\n   原子思想，放进卡片盒，编号，链接到相关卡片\n\nPerm",
+        "## Layout\n\n| Folder | Purpose | Style |\n|---|---|---|\n| `notes/` | Permanent notes | Strong frontmatter (tags, aliases), clear titles, wikilinks between notes, 300-800 words |\n| `logs/` | Weekly/daily"
+      ],
+      "scores": [
+        0.7772998611746911,
+        0.7549149868676283,
+        0.6654105587468139,
+        0.5621765008857981,
+        0.30735801686526387,
+        0.23934934732271165,
+        0.13296424019782924,
+        0.11920292202211756,
+        0.06371499425196533,
+        0.06371499425196533
+      ],
+      "relevance": {
+        "notes/note-to-card-workflow.md": 3.0,
+        "notes/atomic-notes.md": 3.0,
+        "sources/anki-and-flashcards-intro.md": 3.0
+      },
+      "latency_ms": 2124.3579171132296,
+      "reranker_active": true,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.6,
+      "average_precision_at_10": 0.9166666666666666,
+      "ndcg_at_10": 0.9674679834891693,
+      "last_expected_rank": 4,
+      "rerank_k": "auto",
+      "resolved_rerank_k": 20,
+      "rerank_k_reason": "cjk_technical",
+      "first_stage": {
+        "candidate_count": 23,
+        "channel_source_counts": {
+          "bm25": 0,
+          "vector": 23,
+          "title": 0,
+          "metadata": 0,
+          "indegree": 23
+        },
+        "expected_path_ranks": {
+          "notes/note-to-card-workflow.md": {
+            "bm25": null,
+            "vector": 4,
+            "title": null,
+            "metadata": null,
+            "indegree": 7,
+            "rrf": 2,
+            "rerank_candidate": 2
+          },
+          "notes/atomic-notes.md": {
+            "bm25": null,
+            "vector": 9,
+            "title": null,
+            "metadata": null,
+            "indegree": 8,
+            "rrf": 8,
+            "rerank_candidate": 8
+          },
+          "sources/anki-and-flashcards-intro.md": {
+            "bm25": null,
+            "vector": 1,
+            "title": null,
+            "metadata": null,
+            "indegree": 21,
+            "rrf": 3,
+            "rerank_candidate": 3
+          }
+        },
+        "hit_channel_ranks": [
+          {
+            "path": "sources/anki-and-flashcards-intro.md",
+            "bm25": null,
+            "vector": 1,
+            "title": null,
+            "metadata": null,
+            "indegree": 21,
+            "rrf": 3,
+            "rerank_candidate": 3
+          },
+          {
+            "path": "notes/note-to-card-workflow.md",
+            "bm25": null,
+            "vector": 4,
+            "title": null,
+            "metadata": null,
+            "indegree": 7,
+            "rrf": 2,
+            "rerank_candidate": 2
+          },
+          {
+            "path": "logs/2026-W14.md",
+            "bm25": null,
+            "vector": 2,
+            "title": null,
+            "metadata": null,
+            "indegree": 16,
+            "rrf": 4,
+            "rerank_candidate": 4
+          },
+          {
+            "path": "notes/atomic-notes.md",
+            "bm25": null,
+            "vector": 9,
+            "title": null,
+            "metadata": null,
+            "indegree": 8,
+            "rrf": 8,
+            "rerank_candidate": 8
+          },
+          {
+            "path": "notes/spaced-repetition.md",
+            "bm25": null,
+            "vector": 3,
+            "title": null,
+            "metadata": null,
+            "indegree": 2,
+            "rrf": 1,
+            "rerank_candidate": 1
+          },
+          {
+            "path": "notes/deep-work-deliberate-practice.md",
+            "bm25": null,
+            "vector": 7,
+            "title": null,
+            "metadata": null,
+            "indegree": 11,
+            "rrf": 7,
+            "rerank_candidate": 7
+          },
+          {
+            "path": "sources/wikipedia-spaced-repetition.md",
+            "bm25": null,
+            "vector": 16,
+            "title": null,
+            "metadata": null,
+            "indegree": 23,
+            "rrf": 20,
+            "rerank_candidate": 20
+          },
+          {
+            "path": "notes/memory-consolidation.md",
+            "bm25": null,
+            "vector": 5,
+            "title": null,
+            "metadata": null,
+            "indegree": 12,
+            "rrf": 6,
+            "rerank_candidate": 6
+          },
+          {
+            "path": "notes/zettelkasten.md",
+            "bm25": null,
+            "vector": 12,
+            "title": null,
+            "metadata": null,
+            "indegree": 5,
+            "rrf": 10,
+            "rerank_candidate": 10
+          },
+          {
+            "path": "README.md",
+            "bm25": null,
+            "vector": 11,
+            "title": null,
+            "metadata": null,
+            "indegree": 14,
+            "rrf": 11,
+            "rerank_candidate": 11
+          }
+        ]
+      },
+      "expansions_used": []
+    }
+  ]
+}

@@ -8,31 +8,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Source-level metadata search now indexes Markdown headings alongside note titles and frontmatter aliases, improving section-name queries without changing the search output format.
-- `seeklink get PATH:LINE -C N` prints a grep-style context window around a search hit, returning `N` lines before and after the requested line while preserving direct filesystem reads and path-escape protection.
 - `seeklink search --json` and `seeklink status --json` emit stable machine-readable stdout for agents that should not scrape the human text format.
-- `seeklink search --rerank-k N` and `seeklink search --no-rerank` let callers trade precision for latency per query without changing the global reranker configuration.
-- `seeklink search --rerank-k auto` chooses a 5- or 20-candidate reranker budget from query shape, keeping exact source-metadata, English, and ordinary CJK queries fast while giving filtered and CJK technical queries deeper reranking.
-- The blind-test runner now accepts `--rerank-k N`, `--rerank-k auto`, and `--no-rerank`, and records requested plus resolved reranking metadata in result JSON for latency / quality sweeps.
-- The blind-test runner now accepts optional graded `relevance:` labels in `queries.yaml`, using them for nDCG@10 while keeping `expected_paths` as hard Recall/MRR targets.
-- The blind-test runner now records first-stage BM25, vector, title, metadata, indegree, and fused-RRF diagnostics in config A result JSON so retrieval misses can be classified without ad hoc scripts.
-- The blind-test runner can now enable an off-by-default local metadata candidate-injection experiment, letting source metadata fallback add source and one-hop neighbor candidates before the single rerank pass.
+- `seeklink get PATH:LINE -C N` prints a grep-style context window around a search hit while preserving direct filesystem reads and path-escape protection.
+- `seeklink search --rerank-k N`, `--rerank-k auto`, and `--no-rerank` let callers trade precision for latency per query without changing the global reranker configuration.
+- Source-level metadata search now indexes Markdown headings alongside note titles and frontmatter aliases, improving section-name queries without changing the output format.
 
 ### Changed
-- README and search-evaluation docs now focus on concise usage, agent contracts, and release-quality measurement guidance instead of product positioning or internal experiment notes.
 - Full-vault indexing now embeds chunks in length-sorted batches instead of one file at a time, improving first-run indexing throughput on real Markdown vaults while preserving single-file indexing behavior and the existing SQLite schema.
 - The MLX reranker now caps each passage to the first 200 tokens before scoring, reducing warm-query latency on long chunks while preserving the full result preview and `seeklink get` output.
 - `seeklink search` now defaults to `--rerank-k auto`, using a smaller reranker budget for ordinary lookups while preserving deeper reranking for filtered and technical CJK queries.
+- README, `llms.txt`, and search-evaluation docs now focus on concise usage, agent contracts, and release-quality measurement guidance instead of product positioning or internal experiment notes.
 - Existing indexes migrate to schema v3 and mark sources unprocessed so the next `seeklink index` pass can populate heading metadata.
 
 ### Fixed
 - Python builds that compile `_sqlite3` as a built-in module with hidden SQLite symbols now fall back to SQLite's built-in trigram FTS tokenizer instead of letting `sqlitefts` cross SQLite library boundaries and segfault.
 - Filtered searches now rank BM25 and source-metadata candidates inside the requested tag/folder scope, so relevant filtered notes are not dropped just because unfiltered notes filled the global first-stage limit.
+- Exact title, alias, and heading lookups now keep the source-metadata winner at rank 1 after reranking, while broader heading matches still allow the content reranker to reorder results.
 - `seeklink search --rerank-k N` now limits the number of candidates passed to the cross-encoder even when `N` is lower than `--top-k`; the remaining results keep first-stage RRF order.
 - `seeklink search` and `seeklink index` now auto-restart a stale daemon when its vault, embedder, or reranker config no longer matches the caller, avoiding repeated cold-start fallbacks after switching vaults or model settings.
 
 ### Dev
 - Added a CLI contract smoke test that runs the documented status, index, search, JSON, and get workflow against the bundled `tests/corpus` vault before release.
+- The blind-test runner now records nDCG@10, Precision@5, MAP@10, reranker-budget metadata, and first-stage channel diagnostics for config A.
+- Refreshed `tests/blind/results/` with v0.4 release-quality snapshots only. On the bundled 22-query fixture, config A reports mean Recall@10 0.985, MRR 0.977, nDCG@10 0.901, and p95 latency 2124 ms on a local Apple Silicon run.
 
 ## [0.3.2] - 2026-04-23
 
@@ -42,7 +40,7 @@ surface so the repo reads as a shipped tool rather than a work log.
 
 ### Changed
 - Consolidated the 0.3.0 / 0.3.1 narrative into a single release entry (this one). The earlier entries described the same code twice with process detail that did not belong in public release notes.
-- Trimmed `tests/blind/results/` to the two measurements a reader actually needs: baseline (`A_v0.2.2.json`) and shipping (`A_v0.3.json`), plus the upper-bound reference (`C_v0.2.2.json`). Intermediate iteration results removed.
+- Trimmed `tests/blind/results/` to release-quality baseline, shipping, and upper-bound measurements. Intermediate iteration results removed.
 - Tightened internal code comments and test docstrings so they describe current behavior rather than the iteration history that produced it.
 - README metric claims explicitly labeled as "pilot" with sample size.
 

@@ -17,6 +17,11 @@ from tests.blind.run import (
 
 
 class TestLoadQueries:
+    def test_display_path_uses_repo_relative_paths_for_committed_results(self):
+        path = blind_run.REPO_ROOT / "tests" / "corpus"
+
+        assert blind_run._display_path(path) == "tests/corpus"
+
     def test_load_queries_defaults_expected_paths_to_grade_three(self, tmp_path: Path):
         path = tmp_path / "queries.yaml"
         path.write_text(
