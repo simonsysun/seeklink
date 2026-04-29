@@ -29,6 +29,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `seeklink search --rerank-k N` now limits the number of candidates passed to the cross-encoder even when `N` is lower than `--top-k`; the remaining results keep first-stage RRF order.
 - `seeklink search` and `seeklink index` now auto-restart a stale daemon when its vault, embedder, or reranker config no longer matches the caller, avoiding repeated cold-start fallbacks after switching vaults or model settings.
 
+### Dev
+- Added a CLI contract smoke test that runs the documented status, index, search, JSON, and get workflow against the bundled `tests/corpus` vault before release.
+
 ## [0.3.2] - 2026-04-23
 
 Repository cleanup pass. No code changes affecting runtime behavior
