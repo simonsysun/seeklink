@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The blind-test runner can now enable an off-by-default local metadata candidate-injection experiment, letting source metadata fallback add source and one-hop neighbor candidates before the single rerank pass.
 
 ### Changed
+- README and search-evaluation docs now focus on concise usage, agent contracts, and release-quality measurement guidance instead of product positioning or internal experiment notes.
 - Full-vault indexing now embeds chunks in length-sorted batches instead of one file at a time, improving first-run indexing throughput on real Markdown vaults while preserving single-file indexing behavior and the existing SQLite schema.
 - The MLX reranker now caps each passage to the first 200 tokens before scoring, reducing warm-query latency on long chunks while preserving the full result preview and `seeklink get` output.
 - `seeklink search` now defaults to `--rerank-k auto`, using a smaller reranker budget for ordinary lookups while preserving deeper reranking for filtered and technical CJK queries.

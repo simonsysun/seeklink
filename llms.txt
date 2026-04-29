@@ -1,10 +1,10 @@
 # SeekLink
 
-> Hybrid semantic search CLI for Obsidian-compatible markdown vaults. Combines BM25 + vector + knowledge-graph + title/alias/heading metadata channels via Reciprocal Rank Fusion. Native CJK tokenization (jieba). Optional cross-encoder reranking via MLX on Apple Silicon. Fully local — no API keys, no cloud.
+> Local semantic search CLI for Markdown vaults. Combines BM25, vector search, wikilink graph signal, and title/alias/heading metadata via Reciprocal Rank Fusion. Native CJK tokenization. Optional MLX reranking on Apple Silicon. No API keys or cloud service.
 
-SeekLink is a Python CLI + optional Unix-socket daemon that searches personal markdown knowledge bases. It targets the niche of "markdown-native, hybrid keyword + semantic search, CJK-first, with the knowledge-graph signal your wikilinks already encode" — available as a single `pip install seeklink`.
+SeekLink is a Python CLI plus an optional Unix-socket daemon. It searches personal Markdown knowledge bases, Obsidian-compatible vaults, and LLM-maintained Markdown wikis.
 
-Runs on macOS and Linux, Python 3.11+. Indexes any folder of `.md` files (Obsidian-style `[[wikilinks]]` and `aliases` frontmatter are parsed but optional). Single-vault daemon; pass `--vault` for one-shot cold-start queries against a different vault.
+Runs on macOS and Linux, Python 3.11+. Indexes any folder of `.md` files. Obsidian-style `[[wikilinks]]` and `aliases` frontmatter are parsed but optional. Single-vault daemon; pass `--vault` for one-shot cold-start queries against a different vault.
 
 ## Docs
 

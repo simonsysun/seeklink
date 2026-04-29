@@ -1,19 +1,18 @@
-"""Blind test runner for query expansion evaluation.
+"""Blind test runner for search-quality evaluation.
 
 Usage:
     python tests/blind/run.py --config A --queries tests/blind/queries.yaml \\
-        --vault /path/to/vault --out tests/blind/results/A.json
+        --vault /path/to/vault --out .scratch/blind/A.json
 
 Three configs:
     A: baseline = current seeklink daemon path (search + reranker)
-    B: Qwen3-0.6B expansion (requires seeklink v0.4+; raises until implemented)
+    B: candidate query expansion path (raises until implemented)
     C: hand-crafted expansion (RRF-fused; upper bound, not simple max)
 
 See docs/blind-test.md for the framework spec and acceptance criteria.
 
 Requires: PyYAML (dev dependency). Install with
-    uv pip install --group dev pyyaml
-or add to pyproject.toml [dependency-groups.dev] before running.
+    uv sync --dev
 """
 
 from __future__ import annotations
@@ -446,9 +445,9 @@ def run_config_a(spec: QuerySpec, state: RunnerState) -> ResultRow:
 
 
 def run_config_b(spec: QuerySpec, state: RunnerState) -> ResultRow:
-    """v0.4 candidate: Qwen3-0.6B expansion + seeklink. Not yet shipped.
+    """Candidate query expansion path. Not yet shipped.
 
-    Wiring sketch for when v0.4 arrives:
+    Wiring sketch for a future implementation:
 
         from seeklink.expansion import expand_query     # future module
         expansions = expand_query(spec.query, intent=spec.intent)
@@ -457,8 +456,9 @@ def run_config_b(spec: QuerySpec, state: RunnerState) -> ResultRow:
         # ... wrap into ResultRow, record `expansions_used=expansions` ...
     """
     raise NotImplementedError(
-        "Config B requires seeklink v0.4 query expansion (not yet shipped). "
-        "Re-run the blind test after v0.4 lands."
+        "Config B requires a query expansion implementation that is not yet "
+        "shipped. Use config A for the product baseline and config C for the "
+        "hand-written expansion upper bound."
     )
 
 
