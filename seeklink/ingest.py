@@ -6,6 +6,7 @@ import hashlib
 import json
 import logging
 import re
+from collections.abc import Iterator
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -42,6 +43,7 @@ class _PreparedFile:
     tags: list[str]
     aliases: list[str]
     aliases_json: str
+    headings_json: str
     unchanged: bool = False
 
 
@@ -85,7 +87,11 @@ def ingest_file(
 
     # Check existing source
     existing = db.get_source_by_path(rel_path)
-    if existing is not None and existing.content_hash == content_hash:
+    if (
+        existing is not None
+        and existing.content_hash == content_hash
+        and existing.status == "indexed"
+    ):
         # Content unchanged — but refresh indexed_at so that freshness
         # checks don't keep warning about this file after a content-
         # preserving touch / git checkout / editor save-without-change.
@@ -99,6 +105,7 @@ def ingest_file(
     # Prepare data outside transaction: title, chunks, embeddings, links
     # Use body (stripped of frontmatter) for chunking/embedding/link parsing
     title = _extract_title(body, path)
+    headings = _extract_headings(body, title)
     chunks = chunk_markdown(body)
 
     if chunks:
@@ -112,6 +119,7 @@ def ingest_file(
 
     targets = extract_wiki_links(body)
     aliases_json = json.dumps(aliases, ensure_ascii=False)
+    headings_json = json.dumps(headings, ensure_ascii=False)
 
     # Mutate DB atomically
     with db.transaction():
@@ -170,6 +178,7 @@ def ingest_file(
             status="indexed",
             indexed_at=_utcnow(),
             aliases=aliases_json,
+            headings=headings_json,
         )
 
     return db.get_source(source.id)
@@ -296,14 +305,17 @@ def _prepare_file(
             tags=[],
             aliases=[],
             aliases_json=existing.aliases,
+            headings_json=existing.headings,
             unchanged=True,
         )
 
     tags, aliases, body = _parse_frontmatter(content)
     title = _extract_title(body, path)
+    headings = _extract_headings(body, title)
     chunks = chunk_markdown(body)
     targets = extract_wiki_links(body)
     aliases_json = json.dumps(aliases, ensure_ascii=False)
+    headings_json = json.dumps(headings, ensure_ascii=False)
 
     return _PreparedFile(
         path=path,
@@ -316,6 +328,7 @@ def _prepare_file(
         tags=tags,
         aliases=aliases,
         aliases_json=aliases_json,
+        headings_json=headings_json,
     )
 
 
@@ -455,6 +468,7 @@ def _write_prepared_file(
             status="indexed",
             indexed_at=_utcnow(),
             aliases=prepared.aliases_json,
+            headings=prepared.headings_json,
         )
 
     return db.get_source(source.id)
@@ -519,11 +533,52 @@ def _parse_yaml_list_field(yaml_block: str, field: str) -> list[str]:
 
 def _extract_title(content: str, path: Path) -> str:
     """Extract title from first # heading, falling back to filename stem."""
-    for line in content.splitlines():
-        stripped = line.strip()
-        if stripped.startswith("# ") and not stripped.startswith("##"):
-            return stripped[2:].strip()
+    for level, heading in _iter_markdown_headings(content):
+        if level == 1:
+            return heading
     return path.stem
+
+
+def _extract_headings(content: str, title: str) -> list[str]:
+    """Extract markdown headings for source-level retrieval."""
+    headings: list[str] = []
+    seen: set[str] = set()
+    title_key = title.casefold()
+    for _, heading in _iter_markdown_headings(content):
+        if not heading or heading.casefold() == title_key:
+            continue
+        key = heading.casefold()
+        if key in seen:
+            continue
+        seen.add(key)
+        headings.append(heading)
+    return headings
+
+
+def _iter_markdown_headings(content: str) -> Iterator[tuple[int, str]]:
+    """Yield ATX headings outside fenced and indented code blocks."""
+    fence: tuple[str, int] | None = None
+    for line in content.splitlines():
+        leading_spaces = len(line) - len(line.lstrip(" "))
+        stripped = line.strip()
+        fence_match = re.match(r"^(`{3,}|~{3,})", stripped)
+        if fence_match:
+            marker = fence_match.group(1)
+            char = marker[0]
+            count = len(marker)
+            if fence is None:
+                fence = (char, count)
+            elif char == fence[0] and count >= fence[1]:
+                fence = None
+            continue
+
+        if fence is not None or leading_spaces >= 4:
+            continue
+
+        match = re.match(r"^(#{1,6})\s+(.+?)\s*#*\s*$", stripped)
+        if not match:
+            continue
+        yield len(match.group(1)), match.group(2).strip()
 
 
 def _find_source_by_target(db: Database, target: str) -> Source | None:

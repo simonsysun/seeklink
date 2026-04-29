@@ -1,6 +1,6 @@
 # SeekLink
 
-> Hybrid semantic search CLI for Obsidian-compatible markdown vaults. Combines BM25 + vector + knowledge-graph + title/alias channels via Reciprocal Rank Fusion. Native CJK tokenization (jieba). Optional cross-encoder reranking via MLX on Apple Silicon. Fully local — no API keys, no cloud.
+> Hybrid semantic search CLI for Obsidian-compatible markdown vaults. Combines BM25 + vector + knowledge-graph + title/alias/heading metadata channels via Reciprocal Rank Fusion. Native CJK tokenization (jieba). Optional cross-encoder reranking via MLX on Apple Silicon. Fully local — no API keys, no cloud.
 
 SeekLink is a Python CLI + optional Unix-socket daemon that searches personal markdown knowledge bases. It targets the niche of "markdown-native, hybrid keyword + semantic search, CJK-first, with the knowledge-graph signal your wikilinks already encode" — available as a single `pip install seeklink`.
 
@@ -72,7 +72,7 @@ No other codes.
 ### Query shape
 
 - Raw CJK is fine. jieba tokenizer handles word segmentation.
-- Short queries that match a note title or alias get title-gated position protection so the exact hit anchors at rank 1.
+- Short queries that match a note title, alias, or Markdown heading get metadata-gated position protection so the exact hit anchors at rank 1.
 - Filters: `--tags T1 T2` (AND), `--folder PREFIX`. Multi-word filter values not supported.
 - `--title-weight F` override (default 1.5; raise to 3.0 for "find the definitive article", lower to 0.5 for "surface raw log moments").
 - Reranking controls: `--rerank-k auto` is the default and chooses a 5- or 20-candidate budget from the query shape; `--rerank-k N` forces a fixed cross-encoder budget; `--no-rerank` skips cross-encoder scoring for one query.

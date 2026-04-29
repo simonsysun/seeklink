@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 import re
 from pathlib import Path
 from unittest.mock import patch
@@ -123,6 +125,63 @@ class TestIngestFile:
         result = ingest_file(db, path, vault, embedder)
         assert result is not None
         assert result.title == "no-heading"
+
+    def test_title_ignores_fenced_code_heading(
+        self, db: Database, embedder: Embedder, vault: Path
+    ):
+        path = _write_md(
+            vault,
+            "code-first.md",
+            "```markdown\n# Fake Title\n```\n\n# Real Title\n\nBody text.",
+        )
+        result = ingest_file(db, path, vault, embedder)
+        assert result is not None
+        assert result.title == "Real Title"
+
+    def test_headings_stored_for_source_search(self, db: Database, vault: Path):
+        path = _write_md(
+            vault,
+            "workflow.md",
+            "# Workflow\n\n## Capture inbox workflow\n\nBody text.",
+        )
+
+        result = ingest_file(db, path, vault, FakeBatchEmbedder())  # type: ignore[arg-type]
+
+        assert result is not None
+        assert json.loads(result.headings) == ["Capture inbox workflow"]
+        source_ids = [sid for sid, _ in db.search_fts_sources("capture inbox")]
+        assert result.id in source_ids
+
+    def test_headings_ignore_fenced_code(self, db: Database, vault: Path):
+        path = _write_md(
+            vault,
+            "workflow.md",
+            "# Workflow\n\n```markdown\n## Fake heading\n```\n\n## Real heading",
+        )
+
+        result = ingest_file(db, path, vault, FakeBatchEmbedder())  # type: ignore[arg-type]
+
+        assert result is not None
+        assert json.loads(result.headings) == ["Real heading"]
+
+    def test_unprocessed_same_hash_reindexed_after_schema_migration(
+        self, db: Database, vault: Path
+    ):
+        content = "# Workflow\n\n## Capture inbox workflow\n\nBody text."
+        path = _write_md(vault, "workflow.md", content)
+        db.add_source(
+            uid="existing",
+            path="workflow.md",
+            content_hash=hashlib.sha256(content.encode("utf-8")).hexdigest(),
+            status="unprocessed",
+        )
+
+        result = ingest_file(db, path, vault, FakeBatchEmbedder())  # type: ignore[arg-type]
+
+        assert result is not None
+        assert result.status == "indexed"
+        assert json.loads(result.headings) == ["Capture inbox workflow"]
+        assert db.get_chunks_by_source(result.id)
 
     def test_wiki_links_stored(self, db: Database, embedder: Embedder, vault: Path):
         # Create target first

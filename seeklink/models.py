@@ -19,6 +19,7 @@ class Source:
     created_at: str
     updated_at: str
     aliases: str = "[]"  # JSON array of alias strings
+    headings: str = "[]"  # JSON array of markdown headings
 
 
 @dataclass(frozen=True, slots=True)
@@ -52,5 +53,4 @@ class Suggestion:
     status: str
     created_at: str
     resolved_at: str | None
-
 

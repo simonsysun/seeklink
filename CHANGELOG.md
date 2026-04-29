@@ -8,19 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Source-level metadata search now indexes Markdown headings alongside note titles and frontmatter aliases, improving section-name queries without changing the search output format.
 - `seeklink get PATH:LINE -C N` prints a grep-style context window around a search hit, returning `N` lines before and after the requested line while preserving direct filesystem reads and path-escape protection.
 - `seeklink search --json` and `seeklink status --json` emit stable machine-readable stdout for agents that should not scrape the human text format.
 - `seeklink search --rerank-k N` and `seeklink search --no-rerank` let callers trade precision for latency per query without changing the global reranker configuration.
-- `seeklink search --rerank-k auto` chooses a 5- or 20-candidate reranker budget from query shape, keeping exact title / alias, English, and ordinary CJK queries fast while giving filtered and CJK technical queries deeper reranking.
+- `seeklink search --rerank-k auto` chooses a 5- or 20-candidate reranker budget from query shape, keeping exact source-metadata, English, and ordinary CJK queries fast while giving filtered and CJK technical queries deeper reranking.
 - The blind-test runner now accepts `--rerank-k N`, `--rerank-k auto`, and `--no-rerank`, and records requested plus resolved reranking metadata in result JSON for latency / quality sweeps.
 - The blind-test runner now accepts optional graded `relevance:` labels in `queries.yaml`, using them for nDCG@10 while keeping `expected_paths` as hard Recall/MRR targets.
 - The blind-test runner now records first-stage BM25, vector, title, metadata, indegree, and fused-RRF diagnostics in config A result JSON so retrieval misses can be classified without ad hoc scripts.
-- The blind-test runner can now enable an off-by-default local metadata candidate-injection experiment, letting title/alias fallback add source and one-hop neighbor candidates before the single rerank pass.
+- The blind-test runner can now enable an off-by-default local metadata candidate-injection experiment, letting source metadata fallback add source and one-hop neighbor candidates before the single rerank pass.
 
 ### Changed
 - Full-vault indexing now embeds chunks in length-sorted batches instead of one file at a time, improving first-run indexing throughput on real Markdown vaults while preserving single-file indexing behavior and the existing SQLite schema.
 - The MLX reranker now caps each passage to the first 200 tokens before scoring, reducing warm-query latency on long chunks while preserving the full result preview and `seeklink get` output.
 - `seeklink search` now defaults to `--rerank-k auto`, using a smaller reranker budget for ordinary lookups while preserving deeper reranking for filtered and technical CJK queries.
+- Existing indexes migrate to schema v3 and mark sources unprocessed so the next `seeklink index` pass can populate heading metadata.
 
 ### Fixed
 - `seeklink search --rerank-k N` now limits the number of candidates passed to the cross-encoder even when `N` is lower than `--top-k`; the remaining results keep first-stage RRF order.

@@ -552,7 +552,7 @@ class TestTagCRUD:
 
 
 class TestFTSSources:
-    """Tests for fts_sources search (title + aliases)."""
+    """Tests for fts_sources search (title + aliases + headings)."""
 
     def test_search_by_title(self, db: Database):
         source = db.add_source(uid=_uid(), path="notes/ml.md", title="Machine Learning Basics")
@@ -565,6 +565,13 @@ class TestFTSSources:
         source = db.add_source(uid=_uid(), path="notes/ml-alias.md", title="ML Intro")
         db.update_source(source.id, aliases='["Machine Learning", "ML Basics"]')
         results = db.search_fts_sources("machine learning", limit=10)
+        source_ids = [sid for sid, _ in results]
+        assert source.id in source_ids
+
+    def test_search_by_heading(self, db: Database):
+        source = db.add_source(uid=_uid(), path="notes/workflow.md", title="Workflow")
+        db.update_source(source.id, headings='["Capture inbox workflow", "Review queue"]')
+        results = db.search_fts_sources("capture inbox", limit=10)
         source_ids = [sid for sid, _ in results]
         assert source.id in source_ids
 
@@ -709,5 +716,66 @@ class TestMigrationV1ToV2:
             "SELECT rowid FROM fts_sources WHERE fts_sources MATCH 'test'"
         ).fetchall()
         assert len(fts_rows) >= 1
+
+        db.close()
+
+
+class TestMigrationV2ToV3:
+    """Test that v2 databases migrate to v3 correctly."""
+
+    def test_migrate_adds_headings_and_rebuilds_source_fts(self):
+        db = Database(":memory:")
+
+        db._conn.executescript("""
+            CREATE TABLE sources (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                uid TEXT NOT NULL UNIQUE,
+                path TEXT NOT NULL UNIQUE,
+                title TEXT,
+                content_hash TEXT,
+                status TEXT DEFAULT 'unprocessed',
+                indegree INTEGER DEFAULT 0,
+                aliases TEXT DEFAULT '[]',
+                fs_modified_at TEXT,
+                indexed_at TEXT,
+                created_at TEXT DEFAULT (datetime('now')),
+                updated_at TEXT DEFAULT (datetime('now'))
+            );
+            CREATE VIRTUAL TABLE fts_sources USING fts5(
+                title,
+                aliases,
+                content=sources,
+                content_rowid=id,
+                tokenize='jieba'
+            );
+            PRAGMA user_version = 2;
+        """)
+        db._conn.execute(
+            """INSERT INTO sources (uid, path, title, aliases, status)
+               VALUES (?, ?, ?, ?, ?)""",
+            (_uid(), "notes/workflow.md", "Workflow", '["Flow"]', "indexed"),
+        )
+        db._conn.execute("""
+            INSERT INTO fts_sources(rowid, title, aliases)
+            SELECT id, COALESCE(title, ''), COALESCE(aliases, '[]') FROM sources
+        """)
+        db._conn.commit()
+
+        db.init_schema()
+
+        version = db._conn.execute("PRAGMA user_version").fetchone()[0]
+        assert version == 3
+
+        source = db.get_source_by_path("notes/workflow.md")
+        assert source is not None
+        assert source.headings == "[]"
+        assert source.status == "unprocessed"
+
+        title_hits = db.search_fts_sources("workflow", limit=10)
+        assert source.id in [sid for sid, _ in title_hits]
+
+        db.update_source(source.id, headings='["Capture inbox workflow"]')
+        heading_hits = db.search_fts_sources("capture inbox", limit=10)
+        assert source.id in [sid for sid, _ in heading_hits]
 
         db.close()

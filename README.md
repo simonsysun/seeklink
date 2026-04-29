@@ -7,7 +7,7 @@
 
 **Hybrid semantic search for your Obsidian-compatible markdown vault.**
 
-SeekLink searches your personal knowledge base using four channels in parallel — keyword matching, semantic similarity, knowledge graph, and title/alias lookup — then fuses the results for high-recall, high-precision retrieval. Optional cross-encoder reranking via MLX gives an extra precision boost on Apple Silicon.
+SeekLink searches your personal knowledge base using four channels in parallel — keyword matching, semantic similarity, knowledge graph, and source metadata lookup — then fuses the results for high-recall, high-precision retrieval. Optional cross-encoder reranking via MLX gives an extra precision boost on Apple Silicon.
 
 Built for people who take notes seriously and want an AI that understands their knowledge structure, not just their text.
 
@@ -63,7 +63,7 @@ Query: "agent memory systems"
         ├── BM25 (FTS5 + jieba) ──── keyword match ──────── weight 1.0
         ├── Vector (jina-v2-zh) ──── semantic similarity ── weight 1.0
         ├── Indegree ─────────────── well-linked = quality ─ weight 0.3
-        └── Title/Alias (FTS5) ──── exact name match ────── weight 1.5
+        └── Title/Alias/Heading ─── exact metadata match ─ weight 1.5
         │
         └── RRF Fusion → top candidates
                 │
@@ -209,7 +209,7 @@ SeekLink runs four search channels in parallel and merges results with Reciproca
 - **BM25** (FTS5 + jieba): keyword match on chunk content. Handles CJK natively via jieba tokenization.
 - **Vector** (jina-embeddings-v2-base-zh): semantic similarity. Finds conceptually related notes even when they use different words or languages.
 - **Indegree**: notes that many other notes link to rank higher — a lightweight quality signal from your knowledge graph.
-- **Title/Alias** (FTS5): matches against note titles and `aliases` frontmatter. Weight 1.5 gives a modest boost without overwhelming content matches.
+- **Title/Alias/Heading** (FTS5): matches against note titles, `aliases` frontmatter, and Markdown headings. Weight 1.5 gives a modest boost without overwhelming content matches.
 
 ### Why title weight is 1.5 (not higher)
 
@@ -217,9 +217,9 @@ Many personal knowledge bases contain a mix of **titled articles** (permanent no
 
 ### Title-gated rerank blending (v0.3+)
 
-When the reranker is enabled, a cross-encoder (`Qwen3-Reranker-0.6B` on MLX, ~1-2s per query) re-scores a query-sensitive candidate budget for precision: 5 candidates for ordinary title / alias / natural-language lookups and 20 candidates for filtered or technical CJK queries. Use `--rerank-k N` to force a fixed budget for one query, or `--no-rerank` to return raw RRF results without cross-encoder scoring. SeekLink applies **title-gated position blending** on top of reranked results:
+When the reranker is enabled, a cross-encoder (`Qwen3-Reranker-0.6B` on MLX, ~1-2s per query) re-scores a query-sensitive candidate budget for precision: 5 candidates for ordinary metadata / natural-language lookups and 20 candidates for filtered or technical CJK queries. Use `--rerank-k N` to force a fixed budget for one query, or `--no-rerank` to return raw RRF results without cross-encoder scoring. SeekLink applies **title-gated position blending** on top of reranked results:
 
-- **If the title channel's best match is in the candidate pool**, blend `alpha · normalized_rrf + (1 - alpha) · rerank_score` with `alpha = 0.60/0.50/0.40` by rank bucket. This protects exact title / alias hits from being demoted by a content-focused reranker.
+- **If the title channel's best match is in the candidate pool**, blend `alpha · normalized_rrf + (1 - alpha) · rerank_score` with `alpha = 0.60/0.50/0.40` by rank bucket. This protects exact title, alias, and heading hits from being demoted by a content-focused reranker.
 - **Otherwise** (no strong title signal), the reranker score is used directly — same as pre-v0.3 behavior. This lets the reranker correct poor first-stage ordering.
 
 On the bundled 22-query pilot (see `tests/blind/`), mean MRR moved from 0.932 to 0.977 vs pure-reranker-override with no per-query regressions. Sample size is a pilot, not a statistically powered benchmark — contributions of larger labeled corpora are welcome.

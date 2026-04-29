@@ -100,9 +100,9 @@ def _resolve_rerank_k_with_reason(
     """Resolve a numeric rerank budget for one query.
 
     The default CLI path uses "auto", a conservative policy from the 22-query
-    pilot: English, title/alias, and ordinary CJK lookups got most of the
-    reranker benefit by reranking only the top 5, while CJK / mixed technical
-    queries needed deeper candidates to recover recall.
+    pilot: English, source-metadata, and ordinary CJK lookups got most of
+    the reranker benefit by reranking only the top 5, while CJK / mixed
+    technical queries needed deeper candidates to recover recall.
     """
     if isinstance(rerank_k, int):
         return rerank_k, "fixed"
@@ -176,7 +176,7 @@ def search(
     """Search the knowledge base using four-channel RRF fusion.
 
     Channels: BM25 (keyword chunks), vector (semantic), indegree (quality
-    prior), title/alias (source-level FTS5).
+    prior), title/alias/heading metadata (source-level FTS5).
     Optional graph expansion follows wiki-links from top results.
 
     Note on title_weight (default 1.5): rank-1 title match contributes
@@ -194,8 +194,8 @@ def search(
     - path_prefix: alias for folder (legacy)
 
     metadata_expansion is an off-by-default evaluation hook. It uses conservative
-    title/alias token fallback to add local metadata candidates before the single
-    rerank pass. It is not wired into the public CLI default.
+    source-metadata token fallback to add local metadata candidates before the
+    single rerank pass. It is not wired into the public CLI default.
     """
     if not query.strip() or top_k <= 0:
         return []
@@ -416,7 +416,7 @@ def search(
 
     # Cross-encoder reranking — title-gated blending (v0.3).
     #
-    # The failure mode this guards against: an exact title / alias hit
+    # The failure mode this guards against: an exact source-metadata hit
     # wins rank 1 cleanly from the title channel, then the reranker
     # demotes it because the note is short or uses different phrasing
     # than the query. In that scenario the title signal is a strong
@@ -456,7 +456,7 @@ def search(
         rerank_scores = reranker.rerank(query, passages)
         if rerank_scores is not None and len(rerank_scores) == len(rerank_head):
             # Title-channel rank 1 is the strongest "this source was
-            # confidently identified by title/alias" signal. If that
+            # confidently identified by source metadata" signal. If that
             # source is anywhere in the candidate pool, apply position
             # blending; otherwise trust the reranker fully. See the
             # block comment above for the "anywhere in pool" rationale.
@@ -697,15 +697,23 @@ def _metadata_query_terms(query: str) -> list[str]:
 
 
 def _metadata_source_tokens(source: Source) -> set[str]:
-    raw_aliases: object
-    try:
-        raw_aliases = json.loads(source.aliases)
-    except (TypeError, ValueError):
-        raw_aliases = source.aliases
-    alias_text = (
-        " ".join(raw_aliases) if isinstance(raw_aliases, list) else str(raw_aliases)
+    def json_text(value: str) -> str:
+        try:
+            raw: object = json.loads(value)
+        except (TypeError, ValueError):
+            raw = value
+        return " ".join(raw) if isinstance(raw, list) else str(raw)
+
+    text = " ".join(
+        part
+        for part in (
+            source.title,
+            json_text(source.aliases),
+            json_text(source.headings),
+            source.path,
+        )
+        if part
     )
-    text = " ".join(part for part in (source.title, alias_text, source.path) if part)
     tokens = set(re.findall(r"[a-z0-9]+", text.casefold()))
     expanded = set(tokens)
     for token in tokens:
@@ -747,10 +755,10 @@ def _filter_ambiguous_metadata_rows(
 
 
 def _metadata_source_seeds(db: Database, query: str, limit: int) -> list[int]:
-    """Return source IDs from conservative title/alias token fallback.
+    """Return source IDs from conservative source-metadata token fallback.
 
     A full source-level FTS match is already handled by the title channel. This
-    helper only activates when the full query misses source title/alias FTS, then
+    helper only activates when the full query misses source metadata FTS, then
     tries adjacent English bigrams followed by individual meaningful terms. It
     returns the first term's matches only to avoid broad late tokens such as
     "memory" flooding candidates.

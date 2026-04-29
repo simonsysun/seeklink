@@ -588,7 +588,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--metadata-expansion",
         action="store_true",
         help=(
-            "Experimental: add local title/alias metadata candidates before "
+            "Experimental: add local source metadata candidates before "
             "the single rerank pass. Off by default; use only for quality sweeps."
         ),
     )

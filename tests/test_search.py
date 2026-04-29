@@ -510,7 +510,7 @@ class TestFolderFiltering:
 
 
 class TestTitleChannel:
-    """Test that the 4th RRF channel (title/alias) boosts title matches."""
+    """Test that the 4th RRF channel boosts source metadata matches."""
 
     def test_title_match_boosts_ranking(self, db: Database, embedder: Embedder, vault: Path):
         _ingest_corpus(db, embedder, vault)
@@ -519,6 +519,36 @@ class TestTitleChannel:
             # ml-basics.md has title "Machine Learning" — should rank high
             top_paths = [r.path for r in results[:3]]
             assert "ml-basics.md" in top_paths
+
+    def test_heading_match_boosts_ranking(
+        self, db: Database, embedder: Embedder, vault: Path
+    ):
+        _write_md(
+            vault,
+            "workflow.md",
+            "# Workflow\n\n## Capture inbox workflow\n\nA sparse body.",
+        )
+        _write_md(
+            vault,
+            "noise.md",
+            "# Noise\n\nCapture inbox workflow terms repeated in ordinary body text.",
+        )
+        ingest_file(db, vault / "workflow.md", vault, embedder)
+        ingest_file(db, vault / "noise.md", vault, embedder)
+
+        diagnostics = SearchDiagnostics()
+        results = search(
+            db,
+            embedder,
+            "capture inbox workflow",
+            diagnostics=diagnostics,
+        )
+
+        assert results
+        workflow = db.get_source_by_path("workflow.md")
+        assert workflow is not None
+        assert diagnostics.title_ranks[workflow.id] == 1
+        assert results[0].path == "workflow.md"
 
 
 class TestMetadataExpansion:
@@ -664,7 +694,7 @@ class TestPositionAwareBlending:
     def test_gate_off_without_title_match(
         self, db: Database, embedder: Embedder, vault: Path
     ):
-        """When the query has no title/alias hit at all, blending must
+        """When the query has no source-metadata hit at all, blending must
         be OFF — final scores equal the raw reranker scores, and the
         reranker's ordering wins (pre-v0.3 behavior)."""
         _ingest_corpus(db, embedder, vault)

@@ -26,7 +26,7 @@ class Database:
     types: sources, chunks, wiki_links, suggestions.
     """
 
-    SCHEMA_VERSION = 2
+    SCHEMA_VERSION = 3
 
     def __init__(self, path: str | Path = ":memory:"):
         self._path = str(path)
@@ -139,9 +139,12 @@ class Database:
                 "Delete the DB file to recreate."
             )
 
-        # Migrate from v1 → v2 if needed
         if version == 1:
             self._migrate_v1_to_v2()
+            version = 2
+
+        if version == 2:
+            self._migrate_v2_to_v3()
             return
 
         # -- Tables (order matters for FK references) --
@@ -156,6 +159,7 @@ class Database:
                 status TEXT DEFAULT 'unprocessed',
                 indegree INTEGER DEFAULT 0,
                 aliases TEXT DEFAULT '[]',
+                headings TEXT DEFAULT '[]',
                 fs_modified_at TEXT,
                 indexed_at TEXT,
                 created_at TEXT DEFAULT (datetime('now')),
@@ -315,6 +319,7 @@ class Database:
             CREATE VIRTUAL TABLE IF NOT EXISTS fts_sources USING fts5(
                 title,
                 aliases,
+                headings,
                 content=sources,
                 content_rowid=id,
                 tokenize='jieba'
@@ -326,26 +331,48 @@ class Database:
         self._create_trigger(
             "sources_fts_insert",
             """CREATE TRIGGER sources_fts_insert AFTER INSERT ON sources BEGIN
-                INSERT INTO fts_sources(rowid, title, aliases)
-                    VALUES (new.id, COALESCE(new.title, ''), COALESCE(new.aliases, '[]'));
+                INSERT INTO fts_sources(rowid, title, aliases, headings)
+                    VALUES (
+                        new.id,
+                        COALESCE(new.title, ''),
+                        COALESCE(new.aliases, '[]'),
+                        COALESCE(new.headings, '[]')
+                    );
             END""",
         )
 
         self._create_trigger(
             "sources_fts_delete",
             """CREATE TRIGGER sources_fts_delete AFTER DELETE ON sources BEGIN
-                INSERT INTO fts_sources(fts_sources, rowid, title, aliases)
-                    VALUES ('delete', old.id, COALESCE(old.title, ''), COALESCE(old.aliases, '[]'));
+                INSERT INTO fts_sources(fts_sources, rowid, title, aliases, headings)
+                    VALUES (
+                        'delete',
+                        old.id,
+                        COALESCE(old.title, ''),
+                        COALESCE(old.aliases, '[]'),
+                        COALESCE(old.headings, '[]')
+                    );
             END""",
         )
 
         self._create_trigger(
             "sources_fts_update",
-            """CREATE TRIGGER sources_fts_update AFTER UPDATE OF title, aliases ON sources BEGIN
-                INSERT INTO fts_sources(fts_sources, rowid, title, aliases)
-                    VALUES ('delete', old.id, COALESCE(old.title, ''), COALESCE(old.aliases, '[]'));
-                INSERT INTO fts_sources(rowid, title, aliases)
-                    VALUES (new.id, COALESCE(new.title, ''), COALESCE(new.aliases, '[]'));
+            """CREATE TRIGGER sources_fts_update AFTER UPDATE OF title, aliases, headings ON sources BEGIN
+                INSERT INTO fts_sources(fts_sources, rowid, title, aliases, headings)
+                    VALUES (
+                        'delete',
+                        old.id,
+                        COALESCE(old.title, ''),
+                        COALESCE(old.aliases, '[]'),
+                        COALESCE(old.headings, '[]')
+                    );
+                INSERT INTO fts_sources(rowid, title, aliases, headings)
+                    VALUES (
+                        new.id,
+                        COALESCE(new.title, ''),
+                        COALESCE(new.aliases, '[]'),
+                        COALESCE(new.headings, '[]')
+                    );
             END""",
         )
 
@@ -382,6 +409,90 @@ class Database:
             "CREATE INDEX IF NOT EXISTS idx_source_tags_tag ON source_tags(tag)"
         )
         # -- Set schema version --
+
+        self._conn.execute(f"PRAGMA user_version = {self.SCHEMA_VERSION}")
+        self._conn.commit()
+
+    def _migrate_v2_to_v3(self) -> None:
+        """Migrate schema from v2 to v3: add source-level headings.
+
+        Existing sources are marked unprocessed so the next full index pass
+        extracts headings from disk and refreshes source-level FTS metadata.
+        Search still works before reindexing; it just lacks the new heading
+        signal for old rows.
+        """
+        self._conn.execute(
+            "ALTER TABLE sources ADD COLUMN headings TEXT DEFAULT '[]'"
+        )
+        self._conn.execute(
+            "UPDATE sources SET status = 'unprocessed' WHERE status = 'indexed'"
+        )
+
+        self._conn.execute("DROP TRIGGER IF EXISTS sources_fts_insert")
+        self._conn.execute("DROP TRIGGER IF EXISTS sources_fts_delete")
+        self._conn.execute("DROP TRIGGER IF EXISTS sources_fts_update")
+        self._conn.execute("DROP TABLE IF EXISTS fts_sources")
+
+        self._conn.execute("""
+            CREATE VIRTUAL TABLE IF NOT EXISTS fts_sources USING fts5(
+                title,
+                aliases,
+                headings,
+                content=sources,
+                content_rowid=id,
+                tokenize='jieba'
+            )
+        """)
+        self._create_trigger(
+            "sources_fts_insert",
+            """CREATE TRIGGER sources_fts_insert AFTER INSERT ON sources BEGIN
+                INSERT INTO fts_sources(rowid, title, aliases, headings)
+                    VALUES (
+                        new.id,
+                        COALESCE(new.title, ''),
+                        COALESCE(new.aliases, '[]'),
+                        COALESCE(new.headings, '[]')
+                    );
+            END""",
+        )
+        self._create_trigger(
+            "sources_fts_delete",
+            """CREATE TRIGGER sources_fts_delete AFTER DELETE ON sources BEGIN
+                INSERT INTO fts_sources(fts_sources, rowid, title, aliases, headings)
+                    VALUES (
+                        'delete',
+                        old.id,
+                        COALESCE(old.title, ''),
+                        COALESCE(old.aliases, '[]'),
+                        COALESCE(old.headings, '[]')
+                    );
+            END""",
+        )
+        self._create_trigger(
+            "sources_fts_update",
+            """CREATE TRIGGER sources_fts_update AFTER UPDATE OF title, aliases, headings ON sources BEGIN
+                INSERT INTO fts_sources(fts_sources, rowid, title, aliases, headings)
+                    VALUES (
+                        'delete',
+                        old.id,
+                        COALESCE(old.title, ''),
+                        COALESCE(old.aliases, '[]'),
+                        COALESCE(old.headings, '[]')
+                    );
+                INSERT INTO fts_sources(rowid, title, aliases, headings)
+                    VALUES (
+                        new.id,
+                        COALESCE(new.title, ''),
+                        COALESCE(new.aliases, '[]'),
+                        COALESCE(new.headings, '[]')
+                    );
+            END""",
+        )
+        self._conn.execute("""
+            INSERT INTO fts_sources(rowid, title, aliases, headings)
+            SELECT id, COALESCE(title, ''), COALESCE(aliases, '[]'), '[]'
+            FROM sources
+        """)
 
         self._conn.execute(f"PRAGMA user_version = {self.SCHEMA_VERSION}")
         self._conn.commit()
@@ -471,7 +582,7 @@ class Database:
         # Cleanup: drop budget_log if it exists (leftover from pre-v1)
         self._conn.execute("DROP TABLE IF EXISTS budget_log")
 
-        self._conn.execute(f"PRAGMA user_version = {self.SCHEMA_VERSION}")
+        self._conn.execute("PRAGMA user_version = 2")
         self._conn.commit()
 
     # ── Source CRUD ───────────────────────────────────────────────
@@ -533,7 +644,7 @@ class Database:
 
     _SOURCE_UPDATABLE = frozenset({
         "path", "title", "content_hash", "status",
-        "indegree", "fs_modified_at", "indexed_at", "aliases",
+        "indegree", "fs_modified_at", "indexed_at", "aliases", "headings",
     })
 
     def update_source(self, id: int, **kwargs: str | int | None) -> Source | None:
@@ -644,7 +755,7 @@ class Database:
     def search_fts_sources(
         self, query: str, limit: int = 20
     ) -> list[tuple[int, float]]:
-        """Search source titles and aliases via FTS5.
+        """Search source titles, aliases, and headings via FTS5.
 
         Returns (source_id, bm25_rank) pairs. Safe: returns [] on query errors.
         """
@@ -675,6 +786,7 @@ class Database:
             created_at=row["created_at"],
             updated_at=row["updated_at"],
             aliases=row["aliases"] if "aliases" in row.keys() else "[]",
+            headings=row["headings"] if "headings" in row.keys() else "[]",
         )
 
     # ── Chunk CRUD ───────────────────────────────────────────────
@@ -994,4 +1106,3 @@ class Database:
             ).fetchone()[0],
             "wal_bytes": wal_bytes,
         }
-
