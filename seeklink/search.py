@@ -7,6 +7,7 @@ import logging
 import math
 import re
 import sqlite3
+import unicodedata
 from collections import OrderedDict
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -63,6 +64,94 @@ _METADATA_COMPANION_STOPWORDS = frozenset({
     "why",
     "with",
 })
+
+
+def _normalize_metadata_match_text(text: str) -> str:
+    return " ".join(unicodedata.normalize("NFKC", text).casefold().split())
+
+
+def _json_string_list(raw_json: str) -> list[str]:
+    try:
+        parsed = json.loads(raw_json or "[]")
+    except json.JSONDecodeError:
+        parsed = []
+    if not isinstance(parsed, list):
+        return []
+    return [str(item) for item in parsed if item]
+
+
+def _metadata_values(source: Source, *, include_headings: bool = True) -> list[str]:
+    values: list[str] = [source.title] if source.title else []
+    values.extend(_json_string_list(source.aliases))
+    if include_headings:
+        values.extend(_json_string_list(source.headings))
+    return values
+
+
+def _metadata_value_matches_query(normalized_query: str, normalized_value: str) -> bool:
+    if normalized_value == normalized_query:
+        return True
+    prefix = f"{normalized_query} "
+    if not normalized_value.startswith(prefix):
+        return False
+    suffix = normalized_value[len(prefix):]
+    return _contains_cjk(normalized_query) or suffix.startswith(("(", "[", "{"))
+
+
+def _metadata_match_priority(query: str, source: Source | None) -> int:
+    """Rank exact source-metadata matches before broader heading hits."""
+    if source is None:
+        return 2
+    normalized_query = _normalize_metadata_match_text(query)
+    if not normalized_query:
+        return 2
+
+    for value in _metadata_values(source, include_headings=False):
+        normalized_value = _normalize_metadata_match_text(value)
+        if _metadata_value_matches_query(normalized_query, normalized_value):
+            return 0
+    for value in _json_string_list(source.headings):
+        normalized_value = _normalize_metadata_match_text(value)
+        if _metadata_value_matches_query(normalized_query, normalized_value):
+            return 1
+    return 2
+
+
+def _rerank_source_metadata_ranks(
+    query: str,
+    ranks: dict[int, int],
+    sources: dict[int, Source],
+) -> dict[int, int]:
+    if not ranks:
+        return ranks
+    ordered = sorted(
+        ranks,
+        key=lambda source_id: (
+            _metadata_match_priority(query, sources.get(source_id)),
+            ranks[source_id],
+        ),
+    )
+    return {source_id: rank for rank, source_id in enumerate(ordered, start=1)}
+
+
+def _is_exact_metadata_lookup(query: str, source: Source | None) -> bool:
+    """Return True when the query clearly names this source or section.
+
+    FTS source search is broad by design; it can match a token inside a title or
+    heading. This helper is narrower and is used only as a post-rerank guard for
+    exact title / alias / heading lookups. Prefix matching covers bilingual
+    titles such as "遗忘曲线 Forgetting curve" for the query "遗忘曲线".
+    """
+    if source is None:
+        return False
+    normalized_query = _normalize_metadata_match_text(query)
+    if not normalized_query:
+        return False
+    for value in _metadata_values(source):
+        normalized_value = _normalize_metadata_match_text(value)
+        if _metadata_value_matches_query(normalized_query, normalized_value):
+            return True
+    return False
 
 
 @dataclass(slots=True)
@@ -280,6 +369,7 @@ def search(
     bm25_ranks = {k: v for k, v in bm25_ranks.items() if k in candidate_ids}
     vec_ranks = {k: v for k, v in vec_ranks.items() if k in candidate_ids}
     title_ranks = {k: v for k, v in title_ranks.items() if k in candidate_ids}
+    title_ranks = _rerank_source_metadata_ranks(query, title_ranks, sources)
 
     resolved_rerank_k, rerank_k_reason = _resolve_rerank_k_with_reason(
         query,
@@ -411,7 +501,7 @@ def search(
     results.sort(key=lambda r: r.score, reverse=True)
     results = results[:candidate_k]
 
-    # Cross-encoder reranking — title-gated blending (v0.3).
+    # Cross-encoder reranking — title-gated blending.
     #
     # The failure mode this guards against: an exact source-metadata hit
     # wins rank 1 cleanly from the title channel, then the reranker
@@ -424,8 +514,9 @@ def search(
     #   IF title channel rank 1 is in the rerank candidate pool:
     #       blended_i = alpha_i * (rrf_i / max_rrf) + (1 - alpha_i) * rerank_i
     #       with alpha = 0.60 (rank 1-3), 0.50 (4-10), 0.40 (11+)
+    #       and exact title/alias/heading lookups are kept at rank 1
     #   ELSE:
-    #       blended_i = rerank_i   (pure reranker, pre-v0.3 behavior)
+    #       blended_i = rerank_i   (pure reranker ordering)
     #
     # Rationale for gating on "title winner anywhere in pool" (rather
     # than strictly requiring pool rank 1 === title rank 1): exact-title
@@ -468,6 +559,15 @@ def search(
                 title_rank_1_sid is not None
                 and title_rank_1_sid in candidate_sids
             ) or bool(metadata_candidate_sids & candidate_sids)
+            exact_metadata_sid = (
+                title_rank_1_sid
+                if title_rank_1_sid is not None
+                and _is_exact_metadata_lookup(
+                    query,
+                    sources.get(title_rank_1_sid),
+                )
+                else None
+            )
 
             max_rrf = rerank_head[0].score if rerank_head[0].score > 0 else 1.0
             blended: list[SearchResult] = []
@@ -485,7 +585,7 @@ def search(
                     blended_score = alpha * norm_score + (1.0 - alpha) * rerank_s
                 else:
                     # No title-channel confidence → pure reranker override
-                    # (pre-v0.3 behavior). Reranker has the full say.
+                    # for cases where content relevance is the best signal.
                     blended_score = rerank_s
                 blended.append(SearchResult(
                     source_id=r.source_id,
@@ -497,6 +597,25 @@ def search(
                     indegree=r.indegree,
                 ))
             blended.sort(key=lambda r: r.score, reverse=True)
+            if exact_metadata_sid is not None:
+                for exact_index, exact_result in enumerate(blended):
+                    if exact_result.source_id != exact_metadata_sid:
+                        continue
+                    if exact_index == 0:
+                        break
+                    top_score = blended[0].score if blended else exact_result.score
+                    boosted = SearchResult(
+                        source_id=exact_result.source_id,
+                        chunk_id=exact_result.chunk_id,
+                        path=exact_result.path,
+                        title=exact_result.title,
+                        content=exact_result.content,
+                        score=max(exact_result.score, top_score + 1e-9),
+                        indegree=exact_result.indegree,
+                    )
+                    del blended[exact_index]
+                    blended.insert(0, boosted)
+                    break
             # If rerank_k < top_k, rerank only the head and append the
             # untouched first-stage tail. This gives callers a real latency
             # knob without losing the requested number of output rows.

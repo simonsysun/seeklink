@@ -14,11 +14,12 @@ from seeklink.search import (
     SearchDiagnostics,
     SearchResult,
     _best_chunk_per_source,
+    _is_exact_metadata_lookup,
     _resolve_rerank_k,
     _rrf_fuse,
     search,
 )
-from seeklink.models import Chunk
+from seeklink.models import Chunk, Source
 
 
 @pytest.fixture(scope="session")
@@ -586,6 +587,40 @@ class TestFolderFiltering:
 class TestTitleChannel:
     """Test that the 4th RRF channel boosts source metadata matches."""
 
+    def test_exact_metadata_lookup_does_not_treat_english_prefix_as_exact(self):
+        source = Source(
+            id=1,
+            uid="source-1",
+            path="agent-memory-patterns.md",
+            title="Agent memory patterns",
+            content_hash=None,
+            status="active",
+            indegree=0,
+            fs_modified_at=None,
+            indexed_at=None,
+            created_at="now",
+            updated_at="now",
+        )
+
+        assert not _is_exact_metadata_lookup("Agent", source)
+
+    def test_exact_metadata_lookup_accepts_cjk_bilingual_title_prefix(self):
+        source = Source(
+            id=1,
+            uid="source-1",
+            path="forgetting-curve.md",
+            title="遗忘曲线 Forgetting curve",
+            content_hash=None,
+            status="active",
+            indegree=0,
+            fs_modified_at=None,
+            indexed_at=None,
+            created_at="now",
+            updated_at="now",
+        )
+
+        assert _is_exact_metadata_lookup("遗忘曲线", source)
+
     def test_title_match_boosts_ranking(self, db: Database, embedder: Embedder, vault: Path):
         _ingest_corpus(db, embedder, vault)
         results = search(db, embedder, "Machine Learning")
@@ -623,6 +658,37 @@ class TestTitleChannel:
         assert workflow is not None
         assert diagnostics.title_ranks[workflow.id] == 1
         assert results[0].path == "workflow.md"
+
+    def test_exact_title_ranks_before_heading_match(
+        self, db: Database, vault: Path
+    ):
+        _write_md(vault, "ml-title.md", "# Machine Learning\n\nShort definition.")
+        _write_md(
+            vault,
+            "heading-hit.md",
+            "# Feynman technique\n\n## Machine Learning\n\n"
+            "Machine learning machine learning machine learning.",
+        )
+        embedder = FtsOnlyEmbedder()
+        ingest_file(db, vault / "ml-title.md", vault, embedder)  # type: ignore[arg-type]
+        ingest_file(db, vault / "heading-hit.md", vault, embedder)  # type: ignore[arg-type]
+
+        title_source = db.get_source_by_path("ml-title.md")
+        heading_source = db.get_source_by_path("heading-hit.md")
+        assert title_source is not None and heading_source is not None
+
+        diagnostics = SearchDiagnostics()
+        results = search(
+            db,
+            embedder,  # type: ignore[arg-type]
+            "Machine Learning",
+            diagnostics=diagnostics,
+            top_k=2,
+        )
+
+        assert results[0].path == "ml-title.md"
+        assert diagnostics.title_ranks[title_source.id] == 1
+        assert diagnostics.title_ranks[heading_source.id] > 1
 
 
 class TestMetadataExpansion:
@@ -700,22 +766,17 @@ class TestMetadataExpansion:
 
 
 class TestPositionAwareBlending:
-    """Test title-gated rerank blending (v0.3) preserves confident
-    first-stage wins while letting the reranker override when no title
-    signal is present.
+    """Test title-gated rerank blending.
 
-    v0.2.x behavior: reranker score fully replaced the first-stage RRF
-    score, so an exact-title or exact-alias hit at RRF rank 1 could be
-    demoted if the reranker gave a longer adjacent document a higher
-    content-relevance score.
-
-    v0.3 formula (title-gated, confidence-aware):
+    Formula (title-gated, confidence-aware):
         norm_score = rrf_score / max_rrf_score_in_pool
         alpha      = 0.60 (ranks 1-3), 0.50 (4-10), 0.40 (11+)
         blended    = alpha * norm_score + (1 - alpha) * rerank_score
+    Exact title / alias / heading lookups keep the metadata winner at
+    rank 1 even when the content reranker strongly prefers a neighbor.
     Only applied when the title channel's rank-1 source is in the
     rerank candidate pool; otherwise falls back to pure reranker
-    (pre-v0.3 behavior).
+    ordering.
     """
 
     def test_blending_preserves_confident_rank_1(
@@ -724,12 +785,9 @@ class TestPositionAwareBlending:
         """A confident rank-1 hit (title channel fires, opening a real RRF
         gap) stays at rank 1 under mild reranker disagreement.
 
-        Note: v0.3's confidence-aware blending intentionally DOES allow
-        a strongly-disagreeing reranker to flip rank 1 when the RRF gap
-        is razor-thin or the reranker is very confident. That's the fix
-        for the `红烧肉做法` class of regression. What we assert here is
-        the complementary case: when RRF is confident AND reranker only
-        mildly disagrees, rank 1 is preserved.
+        The broader blend still lets the reranker win on non-exact
+        metadata hits; exact title/alias/heading lookups are tested
+        separately below.
         """
         _ingest_corpus(db, embedder, vault)
 
@@ -765,12 +823,35 @@ class TestPositionAwareBlending:
             f"{[r.path for r in results]}"
         )
 
+    def test_exact_title_lookup_stays_rank_1_under_strong_reranker_disagreement(
+        self, db: Database, embedder: Embedder, vault: Path
+    ):
+        _ingest_corpus(db, embedder, vault)
+
+        class StronglyDisagreeingReranker:
+            disabled = False
+
+            def rerank(self, query, passages):
+                return [0.01 if i == 0 else 0.99 for i in range(len(passages))]
+
+        results = search(
+            db,
+            embedder,
+            "Machine Learning",
+            reranker=StronglyDisagreeingReranker(),  # type: ignore[arg-type]
+            top_k=4,
+            rerank_k=4,
+        )
+
+        assert results[0].path == "ml-basics.md"
+        assert results[0].score >= results[1].score
+
     def test_gate_off_without_title_match(
         self, db: Database, embedder: Embedder, vault: Path
     ):
         """When the query has no source-metadata hit at all, blending must
         be OFF — final scores equal the raw reranker scores, and the
-        reranker's ordering wins (pre-v0.3 behavior)."""
+        reranker's ordering wins."""
         _ingest_corpus(db, embedder, vault)
 
         rerank_seq = [0.1, 0.9, 0.4, 0.7]
