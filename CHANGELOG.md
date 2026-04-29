@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Existing indexes migrate to schema v3 and mark sources unprocessed so the next `seeklink index` pass can populate heading metadata.
 
 ### Fixed
+- Filtered searches now rank BM25 and source-metadata candidates inside the requested tag/folder scope, so relevant filtered notes are not dropped just because unfiltered notes filled the global first-stage limit.
 - `seeklink search --rerank-k N` now limits the number of candidates passed to the cross-encoder even when `N` is lower than `--top-k`; the remaining results keep first-stage RRF order.
 - `seeklink search` and `seeklink index` now auto-restart a stale daemon when its vault, embedder, or reranker config no longer matches the caller, avoiding repeated cold-start fallbacks after switching vaults or model settings.
 

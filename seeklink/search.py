@@ -188,7 +188,7 @@ def search(
     --title-weight flag per query: raise for "find the definitive article"
     queries, lower (toward 0) for "surface raw moments" queries.
 
-    Filtering (applied as post-filter on candidate pool):
+    Filtering (applied during candidate generation where possible):
     - tags: only include sources with ALL specified tags
     - folder: only include sources whose path starts with this prefix
     - path_prefix: alias for folder (legacy)
@@ -206,11 +206,25 @@ def search(
     if effective_prefix and not effective_prefix.endswith("/"):
         effective_prefix += "/"
 
-    # When filtering, increase vec limit to reduce post-filter recall loss
     has_filter = bool(tags or effective_prefix)
+    allowed_source_ids: set[int] | None = None
+    if has_filter:
+        allowed_source_ids = db.get_source_ids_by_filters(
+            tags=tags,
+            path_prefix=effective_prefix,
+        )
+        if not allowed_source_ids and not metadata_expansion:
+            return []
+    filtered_source_ids = allowed_source_ids if has_filter else None
 
     # Channel 1: BM25 (chunk-level)
-    bm25_results = _safe_fts(db, query, limit=50)
+    fts_limit = 200 if has_filter else 50
+    bm25_results = _safe_fts(
+        db,
+        query,
+        limit=fts_limit,
+        source_ids=filtered_source_ids,
+    )
     bm25_best = _best_chunk_per_source(bm25_results)
     bm25_ranked = sorted(bm25_best.keys(), key=lambda sid: bm25_best[sid][1])
     bm25_ranks = {sid: i + 1 for i, sid in enumerate(bm25_ranked)}
@@ -236,8 +250,12 @@ def search(
     vec_ranked = sorted(vec_best.keys(), key=lambda sid: vec_best[sid][1])
     vec_ranks = {sid: i + 1 for i, sid in enumerate(vec_ranked)}
 
-    # Channel 4: Title/alias (source-level FTS5)
-    title_results = db.search_fts_sources(query, limit=50)
+    # Channel 4: Title/alias/heading metadata (source-level FTS5)
+    title_results = db.search_fts_sources(
+        query,
+        limit=fts_limit,
+        source_ids=filtered_source_ids,
+    )
     title_ranked = sorted(
         [sid for sid, _ in title_results],
         key=lambda sid: dict(title_results).get(sid, 0),
@@ -253,27 +271,8 @@ def search(
     # Batch-fetch sources
     sources = db.get_sources_by_ids(list(candidate_ids))
 
-    # Post-filter: folder/path_prefix
-    if effective_prefix:
-        candidate_ids = {
-            sid for sid in candidate_ids
-            if sid in sources and sources[sid].path.startswith(effective_prefix)
-        }
-        if not candidate_ids and not metadata_expansion:
-            return []
-
-    # Post-filter: tags (source must have ALL specified tags)
-    if tags:
-        tagged_ids: set[int] | None = None
-        for tag in tags:
-            tag_sources = {s.id for s in db.get_sources_by_tag(tag)}
-            if tagged_ids is None:
-                tagged_ids = tag_sources
-            else:
-                tagged_ids &= tag_sources
-        if tagged_ids is None:
-            tagged_ids = set()
-        candidate_ids &= tagged_ids
+    if allowed_source_ids is not None:
+        candidate_ids &= allowed_source_ids
         if not candidate_ids and not metadata_expansion:
             return []
 
@@ -323,9 +322,7 @@ def search(
                 source = metadata_sources.get(source_id)
                 if source is None:
                     continue
-                if effective_prefix and not source.path.startswith(effective_prefix):
-                    continue
-                if tags and not all(tag in db.get_tags(source_id) for tag in tags):
+                if allowed_source_ids is not None and source_id not in allowed_source_ids:
                     continue
                 candidate_ids.add(source_id)
                 sources[source_id] = source
@@ -660,10 +657,15 @@ def compute_lines_for_results(
     return out
 
 
-def _safe_fts(db: Database, query: str, limit: int) -> list[tuple[Chunk, float]]:
+def _safe_fts(
+    db: Database,
+    query: str,
+    limit: int,
+    source_ids: set[int] | None = None,
+) -> list[tuple[Chunk, float]]:
     """Run FTS search, returning empty list on query syntax errors."""
     try:
-        return db.search_fts(query, limit=limit)
+        return db.search_fts(query, limit=limit, source_ids=source_ids)
     except sqlite3.OperationalError:
         return []
     except Exception:

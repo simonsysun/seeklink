@@ -752,20 +752,73 @@ class Database:
         ).fetchall()
         return [self._row_to_source(r) for r in rows]
 
+    def get_source_ids_by_filters(
+        self,
+        *,
+        tags: list[str] | None = None,
+        path_prefix: str | None = None,
+    ) -> set[int]:
+        """Return source IDs matching all provided source-level filters."""
+        where: list[str] = []
+        params: list[str | int] = []
+        joins = ""
+        unique_tags = list(dict.fromkeys(tags or []))
+
+        if unique_tags:
+            placeholders = ",".join("?" for _ in unique_tags)
+            joins = "JOIN source_tags st ON st.source_id = s.id"
+            where.append(f"st.tag IN ({placeholders})")
+            params.extend(unique_tags)
+
+        if path_prefix:
+            escaped_prefix = (
+                path_prefix
+                .replace("\\", "\\\\")
+                .replace("%", "\\%")
+                .replace("_", "\\_")
+            )
+            where.append("s.path LIKE ? ESCAPE '\\'")
+            params.append(f"{escaped_prefix}%")
+
+        sql = f"SELECT s.id FROM sources s {joins}"
+        if where:
+            sql += " WHERE " + " AND ".join(where)
+        if unique_tags:
+            sql += " GROUP BY s.id HAVING COUNT(DISTINCT st.tag) = ?"
+            params.append(len(unique_tags))
+
+        rows = self._conn.execute(sql, params).fetchall()
+        return {r["id"] for r in rows}
+
     def search_fts_sources(
-        self, query: str, limit: int = 20
+        self,
+        query: str,
+        limit: int = 20,
+        source_ids: set[int] | None = None,
     ) -> list[tuple[int, float]]:
         """Search source titles, aliases, and headings via FTS5.
 
+        When source_ids is provided, ranking happens inside that source set.
         Returns (source_id, bm25_rank) pairs. Safe: returns [] on query errors.
         """
+        if source_ids is not None and not source_ids:
+            return []
         try:
+            params: list[str | int] = [query]
+            source_filter = ""
+            if source_ids is not None:
+                ordered_ids = sorted(source_ids)
+                placeholders = ",".join("?" for _ in ordered_ids)
+                source_filter = f"AND rowid IN ({placeholders})"
+                params.extend(ordered_ids)
+            params.append(limit)
             rows = self._conn.execute(
-                """SELECT rowid, rank FROM fts_sources
+                f"""SELECT rowid, rank FROM fts_sources
                    WHERE fts_sources MATCH ?
+                   {source_filter}
                    ORDER BY rank
                    LIMIT ?""",
-                (query, limit),
+                params,
             ).fetchall()
             return [(r["rowid"], r["rank"]) for r in rows]
         except sqlite3.OperationalError:
@@ -834,18 +887,34 @@ class Database:
         self._commit()
         return cursor.rowcount
 
-    def search_fts(self, query: str, limit: int = 20) -> list[tuple[Chunk, float]]:
+    def search_fts(
+        self,
+        query: str,
+        limit: int = 20,
+        source_ids: set[int] | None = None,
+    ) -> list[tuple[Chunk, float]]:
         """Full-text search via FTS5. Returns (Chunk, bm25_rank) pairs."""
+        if source_ids is not None and not source_ids:
+            return []
+        params: list[str | int] = [query]
+        source_filter = ""
+        if source_ids is not None:
+            ordered_ids = sorted(source_ids)
+            placeholders = ",".join("?" for _ in ordered_ids)
+            source_filter = f"AND c.source_id IN ({placeholders})"
+            params.extend(ordered_ids)
+        params.append(limit)
         rows = self._conn.execute(
-            """SELECT c.id, c.source_id, c.content, c.chunk_index,
+            f"""SELECT c.id, c.source_id, c.content, c.chunk_index,
                       c.char_start, c.char_end, c.token_count, c.created_at,
                       fts.rank
             FROM fts_chunks fts
             JOIN chunks c ON c.id = fts.rowid
             WHERE fts_chunks MATCH ?
+            {source_filter}
             ORDER BY fts.rank
             LIMIT ?""",
-            (query, limit),
+            params,
         ).fetchall()
         return [
             (

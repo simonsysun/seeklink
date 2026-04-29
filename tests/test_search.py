@@ -45,6 +45,14 @@ def vault(tmp_path: Path) -> Path:
     return v
 
 
+class FtsOnlyEmbedder:
+    def embed_documents(self, texts: list[str]) -> list[bytes]:
+        return [b"\0" * (768 * 4) for _ in texts]
+
+    def embed_query(self, text: str) -> bytes:
+        raise RuntimeError("vector disabled for FTS-only regression test")
+
+
 class TestAutoRerankK:
     def test_numeric_value_is_used_as_is(self):
         assert _resolve_rerank_k(
@@ -493,6 +501,39 @@ class TestTagFiltering:
         results = search(db, embedder, "machine learning")
         assert len(results) > 0
 
+    def test_tag_filter_retrieves_match_beyond_global_bm25_limit(
+        self, db: Database, vault: Path
+    ):
+        embedder = FtsOnlyEmbedder()
+        for i in range(220):
+            _write_md(
+                vault,
+                f"noise/noise-{i:03}.md",
+                "# Noise\n\nfilterneedle appears here.",
+            )
+            ingest_file(db, vault / "noise" / f"noise-{i:03}.md", vault, embedder)  # type: ignore[arg-type]
+
+        _write_md(
+            vault,
+            "target.md",
+            "---\ntags: [scoped]\n---\n# Target\n\nfilterneedle appears here.",
+        )
+        ingest_file(db, vault / "target.md", vault, embedder)  # type: ignore[arg-type]
+
+        diagnostics = SearchDiagnostics()
+        results = search(
+            db,
+            embedder,  # type: ignore[arg-type]
+            "filterneedle",
+            tags=["scoped"],
+            diagnostics=diagnostics,
+        )
+
+        assert [r.path for r in results] == ["target.md"]
+        target = db.get_source_by_path("target.md")
+        assert target is not None
+        assert diagnostics.bm25_ranks[target.id] == 1
+
 
 class TestFolderFiltering:
     """Test folder-based filtering in search."""
@@ -507,6 +548,39 @@ class TestFolderFiltering:
         results = search(db, embedder, "science", folder="notes")
         paths = {r.path for r in results}
         assert all(p.startswith("notes/") for p in paths)
+
+    def test_folder_filter_retrieves_match_beyond_global_bm25_limit(
+        self, db: Database, vault: Path
+    ):
+        embedder = FtsOnlyEmbedder()
+        for i in range(220):
+            _write_md(
+                vault,
+                f"archive/noise-{i:03}.md",
+                "# Noise\n\nfolderneedle appears here.",
+            )
+            ingest_file(db, vault / "archive" / f"noise-{i:03}.md", vault, embedder)  # type: ignore[arg-type]
+
+        _write_md(
+            vault,
+            "notes/target.md",
+            "# Target\n\nfolderneedle appears here.",
+        )
+        ingest_file(db, vault / "notes" / "target.md", vault, embedder)  # type: ignore[arg-type]
+
+        diagnostics = SearchDiagnostics()
+        results = search(
+            db,
+            embedder,  # type: ignore[arg-type]
+            "folderneedle",
+            folder="notes",
+            diagnostics=diagnostics,
+        )
+
+        assert [r.path for r in results] == ["notes/target.md"]
+        target = db.get_source_by_path("notes/target.md")
+        assert target is not None
+        assert diagnostics.bm25_ranks[target.id] == 1
 
 
 class TestTitleChannel:
