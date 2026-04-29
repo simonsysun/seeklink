@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-04-29
+
 ### Added
 - `seeklink search --json` and `seeklink status --json` emit stable machine-readable stdout for agents that should not scrape the human text format.
 - `seeklink get PATH:LINE -C N` prints a grep-style context window around a search hit while preserving direct filesystem reads and path-escape protection.
@@ -131,7 +133,8 @@ surface so the repo reads as a shipped tool rather than a work log.
 - Native CJK tokenization via jieba registered as a custom FTS5 tokenizer.
 - MCP server transport (`seeklink serve`) — removed in v0.2.0.
 
-[Unreleased]: https://github.com/simonsysun/seeklink/compare/v0.3.2...HEAD
+[Unreleased]: https://github.com/simonsysun/seeklink/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/simonsysun/seeklink/compare/v0.3.2...v0.4.0
 [0.3.2]: https://github.com/simonsysun/seeklink/releases/tag/v0.3.2
 [0.3.1]: https://github.com/simonsysun/seeklink/releases/tag/v0.3.1
 [0.3.0]: https://github.com/simonsysun/seeklink/releases/tag/v0.3.0
