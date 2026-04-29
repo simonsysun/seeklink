@@ -30,6 +30,7 @@ class Database:
 
     def __init__(self, path: str | Path = ":memory:"):
         self._path = str(path)
+        self._fts_tokenizer = "jieba"
         self._conn = self._open()
         self._local = threading.local()
         self._tx_lock = threading.Lock()
@@ -48,8 +49,12 @@ class Database:
         sqlite_vec.load(conn)
         conn.enable_load_extension(False)
 
-        # Register jieba FTS5 tokenizer
-        register_jieba_tokenizer(conn)
+        # Register jieba when sqlitefts can safely access this Python build's
+        # sqlite3 C API. Standalone builds with hidden SQLite symbols fall back
+        # to SQLite's built-in trigram tokenizer to avoid a C-level segfault.
+        self._fts_tokenizer = (
+            "jieba" if register_jieba_tokenizer(conn) else "trigram"
+        )
 
         return conn
 
@@ -213,12 +218,12 @@ class Database:
             )
         """)
 
-        self._conn.execute("""
+        self._conn.execute(f"""
             CREATE VIRTUAL TABLE IF NOT EXISTS fts_chunks USING fts5(
                 content,
                 content=chunks,
                 content_rowid=id,
-                tokenize='jieba'
+                tokenize='{self._fts_tokenizer}'
             )
         """)
 
@@ -315,14 +320,14 @@ class Database:
 
         # -- FTS5 for source-level search: title + aliases (v2) --
 
-        self._conn.execute("""
+        self._conn.execute(f"""
             CREATE VIRTUAL TABLE IF NOT EXISTS fts_sources USING fts5(
                 title,
                 aliases,
                 headings,
                 content=sources,
                 content_rowid=id,
-                tokenize='jieba'
+                tokenize='{self._fts_tokenizer}'
             )
         """)
 
@@ -433,14 +438,14 @@ class Database:
         self._conn.execute("DROP TRIGGER IF EXISTS sources_fts_update")
         self._conn.execute("DROP TABLE IF EXISTS fts_sources")
 
-        self._conn.execute("""
+        self._conn.execute(f"""
             CREATE VIRTUAL TABLE IF NOT EXISTS fts_sources USING fts5(
                 title,
                 aliases,
                 headings,
                 content=sources,
                 content_rowid=id,
-                tokenize='jieba'
+                tokenize='{self._fts_tokenizer}'
             )
         """)
         self._create_trigger(
@@ -538,13 +543,13 @@ class Database:
         )
 
         # Create fts_sources virtual table
-        self._conn.execute("""
+        self._conn.execute(f"""
             CREATE VIRTUAL TABLE IF NOT EXISTS fts_sources USING fts5(
                 title,
                 aliases,
                 content=sources,
                 content_rowid=id,
-                tokenize='jieba'
+                tokenize='{self._fts_tokenizer}'
             )
         """)
 

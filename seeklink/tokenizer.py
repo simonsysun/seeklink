@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 import sqlite3
+import sys
 import unicodedata
 
 import jieba
@@ -68,7 +69,29 @@ class JiebaTokenizer(fts5.FTS5Tokenizer):
             char_offset += len(part)
 
 
-def register_jieba_tokenizer(conn: sqlite3.Connection) -> None:
-    """Register the jieba FTS5 tokenizer on the given connection."""
+def _sqlitefts_can_use_stdlib_connection() -> bool:
+    """Return whether sqlitefts can safely use stdlib sqlite3 connections.
+
+    sqlitefts reaches into CPython's sqlite3 connection and then calls SQLite C
+    symbols from the ``_sqlite3`` extension module. Some standalone Python
+    builds compile ``_sqlite3`` as a built-in module with hidden SQLite symbols;
+    sqlitefts then falls back to the system SQLite dylib, and crossing those two
+    SQLite builds can segfault. In that case callers should use a built-in FTS5
+    tokenizer instead of trying to register the Python tokenizer.
+    """
+    module = sys.modules.get("_sqlite3")
+    return bool(getattr(module, "__file__", None))
+
+
+def register_jieba_tokenizer(conn: sqlite3.Connection) -> bool:
+    """Register the jieba FTS5 tokenizer on the given connection.
+
+    Returns False when the current Python build cannot safely expose the
+    connection's SQLite C API to sqlitefts.
+    """
+    if not _sqlitefts_can_use_stdlib_connection():
+        return False
+
     tk = fts5.make_fts5_tokenizer(JiebaTokenizer())
     fts5.register_tokenizer(conn, "jieba", tk)
+    return True

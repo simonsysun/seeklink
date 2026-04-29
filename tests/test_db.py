@@ -8,6 +8,7 @@ import uuid
 import numpy as np
 import pytest
 
+import seeklink.db as db_module
 from seeklink.db import CapabilityError, Database
 from seeklink.models import Chunk, Source, Suggestion, WikiLink
 
@@ -112,6 +113,25 @@ class TestSchemaCreation:
         db.init_schema()  # second call
         version = db.conn.execute("PRAGMA user_version").fetchone()[0]
         assert version == Database.SCHEMA_VERSION
+
+    def test_static_sqlite_build_uses_trigram_fallback(self, monkeypatch):
+        monkeypatch.setattr(
+            db_module,
+            "register_jieba_tokenizer",
+            lambda conn: False,
+        )
+        db = Database(":memory:")
+        try:
+            assert db._fts_tokenizer == "trigram"
+            db.init_schema()
+            source = db.add_source(uid=_uid(), path="notes/cjk.md", title="CJK")
+            db.add_chunk(source.id, "个人知识管理是一种组织信息的方法。", 0)
+
+            results = db.search_fts("知识管理")
+
+            assert [chunk.source_id for chunk, _ in results] == [source.id]
+        finally:
+            db.close()
 
 
 # ── 2. TestCapabilityCheck ───────────────────────────────────────
@@ -634,7 +654,7 @@ class TestMigrationV1ToV2:
         db = Database(":memory:")
 
         # Manually create v1 schema (without aliases column, without source_tags/fts_sources)
-        db._conn.executescript("""
+        db._conn.executescript(f"""
             CREATE TABLE sources (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 uid TEXT NOT NULL UNIQUE,
@@ -681,7 +701,7 @@ class TestMigrationV1ToV2:
                 embedding float[768] distance_metric=cosine
             );
             CREATE VIRTUAL TABLE fts_chunks USING fts5(
-                content, content=chunks, content_rowid=id, tokenize='jieba'
+                content, content=chunks, content_rowid=id, tokenize='{db._fts_tokenizer}'
             );
             PRAGMA user_version = 1;
         """)
@@ -726,7 +746,7 @@ class TestMigrationV2ToV3:
     def test_migrate_adds_headings_and_rebuilds_source_fts(self):
         db = Database(":memory:")
 
-        db._conn.executescript("""
+        db._conn.executescript(f"""
             CREATE TABLE sources (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 uid TEXT NOT NULL UNIQUE,
@@ -746,7 +766,7 @@ class TestMigrationV2ToV3:
                 aliases,
                 content=sources,
                 content_rowid=id,
-                tokenize='jieba'
+                tokenize='{db._fts_tokenizer}'
             );
             PRAGMA user_version = 2;
         """)
