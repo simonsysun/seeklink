@@ -1,5 +1,7 @@
 # SeekLink
 
+[English](README.md) · [中文](README.zh.md)
+
 [![PyPI](https://img.shields.io/pypi/v/seeklink)](https://pypi.org/project/seeklink/)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://python.org)
 [![Tests](https://github.com/simonsysun/seeklink/actions/workflows/test.yml/badge.svg)](https://github.com/simonsysun/seeklink/actions/workflows/test.yml)
