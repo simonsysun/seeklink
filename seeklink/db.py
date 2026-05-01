@@ -12,11 +12,55 @@ from pathlib import Path
 import sqlite_vec
 
 from seeklink.models import Chunk, Source, Suggestion, WikiLink
-from seeklink.tokenizer import register_jieba_tokenizer
+from seeklink.tokenizer import JiebaTokenizer, register_jieba_tokenizer
+
+
+_CJK_QUERY_STOPWORDS = frozenset({
+    "有",
+    "有哪些",
+    "哪些",
+    "是",
+    "什么",
+    "多少",
+    "几",
+    "几位",
+    "哪里",
+    "哪",
+    "哪儿",
+    "哪一",
+    "哪一大洲",
+    "在哪里",
+    "如何",
+    "怎么",
+    "怎样",
+    "的",
+    "了",
+    "吗",
+    "呢",
+})
 
 
 class CapabilityError(Exception):
     """Raised when the runtime environment doesn't meet requirements."""
+
+
+def _contains_cjk(text: str) -> bool:
+    return any("\u3400" <= ch <= "\u9fff" for ch in text)
+
+
+def _normalize_fts_query(query: str) -> str:
+    """Strip common Chinese question particles from FTS5 MATCH queries.
+
+    FTS5 treats space-separated query tokens as mandatory terms. For Chinese
+    questions, jieba can tokenize function words like "有哪些" or "多少"; leaving
+    them in the MATCH expression often makes the BM25 channel return no rows.
+    """
+    if not _contains_cjk(query):
+        return query
+
+    tokens = [token for token, _start, _end in JiebaTokenizer().tokenize(query)]
+    kept = [token for token in tokens if token not in _CJK_QUERY_STOPWORDS]
+    return " ".join(kept) if kept else query
 
 
 class Database:
@@ -809,7 +853,12 @@ class Database:
         if source_ids is not None and not source_ids:
             return []
         try:
-            params: list[str | int] = [query]
+            fts_query = (
+                _normalize_fts_query(query)
+                if self._fts_tokenizer == "jieba"
+                else query
+            )
+            params: list[str | int] = [fts_query]
             source_filter = ""
             if source_ids is not None:
                 ordered_ids = sorted(source_ids)
@@ -901,7 +950,12 @@ class Database:
         """Full-text search via FTS5. Returns (Chunk, bm25_rank) pairs."""
         if source_ids is not None and not source_ids:
             return []
-        params: list[str | int] = [query]
+        fts_query = (
+            _normalize_fts_query(query)
+            if self._fts_tokenizer == "jieba"
+            else query
+        )
+        params: list[str | int] = [fts_query]
         source_filter = ""
         if source_ids is not None:
             ordered_ids = sorted(source_ids)

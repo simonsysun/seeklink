@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `seeklink index --vault PATH` now prints full-vault progress to stderr while keeping the final `Done:` summary on stdout.
 
 ### Fixed
+- Chinese question-style queries now strip common question particles before
+  FTS5 matching, so terms like `卵生动物有哪些？` can use the BM25 channel
+  instead of falling back to vector-only retrieval.
 - Long paragraphs that follow a buffered heading now split at sentence
   boundaries instead of becoming one oversized chunk, reducing pathological
   chunks in generated/list-heavy Markdown while preserving fenced-code

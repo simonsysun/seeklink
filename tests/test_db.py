@@ -266,6 +266,14 @@ class TestChunkCRUD:
         results = db.search_fts("知识管理")
         assert len(results) >= 1
 
+    def test_fts_chinese_question_terms_do_not_block_keyword_match(self, db: Database):
+        src = _make_source(db)
+        db.add_chunk(src.id, "卵生动物通过产卵进行繁殖。", 0)
+
+        results = db.search_fts("卵生动物有哪些？")
+
+        assert [chunk.source_id for chunk, _ in results] == [src.id]
+
     def test_cascade_delete_cleans_fts(self, db: Database):
         src = _make_source(db)
         db.add_chunk(src.id, "Unique searchable content xyzzy", 0)
@@ -594,6 +602,17 @@ class TestFTSSources:
         results = db.search_fts_sources("capture inbox", limit=10)
         source_ids = [sid for sid, _ in results]
         assert source.id in source_ids
+
+    def test_search_by_chinese_question_terms(self, db: Database):
+        source = db.add_source(
+            uid=_uid(),
+            path="notes/shanghai-theaters.md",
+            title="上海剧院",
+        )
+
+        results = db.search_fts_sources("上海有哪些剧院？", limit=10)
+
+        assert [source_id for source_id, _ in results] == [source.id]
 
     def test_search_returns_empty_on_no_match(self, db: Database):
         results = db.search_fts_sources("nonexistent_term_xyz", limit=10)
