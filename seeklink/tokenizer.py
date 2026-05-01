@@ -2,13 +2,23 @@
 
 from __future__ import annotations
 
+import logging
 import re
 import sqlite3
 import sys
 import unicodedata
+import warnings
 
+warnings.filterwarnings(
+    "ignore",
+    message=r"pkg_resources is deprecated as an API.*",
+    category=UserWarning,
+    module=r"jieba\._compat",
+)
 import jieba
 from sqlitefts import fts5
+
+jieba.setLogLevel(logging.WARNING)
 
 
 class JiebaTokenizer(fts5.FTS5Tokenizer):

@@ -44,6 +44,8 @@ def test_documented_non_daemon_cli_workflow(tmp_path: Path):
     assert "Done:" in index.stdout
     assert "Scanning vault..." in index.stderr
     assert "Embedding" in index.stderr
+    assert "pkg_resources is deprecated" not in index.stderr
+    assert "Building prefix dict" not in index.stderr
 
     status_json = _run_seeklink(vault, "status", "--json")
     assert status_json.returncode == 0, status_json.stderr
