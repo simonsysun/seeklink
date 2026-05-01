@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Full-vault indexing now embeds in smaller batches to reduce long-tail embedding stalls on real Markdown vaults.
+- `seeklink index --vault PATH` now prints full-vault progress to stderr while keeping the final `Done:` summary on stdout.
 
 ## [0.4.0] - 2026-04-29
 

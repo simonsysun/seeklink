@@ -6,7 +6,8 @@ import hashlib
 import json
 import logging
 import re
-from collections.abc import Iterator
+import time
+from collections.abc import Callable, Iterator
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -188,6 +189,7 @@ def ingest_vault(
     db: Database,
     vault_root: Path,
     embedder: Embedder | None = None,
+    progress: Callable[[str, dict], None] | None = None,
 ) -> dict[str, int]:
     """Ingest all markdown files in a vault directory and prune stale entries.
 
@@ -204,7 +206,16 @@ def ingest_vault(
     seen_paths: set[str] = set()
     prepared_files: list[_PreparedFile] = []
 
-    for md_path in sorted(vault_root.rglob("*.md")):
+    if progress is not None:
+        progress("scan_start", {})
+
+    md_paths = sorted(vault_root.rglob("*.md"))
+    if progress is not None:
+        progress("scan_done", {"files_total": len(md_paths)})
+
+    prepare_start = time.perf_counter()
+    chunks_to_embed = 0
+    for file_number, md_path in enumerate(md_paths, start=1):
         try:
             rel = md_path.relative_to(vault_root)
         except ValueError:
@@ -227,13 +238,44 @@ def ingest_vault(
             stats["unchanged"] += 1
         else:
             prepared_files.append(prepared)
+            chunks_to_embed += len(prepared.chunks)
+
+        if progress is not None:
+            progress(
+                "prepare_progress",
+                {
+                    "files_seen": file_number,
+                    "files_total": len(md_paths),
+                    "files_to_index": len(prepared_files),
+                    "chunks_to_embed": chunks_to_embed,
+                    "elapsed_s": time.perf_counter() - prepare_start,
+                },
+            )
+
+    if progress is not None:
+        progress(
+            "prepare_done",
+            {
+                "files_total": len(md_paths),
+                "files_to_index": len(prepared_files),
+                "chunks_to_embed": chunks_to_embed,
+                "unchanged": stats["unchanged"],
+                "skipped": stats["skipped"],
+                "errors": stats["errors"],
+                "elapsed_s": time.perf_counter() - prepare_start,
+            },
+        )
 
     embeddings_by_file, embed_errors = _embed_prepared_files(
         prepared_files,
         embedder,
         batch_size=_EMBED_BATCH_SIZE,
+        progress=progress,
     )
 
+    if progress is not None:
+        progress("write_start", {"files_to_index": len(prepared_files)})
+    write_start = time.perf_counter()
     for i, prepared in enumerate(prepared_files):
         if i in embed_errors:
             error = embed_errors[i]
@@ -258,6 +300,15 @@ def ingest_vault(
             continue
 
         stats["ingested"] += 1
+        if progress is not None:
+            progress(
+                "write_progress",
+                {
+                    "files_written": stats["ingested"],
+                    "files_to_index": len(prepared_files),
+                    "elapsed_s": time.perf_counter() - write_start,
+                },
+            )
 
     # Prune DB entries for files that no longer exist on disk
     for src in db.list_sources():
@@ -265,6 +316,9 @@ def ingest_vault(
             db.delete_source(src.id)
             stats["pruned"] += 1
             logger.info("Pruned stale entry: %s", src.path)
+
+    if progress is not None:
+        progress("done", {"stats": stats})
 
     return stats
 
@@ -337,6 +391,7 @@ def _embed_prepared_files(
     embedder: Embedder,
     *,
     batch_size: int,
+    progress: Callable[[str, dict], None] | None = None,
 ) -> tuple[dict[int, list[bytes]], dict[int, Exception]]:
     """Embed all prepared chunks in length-sorted batches.
 
@@ -356,6 +411,18 @@ def _embed_prepared_files(
             )
 
     items.sort(key=lambda item: len(item.text))
+    total_items = len(items)
+    total_batches = (total_items + batch_size - 1) // batch_size if batch_size else 0
+    if progress is not None:
+        progress(
+            "embed_start",
+            {
+                "chunks_total": total_items,
+                "batch_size": batch_size,
+                "batches_total": total_batches,
+            },
+        )
+
     embeddings_by_file: dict[int, list[bytes | None]] = {
         file_index: [None] * len(prepared.chunks)
         for file_index, prepared in enumerate(prepared_files)
@@ -384,8 +451,30 @@ def _embed_prepared_files(
         for item, embedding in zip(batch, embeddings):
             embeddings_by_file[item.file_index][item.chunk_index] = embedding
 
-    for start in range(0, len(items), batch_size):
+    embed_start = time.perf_counter()
+    for batch_number, start in enumerate(range(0, len(items), batch_size), start=1):
         embed_items(items[start : start + batch_size])
+        if progress is not None:
+            progress(
+                "embed_progress",
+                {
+                    "chunks_done": min(start + batch_size, total_items),
+                    "chunks_total": total_items,
+                    "batches_done": batch_number,
+                    "batches_total": total_batches,
+                    "elapsed_s": time.perf_counter() - embed_start,
+                },
+            )
+
+    if progress is not None:
+        progress(
+            "embed_done",
+            {
+                "chunks_total": total_items,
+                "batches_total": total_batches,
+                "elapsed_s": time.perf_counter() - embed_start,
+            },
+        )
 
     out: dict[int, list[bytes]] = {}
     for file_index, embeddings in embeddings_by_file.items():

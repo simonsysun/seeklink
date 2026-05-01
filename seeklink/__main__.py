@@ -26,6 +26,7 @@ import json
 import logging
 import os
 import sys
+import time
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -536,7 +537,12 @@ def _cmd_index(args: argparse.Namespace) -> None:
             else:
                 print(f"Skipped: {args.path}")
         else:
-            stats = ingest_vault(db, vault_root, embedder)
+            stats = ingest_vault(
+                db,
+                vault_root,
+                embedder,
+                progress=_IndexProgressPrinter(),
+            )
             print(
                 f"Done: {stats['ingested']} indexed, "
                 f"{stats['unchanged']} unchanged, "
@@ -545,6 +551,112 @@ def _cmd_index(args: argparse.Namespace) -> None:
             )
     finally:
         db.close()
+
+
+class _IndexProgressPrinter:
+    """Time-throttled progress renderer for full-vault cold-start indexing."""
+
+    def __init__(self, *, min_interval_s: float = 15.0) -> None:
+        self._min_interval_s = min_interval_s
+        self._last_progress_at = 0.0
+
+    def __call__(self, event: str, payload: dict) -> None:
+        now = time.monotonic()
+
+        if event == "scan_start":
+            self._force_print(now, "Scanning vault...")
+        elif event == "scan_done":
+            self._force_print(
+                now,
+                f"Found {payload.get('files_total', 0)} markdown files."
+            )
+        elif event == "prepare_progress":
+            if self._due(now):
+                self._print(
+                    "Preparing files: "
+                    f"{payload.get('files_seen', 0)}/"
+                    f"{payload.get('files_total', 0)}, "
+                    f"{payload.get('chunks_to_embed', 0)} chunks so far, "
+                    f"{self._fmt_elapsed(payload.get('elapsed_s', 0.0))} elapsed"
+                )
+                self._last_progress_at = now
+        elif event == "prepare_done":
+            self._force_print(
+                now,
+                "Prepared "
+                f"{payload.get('files_to_index', 0)} files, "
+                f"{payload.get('chunks_to_embed', 0)} chunks to embed "
+                f"({payload.get('unchanged', 0)} unchanged, "
+                f"{payload.get('skipped', 0)} skipped, "
+                f"{payload.get('errors', 0)} errors)."
+            )
+        elif event == "embed_start":
+            chunks_total = payload.get("chunks_total", 0)
+            if chunks_total:
+                self._force_print(
+                    now,
+                    "Embedding "
+                    f"{chunks_total} chunks in "
+                    f"{payload.get('batches_total', 0)} batches "
+                    f"(batch size {payload.get('batch_size', 0)})..."
+                )
+            else:
+                self._force_print(now, "No new chunks to embed.")
+        elif event == "embed_progress":
+            chunks_done = payload.get("chunks_done", 0)
+            chunks_total = payload.get("chunks_total", 0)
+            if chunks_done >= chunks_total or self._due(now):
+                self._print(
+                    "Embedding chunks: "
+                    f"{chunks_done}/{chunks_total}, "
+                    f"{payload.get('batches_done', 0)}/"
+                    f"{payload.get('batches_total', 0)} batches, "
+                    f"{self._fmt_elapsed(payload.get('elapsed_s', 0.0))} elapsed"
+                )
+                self._last_progress_at = now
+        elif event == "embed_done":
+            chunks_total = payload.get("chunks_total", 0)
+            if chunks_total:
+                self._force_print(
+                    now,
+                    "Embedding complete: "
+                    f"{chunks_total} chunks, "
+                    f"{self._fmt_elapsed(payload.get('elapsed_s', 0.0))} elapsed."
+                )
+        elif event == "write_start":
+            files_to_index = payload.get("files_to_index", 0)
+            if files_to_index:
+                self._force_print(
+                    now,
+                    f"Writing index for {files_to_index} files...",
+                )
+        elif event == "write_progress":
+            files_written = payload.get("files_written", 0)
+            files_to_index = payload.get("files_to_index", 0)
+            if files_written >= files_to_index or self._due(now):
+                self._print(
+                    "Writing index: "
+                    f"{files_written}/{files_to_index} files, "
+                    f"{self._fmt_elapsed(payload.get('elapsed_s', 0.0))} elapsed"
+                )
+                self._last_progress_at = now
+
+    def _due(self, now: float) -> bool:
+        return now - self._last_progress_at >= self._min_interval_s
+
+    @staticmethod
+    def _print(message: str) -> None:
+        print(message, file=sys.stderr)
+
+    def _force_print(self, now: float, message: str) -> None:
+        self._print(message)
+        self._last_progress_at = now
+
+    @staticmethod
+    def _fmt_elapsed(seconds: float) -> str:
+        if seconds < 60:
+            return f"{seconds:.1f}s"
+        return f"{seconds / 60:.1f}m"
 
 
 def _cmd_status(args: argparse.Namespace) -> None:

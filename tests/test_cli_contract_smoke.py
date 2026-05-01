@@ -42,6 +42,8 @@ def test_documented_non_daemon_cli_workflow(tmp_path: Path):
     index = _run_seeklink(vault, "index")
     assert index.returncode == 0, index.stderr
     assert "Done:" in index.stdout
+    assert "Scanning vault..." in index.stderr
+    assert "Embedding" in index.stderr
 
     status_json = _run_seeklink(vault, "status", "--json")
     assert status_json.returncode == 0, status_json.stderr
@@ -83,4 +85,3 @@ def test_documented_non_daemon_cli_workflow(tmp_path: Path):
     get_context = _run_seeklink(vault, "get", hit, "-C", "2")
     assert get_context.returncode == 0, get_context.stderr
     assert get_context.stdout.strip()
-

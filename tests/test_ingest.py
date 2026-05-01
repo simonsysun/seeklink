@@ -323,6 +323,40 @@ class TestIngestVault:
         assert max(call_sizes) <= _EMBED_BATCH_SIZE
         assert sum(call_sizes) == 40
 
+    def test_vault_progress_callback_reports_index_phases(
+        self,
+        db: Database,
+        vault: Path,
+    ):
+        fake = FakeBatchEmbedder()
+        events: list[tuple[str, dict]] = []
+        for i in range(3):
+            _write_md(vault, f"note-{i}.md", f"# Note {i}\n\nProgress content {i}.")
+
+        stats = ingest_vault(
+            db,
+            vault,
+            fake,  # type: ignore[arg-type]
+            progress=lambda event, payload: events.append((event, payload)),
+        )
+
+        assert stats["ingested"] == 3
+        event_names = [event for event, _payload in events]
+        assert event_names[0] == "scan_start"
+        assert "scan_done" in event_names
+        assert "prepare_done" in event_names
+        assert "embed_start" in event_names
+        assert "embed_progress" in event_names
+        assert "embed_done" in event_names
+        assert "write_start" in event_names
+        assert "write_progress" in event_names
+        assert event_names[-1] == "done"
+        prepare_done = next(
+            payload for event, payload in events if event == "prepare_done"
+        )
+        assert prepare_done["files_to_index"] == 3
+        assert prepare_done["chunks_to_embed"] == 3
+
     def test_batch_vault_resolves_forward_refs(self, db: Database, vault: Path):
         fake = FakeBatchEmbedder()
         _write_md(vault, "a.md", "# A\n\nSee [[b]].")
