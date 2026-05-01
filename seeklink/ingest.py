@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 # Non-hidden top-level dirs excluded from indexing (mirrors freshness._SKIP_DIRS)
 _SKIP_DIRS = {"todo", "archive"}
-_EMBED_BATCH_SIZE = 32
+_EMBED_BATCH_SIZE = 16
 
 # Regex for YAML frontmatter block (handles empty frontmatter too).
 # Public — search.py imports this to map body-relative chunk offsets back

@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Full-vault indexing now embeds in smaller batches to reduce long-tail embedding stalls on real Markdown vaults.
+
 ## [0.4.0] - 2026-04-29
 
 ### Added

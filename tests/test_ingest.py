@@ -12,7 +12,12 @@ import pytest
 
 from seeklink.db import Database
 from seeklink.embedder import Embedder
-from seeklink.ingest import _parse_frontmatter, ingest_file, ingest_vault
+from seeklink.ingest import (
+    _EMBED_BATCH_SIZE,
+    _parse_frontmatter,
+    ingest_file,
+    ingest_vault,
+)
 
 
 @pytest.fixture(scope="session")
@@ -314,8 +319,8 @@ class TestIngestVault:
         assert stats["ingested"] == 40
         assert stats["errors"] == 0
         call_sizes = [len(call) for call in fake.calls]
-        assert len(call_sizes) == 2
-        assert max(call_sizes) <= 32
+        assert len(call_sizes) == (40 + _EMBED_BATCH_SIZE - 1) // _EMBED_BATCH_SIZE
+        assert max(call_sizes) <= _EMBED_BATCH_SIZE
         assert sum(call_sizes) == 40
 
     def test_batch_vault_resolves_forward_refs(self, db: Database, vault: Path):
