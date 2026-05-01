@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `seeklink index --vault PATH` now prints full-vault progress to stderr while keeping the final `Done:` summary on stdout.
 
 ### Fixed
+- Long paragraphs that follow a buffered heading now split at sentence
+  boundaries instead of becoming one oversized chunk, reducing pathological
+  chunks in generated/list-heavy Markdown while preserving fenced-code
+  atomicity.
 - Suppressed noisy jieba import and dictionary-loading messages so CLI stderr stays focused on SeekLink progress and warnings.
 
 ## [0.4.0] - 2026-04-29

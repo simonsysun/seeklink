@@ -71,6 +71,21 @@ class TestChunkMarkdown:
         chunks = chunk_markdown(text, target_tokens=20)
         assert len(chunks) >= 2
 
+    def test_long_paragraph_after_header_still_splits(self):
+        """A heading before a long paragraph must not make it one giant chunk."""
+        list_text = "\n".join(
+            f"- Plugin {i}: This plugin has a short description."
+            for i in range(40)
+        )
+        text = "## Plugins in this category\n\n" + list_text
+
+        chunks = chunk_markdown(text, target_tokens=40)
+
+        assert len(chunks) > 2
+        assert max(len(c.text) for c in chunks) < len(list_text)
+        for c in chunks:
+            assert c.text == text[c.char_start:c.char_end]
+
     def test_single_sentence_kept_whole(self):
         """A single long sentence should not be split mid-sentence."""
         text = "A" * 2000

@@ -181,7 +181,9 @@ def _accumulate(
         para_tokens = estimate_tokens(para_text)
 
         # Single paragraph exceeds target → try splitting at sentences
-        if para_tokens > target_tokens and buf_start is None:
+        if para_tokens > target_tokens:
+            if buf_start is not None:
+                flush()
             _split_sentences(para_start, para_end, target_tokens, out, text)
             continue
 
