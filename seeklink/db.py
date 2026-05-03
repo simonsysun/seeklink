@@ -7,6 +7,7 @@ import sqlite3
 import sys
 import threading
 from contextlib import contextmanager
+from dataclasses import dataclass
 from pathlib import Path
 
 import sqlite_vec
@@ -44,11 +45,17 @@ class CapabilityError(Exception):
     """Raised when the runtime environment doesn't meet requirements."""
 
 
+@dataclass(frozen=True, slots=True)
+class FTSQuery:
+    query: str
+    stripped_cjk_question_terms: bool = False
+
+
 def _contains_cjk(text: str) -> bool:
     return any("\u3400" <= ch <= "\u9fff" for ch in text)
 
 
-def _normalize_fts_query(query: str) -> str:
+def _prepare_jieba_fts_query(query: str) -> FTSQuery:
     """Strip common Chinese question particles from FTS5 MATCH queries.
 
     FTS5 treats space-separated query tokens as mandatory terms. For Chinese
@@ -56,11 +63,14 @@ def _normalize_fts_query(query: str) -> str:
     them in the MATCH expression often makes the BM25 channel return no rows.
     """
     if not _contains_cjk(query):
-        return query
+        return FTSQuery(query)
 
     tokens = [token for token, _start, _end in JiebaTokenizer().tokenize(query)]
     kept = [token for token in tokens if token not in _CJK_QUERY_STOPWORDS]
-    return " ".join(kept) if kept else query
+    return FTSQuery(
+        " ".join(kept) if kept else query,
+        stripped_cjk_question_terms=len(kept) != len(tokens),
+    )
 
 
 class Database:
@@ -105,6 +115,12 @@ class Database:
     @property
     def conn(self) -> sqlite3.Connection:
         return self._conn
+
+    def prepare_fts_query(self, query: str) -> FTSQuery:
+        """Return the FTS5 MATCH query used by this database connection."""
+        if self._fts_tokenizer != "jieba":
+            return FTSQuery(query)
+        return _prepare_jieba_fts_query(query)
 
     def close(self) -> None:
         self._conn.close()
@@ -853,12 +869,7 @@ class Database:
         if source_ids is not None and not source_ids:
             return []
         try:
-            fts_query = (
-                _normalize_fts_query(query)
-                if self._fts_tokenizer == "jieba"
-                else query
-            )
-            params: list[str | int] = [fts_query]
+            params: list[str | int] = [self.prepare_fts_query(query).query]
             source_filter = ""
             if source_ids is not None:
                 ordered_ids = sorted(source_ids)
@@ -950,12 +961,7 @@ class Database:
         """Full-text search via FTS5. Returns (Chunk, bm25_rank) pairs."""
         if source_ids is not None and not source_ids:
             return []
-        fts_query = (
-            _normalize_fts_query(query)
-            if self._fts_tokenizer == "jieba"
-            else query
-        )
-        params: list[str | int] = [fts_query]
+        params: list[str | int] = [self.prepare_fts_query(query).query]
         source_filter = ""
         if source_ids is not None:
             ordered_ids = sorted(source_ids)

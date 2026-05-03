@@ -472,6 +472,46 @@ class TestCustomWeights:
         for r in results:
             assert r.score > 0
 
+    def test_cjk_question_terms_use_lighter_default_bm25_weight(self, db: Database):
+        source = db.add_source(
+            uid="cjk-question",
+            path="notes/oviparity.md",
+            title="卵生动物",
+        )
+        db.add_chunk(source.id, "卵生动物通过产卵进行繁殖。", 0)
+        diagnostics = SearchDiagnostics()
+
+        results = search(
+            db,
+            FtsOnlyEmbedder(),  # type: ignore[arg-type]
+            "卵生动物有哪些？",
+            diagnostics=diagnostics,
+        )
+
+        assert [result.path for result in results] == ["notes/oviparity.md"]
+        assert diagnostics.cjk_question_terms_stripped is True
+        assert diagnostics.effective_bm25_weight == 0.5
+
+    def test_explicit_bm25_weight_is_respected_for_cjk_question(self, db: Database):
+        source = db.add_source(
+            uid="cjk-question-explicit-weight",
+            path="notes/oviparity.md",
+            title="卵生动物",
+        )
+        db.add_chunk(source.id, "卵生动物通过产卵进行繁殖。", 0)
+        diagnostics = SearchDiagnostics()
+
+        search(
+            db,
+            FtsOnlyEmbedder(),  # type: ignore[arg-type]
+            "卵生动物有哪些？",
+            bm25_weight=0.0,
+            diagnostics=diagnostics,
+        )
+
+        assert diagnostics.cjk_question_terms_stripped is True
+        assert diagnostics.effective_bm25_weight == 0.0
+
 
 # ── v2: Tag/Folder filtering ─────────────────────────────────────
 

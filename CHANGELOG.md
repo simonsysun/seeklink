@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Chinese question-style queries now strip common question particles before
   FTS5 matching, so terms like `卵生动物有哪些？` can use the BM25 channel
   instead of falling back to vector-only retrieval.
+- Chinese question-style queries that use the normalized BM25 path now apply
+  that channel as a lighter ranking signal, reducing no-reranker over-promotion
+  of adjacent keyword-heavy passages.
 - Long paragraphs that follow a buffered heading now split at sentence
   boundaries instead of becoming one oversized chunk, reducing pathological
   chunks in generated/list-heavy Markdown while preserving fenced-code

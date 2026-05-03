@@ -274,6 +274,14 @@ class TestChunkCRUD:
 
         assert [chunk.source_id for chunk, _ in results] == [src.id]
 
+    def test_prepare_fts_query_marks_chinese_question_terms(self, db: Database):
+        question = db.prepare_fts_query("卵生动物有哪些？")
+        ordinary = db.prepare_fts_query("知识管理")
+
+        assert question.stripped_cjk_question_terms is True
+        assert "有哪些" not in question.query
+        assert ordinary.stripped_cjk_question_terms is False
+
     def test_cascade_delete_cleans_fts(self, db: Database):
         src = _make_source(db)
         db.add_chunk(src.id, "Unique searchable content xyzzy", 0)

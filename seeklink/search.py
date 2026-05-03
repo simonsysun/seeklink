@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 RerankK = int | Literal["auto"]
 AUTO_RERANK_FAST_K = 5
 AUTO_RERANK_DEEP_K = 20
+_CJK_QUESTION_BM25_WEIGHT = 0.5
 _CJK_TECHNICAL_RERANK_TERMS = (
     "向量",
     "嵌入",
@@ -168,6 +169,8 @@ class SearchDiagnostics:
     indegree_ranks: dict[int, int] = field(default_factory=dict)
     first_stage_ranked_source_ids: list[int] = field(default_factory=list)
     rerank_candidate_source_ids: list[int] = field(default_factory=list)
+    effective_bm25_weight: float = 1.0
+    cjk_question_terms_stripped: bool = False
 
 
 def _contains_cjk(text: str) -> bool:
@@ -305,6 +308,12 @@ def search(
         if not allowed_source_ids and not metadata_expansion:
             return []
     filtered_source_ids = allowed_source_ids if has_filter else None
+    fts_query = db.prepare_fts_query(query)
+    effective_bm25_weight = (
+        _CJK_QUESTION_BM25_WEIGHT
+        if fts_query.stripped_cjk_question_terms and bm25_weight == 1.0
+        else bm25_weight
+    )
 
     # Channel 1: BM25 (chunk-level)
     fts_limit = 200 if has_filter else 50
@@ -387,7 +396,12 @@ def search(
     indeg_ranks = {sid: i + 1 for i, sid in enumerate(indeg_ranked)}
     base_scores = _rrf_fuse(
         [bm25_ranks, vec_ranks, indeg_ranks, title_ranks],
-        weights=[bm25_weight, vec_weight, indegree_weight, title_weight],
+        weights=[
+            effective_bm25_weight,
+            vec_weight,
+            indegree_weight,
+            title_weight,
+        ],
     )
     base_rank_by_source_id = {
         sid: rank
@@ -431,7 +445,12 @@ def search(
 
     # RRF fusion (4 channels)
     channel_ranks = [bm25_ranks, vec_ranks, indeg_ranks, title_ranks]
-    channel_weights = [bm25_weight, vec_weight, indegree_weight, title_weight]
+    channel_weights = [
+        effective_bm25_weight,
+        vec_weight,
+        indegree_weight,
+        title_weight,
+    ]
     if metadata_ranks:
         channel_ranks.append(metadata_ranks)
         channel_weights.append(metadata_weight)
@@ -460,6 +479,10 @@ def search(
         diagnostics.indegree_ranks = dict(indeg_ranks)
         diagnostics.first_stage_ranked_source_ids = list(first_stage_ranked)
         diagnostics.rerank_candidate_source_ids = list(ranked)
+        diagnostics.effective_bm25_weight = effective_bm25_weight
+        diagnostics.cjk_question_terms_stripped = (
+            fts_query.stripped_cjk_question_terms
+        )
 
     # Pick best chunk for each source (prefer BM25 chunk, fall back to vec)
     best_chunks: dict[int, Chunk] = {}
