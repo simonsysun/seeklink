@@ -122,9 +122,9 @@ seeklink index --vault PATH
 seeklink index path/to/file.md --vault PATH
 ```
 
-全库索引通过内容哈希跳过未修改的文件；如果已有索引是用不同的 embedder 或 chunker
-配置生成的，SeekLink 会重建派生索引内容。单文件索引只会在现有索引配置兼容时更新指定的
-一个 Markdown 文件。
+全库索引通过内容哈希跳过未修改的文件；如果已有索引是用不同的 embedder、向量维度或
+chunker 配置生成的，SeekLink 会重建派生索引内容。单文件索引只会在现有索引配置兼容时
+更新指定的一个 Markdown 文件。
 
 ### 守护进程
 
@@ -150,6 +150,9 @@ SeekLink 用倒数排名融合（Reciprocal Rank Fusion）将四个通道合并�
 CJK 全文搜索优先使用 jieba 分词器注册为 FTS5 自定义分词器；如果本地 Python/SQLite
 环境无法安全注册（例如静态编译的 SQLite），SeekLink 会自动降级为 SQLite 内置的
 trigram 分词器，而不是崩溃。
+
+默认向量维度是 768。高级自定义 embedder 实验可以设置 `SEEKLINK_EMBEDDING_DIM`，
+但它必须和 embedder 的实际输出一致，并且需要重新运行一次完整的 `seeklink index`。
 
 在 Apple Silicon 上，SeekLink 可以用 `mlx-community/Qwen3-Reranker-0.6B-mxfp8`
 对候选结果进行重排序。Reranking 是本地且可选的——用 `--no-rerank` 跳过单次查询，

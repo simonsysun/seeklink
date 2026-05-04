@@ -131,9 +131,10 @@ seeklink index path/to/file.md --vault PATH
 ```
 
 Full-vault indexing skips unchanged files by content hash unless the stored
-index was built with a different embedder or chunker configuration, in which
-case SeekLink rebuilds the derived index contents. Single-file indexing updates
-one Markdown file only when the existing index configuration is compatible.
+index was built with a different embedder, vector dimension, or chunker
+configuration, in which case SeekLink rebuilds the derived index contents.
+Single-file indexing updates one Markdown file only when the existing index
+configuration is compatible.
 
 ### Daemon
 
@@ -161,6 +162,10 @@ The default embedder is `jinaai/jina-embeddings-v2-base-zh` through
 `fastembed`. CJK full-text search uses a jieba FTS5 tokenizer when the local
 Python/SQLite build can safely register it; otherwise SeekLink falls back to
 SQLite's built-in trigram tokenizer instead of crashing.
+
+The default vector dimension is 768. Advanced custom-embedder experiments can
+set `SEEKLINK_EMBEDDING_DIM`, but it must match the embedder output and requires
+a full `seeklink index` rebuild.
 
 On Apple Silicon, SeekLink can rerank candidates with
 `mlx-community/Qwen3-Reranker-0.6B-mxfp8`. Reranking is local and optional. Use

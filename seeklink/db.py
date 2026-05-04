@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import re
 import sqlite3
 import sys
 import threading
@@ -12,6 +13,7 @@ from pathlib import Path
 
 import sqlite_vec
 
+from seeklink.index_config import resolve_embedding_dim
 from seeklink.models import Chunk, Source, Suggestion, WikiLink
 from seeklink.tokenizer import JiebaTokenizer, register_jieba_tokenizer
 
@@ -39,6 +41,7 @@ _CJK_QUERY_STOPWORDS = frozenset({
     "吗",
     "呢",
 })
+_VEC_DIM_RE = re.compile(r"embedding\s+float\[(\d+)\]", re.IGNORECASE)
 
 
 class CapabilityError(Exception):
@@ -283,12 +286,7 @@ class Database:
 
         # -- Virtual tables --
 
-        self._conn.execute("""
-            CREATE VIRTUAL TABLE IF NOT EXISTS vec_chunks USING vec0(
-                chunk_id INTEGER PRIMARY KEY,
-                embedding float[768] distance_metric=cosine
-            )
-        """)
+        self._create_vec_table(resolve_embedding_dim())
 
         self._conn.execute(f"""
             CREATE VIRTUAL TABLE IF NOT EXISTS fts_chunks USING fts5(
@@ -593,6 +591,38 @@ class Database:
         ).fetchone()
         if not exists:
             self._conn.execute(ddl)
+
+    @staticmethod
+    def _validate_vector_dimension(dimension: int) -> int:
+        if not isinstance(dimension, int) or dimension <= 0:
+            raise ValueError("vector dimension must be a positive integer")
+        return dimension
+
+    def _create_vec_table(self, dimension: int) -> None:
+        dimension = self._validate_vector_dimension(dimension)
+        self._conn.execute(f"""
+            CREATE VIRTUAL TABLE IF NOT EXISTS vec_chunks USING vec0(
+                chunk_id INTEGER PRIMARY KEY,
+                embedding float[{dimension}] distance_metric=cosine
+            )
+        """)
+
+    def get_vector_dimension(self) -> int | None:
+        """Return vec_chunks embedding dimension, or None if table is missing."""
+        row = self._conn.execute(
+            "SELECT sql FROM sqlite_master WHERE type='table' AND name='vec_chunks'"
+        ).fetchone()
+        if row is None or row["sql"] is None:
+            return None
+        match = _VEC_DIM_RE.search(row["sql"])
+        return int(match.group(1)) if match else None
+
+    def recreate_vec_table(self, dimension: int) -> None:
+        """Drop and recreate the sqlite-vec table for a new vector dimension."""
+        dimension = self._validate_vector_dimension(dimension)
+        self._conn.execute("DROP TABLE IF EXISTS vec_chunks")
+        self._create_vec_table(dimension)
+        self._commit()
 
     def _migrate_v1_to_v2(self) -> None:
         """Migrate schema from v1 to v2: add aliases, source_tags, fts_sources.

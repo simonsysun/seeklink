@@ -180,6 +180,7 @@ def _handle_connection(
     """Handle a single client connection: read request, execute, send response."""
     from seeklink.index_config import (
         compatibility_state,
+        embedding_dimension_for_embedder,
         ensure_index_compatible_for_search,
         expected_index_metadata,
     )
@@ -206,6 +207,7 @@ def _handle_connection(
             ensure_index_compatible_for_search(
                 db,
                 embedder_model=embedder.MODEL_NAME,
+                embedding_dim=embedding_dimension_for_embedder(embedder),
             )
             results = do_search(
                 db,
@@ -250,6 +252,7 @@ def _handle_connection(
                 stored=index_metadata,
                 expected=expected_metadata,
                 chunks_total=stats["chunks_total"],
+                vector_dimension=db.get_vector_dimension(),
             )
             response = {
                 "ok": True,

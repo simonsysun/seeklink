@@ -31,6 +31,7 @@ from pathlib import Path
 
 from seeklink.index_config import (
     compatibility_state,
+    embedding_dimension_for_embedder,
     ensure_index_compatible_for_search,
     expected_index_metadata,
     resolve_embedder_model,
@@ -459,7 +460,11 @@ def _cmd_search(args: argparse.Namespace) -> None:
     reranker = None if args.no_rerank else Reranker()
 
     try:
-        ensure_index_compatible_for_search(db, embedder_model=embedder.MODEL_NAME)
+        ensure_index_compatible_for_search(
+            db,
+            embedder_model=embedder.MODEL_NAME,
+            embedding_dim=embedding_dimension_for_embedder(embedder),
+        )
         check_freshness(db, vault_root)
         search_kwargs = {
             "top_k": args.top_k,
@@ -711,6 +716,7 @@ def _cmd_status(args: argparse.Namespace) -> None:
             stored=index_metadata,
             expected=expected_metadata,
             chunks_total=stats["chunks_total"],
+            vector_dimension=db.get_vector_dimension(),
         )
         if getattr(args, "json", False):
             _emit_json(

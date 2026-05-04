@@ -18,6 +18,7 @@ from seeklink.db import CapabilityError, Database
 from seeklink.embedder import Embedder
 from seeklink.index_config import (
     describe_mismatches,
+    embedding_dimension_for_embedder,
     expected_index_metadata,
     metadata_mismatches,
 )
@@ -335,36 +336,67 @@ def _embedder_model_name(embedder: Embedder) -> str:
     return str(getattr(embedder, "MODEL_NAME", "unknown"))
 
 
+def _index_config_mismatch_reason(
+    mismatches: dict[str, tuple[str | None, str]],
+    *,
+    vector_dimension: int | None,
+    embedding_dim: int,
+) -> str:
+    reason = describe_mismatches(mismatches)
+    if vector_dimension != embedding_dim:
+        suffix = f"vec_chunks_dimension: {vector_dimension!r} != {embedding_dim!r}"
+        reason = f"{reason}; {suffix}" if reason else suffix
+    return reason
+
+
 def _prepare_full_vault_index_config(db: Database, embedder: Embedder) -> None:
     """Ensure full-vault indexing uses a single compatible index config."""
-    expected = expected_index_metadata(_embedder_model_name(embedder))
+    embedding_dim = embedding_dimension_for_embedder(embedder)
+    expected = expected_index_metadata(_embedder_model_name(embedder), embedding_dim)
     stored = db.get_index_metadata()
     mismatches = metadata_mismatches(stored, expected)
-    if mismatches and db.get_stats()["chunks_total"] > 0:
+    vec_dim = db.get_vector_dimension()
+    dimension_mismatch = vec_dim != embedding_dim
+    if (mismatches or dimension_mismatch) and db.get_stats()["chunks_total"] > 0:
         logger.info(
             "Index configuration changed; rebuilding derived index contents: %s",
-            describe_mismatches(mismatches),
+            _index_config_mismatch_reason(
+                mismatches,
+                vector_dimension=vec_dim,
+                embedding_dim=embedding_dim,
+            ),
         )
         db.reset_index_contents_for_rebuild()
+    if dimension_mismatch:
+        db.recreate_vec_table(embedding_dim)
     if mismatches:
         db.set_index_metadata(expected)
 
 
 def _ensure_single_file_index_config(db: Database, embedder: Embedder) -> None:
     """Prevent single-file indexing from mixing incompatible vector spaces."""
-    expected = expected_index_metadata(_embedder_model_name(embedder))
+    embedding_dim = embedding_dimension_for_embedder(embedder)
+    expected = expected_index_metadata(_embedder_model_name(embedder), embedding_dim)
     stored = db.get_index_metadata()
     mismatches = metadata_mismatches(stored, expected)
-    if not mismatches:
+    dimension_mismatch = db.get_vector_dimension() != embedding_dim
+    if not mismatches and not dimension_mismatch:
         return
 
     if db.get_stats()["chunks_total"] == 0:
+        if dimension_mismatch:
+            db.recreate_vec_table(embedding_dim)
         db.set_index_metadata(expected)
         return
 
+    reason = _index_config_mismatch_reason(
+        mismatches,
+        vector_dimension=db.get_vector_dimension(),
+        embedding_dim=embedding_dim,
+    )
     raise CapabilityError(
         "Index configuration does not match the active embedder/chunker "
-        f"settings ({describe_mismatches(mismatches)}). Run full "
+        f"settings ({reason}). Run full "
         "`seeklink index` for this vault to rebuild the index before "
         "indexing individual files."
     )

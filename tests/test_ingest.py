@@ -53,6 +53,7 @@ def _write_md(vault: Path, rel_path: str, content: str) -> Path:
 
 class FakeBatchEmbedder:
     MODEL_NAME = "fake-batch-embedder"
+    EMBEDDING_DIM = 768
 
     def __init__(self, *, fail_on: str | None = None):
         self.calls: list[list[str]] = []
@@ -63,6 +64,14 @@ class FakeBatchEmbedder:
         if self.fail_on and any(self.fail_on in text for text in texts):
             raise RuntimeError("fake embed failure")
         return [b"\0" * (768 * 4) for _ in texts]
+
+
+class Fake384Embedder:
+    MODEL_NAME = "fake-384-embedder"
+    EMBEDDING_DIM = 384
+
+    def embed_documents(self, texts: list[str]) -> list[bytes]:
+        return [b"\0" * (384 * 4) for _ in texts]
 
 
 class TestIngestFile:
@@ -427,6 +436,21 @@ class TestIngestVault:
         assert stats["errors"] == 1
         assert db.get_source_by_path("good.md") is not None
         assert db.get_source_by_path("bad.md") is None
+
+    def test_full_vault_can_recreate_vec_table_for_embedder_dimension(
+        self, db: Database, vault: Path
+    ):
+        fake = Fake384Embedder()
+        _write_md(vault, "small.md", "# Small\n\nDimension-specific index.")
+
+        stats = ingest_vault(db, vault, fake)  # type: ignore[arg-type]
+
+        assert stats["ingested"] == 1
+        assert db.get_vector_dimension() == 384
+        assert db.get_index_metadata() == expected_index_metadata(
+            fake.MODEL_NAME,
+            fake.EMBEDDING_DIM,
+        )
 
 
 class TestTimestamp:

@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Indexes now record the embedder, vector dimension, distance metric, and
   chunker version used to build their vectors; full-vault indexing rebuilds
   derived index contents when that configuration changes.
+- Full-vault indexing can now recreate the sqlite-vec table when the configured
+  embedding dimension changes, enabling custom embedder experiments without
+  changing the default 768-dimensional model.
 
 ### Fixed
 - Chinese question-style queries now strip common question particles before

@@ -68,6 +68,15 @@ class TestSchemaCreation:
         assert "fts_chunks" in tables
         assert "fts_sources" in tables
 
+    def test_vec_table_uses_configured_dimension(self, monkeypatch):
+        monkeypatch.setenv("SEEKLINK_EMBEDDING_DIM", "384")
+        db = Database(":memory:")
+        db.check_capabilities()
+        db.init_schema()
+
+        assert db.get_vector_dimension() == 384
+        db.close()
+
     def test_triggers_exist(self, db: Database):
         triggers = {
             row[0]
@@ -850,6 +859,13 @@ class TestIndexMetadata:
 
         assert metadata["embedder_model"] == "model-b"
         assert metadata["embedding_dim"] == "768"
+
+    def test_recreate_vec_table_changes_dimension(self, db: Database):
+        assert db.get_vector_dimension() == 768
+
+        db.recreate_vec_table(1024)
+
+        assert db.get_vector_dimension() == 1024
 
     def test_reset_index_contents_for_rebuild_preserves_sources(self, db: Database):
         source = _make_source(db, path="notes/rebuild.md", title="Rebuild")

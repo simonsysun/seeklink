@@ -8,7 +8,7 @@ from pathlib import Path
 
 import numpy as np
 
-from seeklink.index_config import resolve_embedder_model
+from seeklink.index_config import resolve_embedder_model, resolve_embedding_dim
 
 
 def _default_cache_dir() -> Path:
@@ -34,6 +34,7 @@ class Embedder:
     """
 
     MODEL_NAME = resolve_embedder_model()
+    EMBEDDING_DIM = resolve_embedding_dim()
 
     def __init__(self) -> None:
         self._model = None

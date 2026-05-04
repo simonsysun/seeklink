@@ -70,7 +70,7 @@ def test_search_no_rerank_passes_none_to_search(monkeypatch):
     monkeypatch.setattr(
         index_config_module,
         "ensure_index_compatible_for_search",
-        lambda db, *, embedder_model: None,
+        lambda db, *, embedder_model, embedding_dim=None: None,
     )
     fake_reranker = FakeReranker()
 
@@ -131,7 +131,7 @@ def test_search_auto_rerank_k_passes_through(monkeypatch):
     monkeypatch.setattr(
         index_config_module,
         "ensure_index_compatible_for_search",
-        lambda db, *, embedder_model: None,
+        lambda db, *, embedder_model, embedding_dim=None: None,
     )
     fake_reranker = FakeReranker()
 
@@ -190,7 +190,7 @@ def test_search_defaults_to_auto_rerank_k(monkeypatch):
     monkeypatch.setattr(
         index_config_module,
         "ensure_index_compatible_for_search",
-        lambda db, *, embedder_model: None,
+        lambda db, *, embedder_model, embedding_dim=None: None,
     )
 
     try:

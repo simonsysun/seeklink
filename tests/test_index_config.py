@@ -42,3 +42,16 @@ def test_search_accepts_matching_metadata(db: Database):
     db.set_index_metadata(expected_index_metadata("model-a"))
 
     ensure_index_compatible_for_search(db, embedder_model="model-a")
+
+
+def test_search_rejects_vector_table_dimension_mismatch(db: Database):
+    source = db.add_source(uid="uid-1", path="note.md")
+    db.add_chunk(source.id, "indexed content", 0)
+    db.set_index_metadata(expected_index_metadata("model-a", 384))
+
+    with pytest.raises(RuntimeError, match="vec_chunks_dimension"):
+        ensure_index_compatible_for_search(
+            db,
+            embedder_model="model-a",
+            embedding_dim=384,
+        )
