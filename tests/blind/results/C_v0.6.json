@@ -21,11 +21,14 @@
     "mean_recall_at_10": 1.0,
     "mean_mrr": 0.9772727272727273,
     "mean_precision_at_5": 0.4727272727272727,
-    "mean_average_precision_at_10": 0.8197420634920634,
-    "mean_ndcg_at_10": 0.9129617600536193,
-    "mean_latency_ms": 3738.1588541479273,
-    "p50_latency_ms": 3308.1682920455933,
-    "p95_latency_ms": 7281.469041015953
+    "mean_average_precision_at_10": 0.8208243145743146,
+    "mean_ndcg_at_10": 0.9133676462436228,
+    "mean_latency_ms": 2324.6376420138404,
+    "p50_latency_ms": 1720.096291974187,
+    "p95_latency_ms": 5098.248125053942,
+    "answerability_labeled_queries": 0,
+    "mean_answerable_at_10": 0.0,
+    "mean_answerable_mrr": 0.0
   },
   "by_tag": {
     "cjk": {
@@ -35,20 +38,26 @@
       "mean_precision_at_5": 0.475,
       "mean_average_precision_at_10": 0.8170138888888888,
       "mean_ndcg_at_10": 0.9026014472650565,
-      "mean_latency_ms": 3517.17563541024,
-      "p50_latency_ms": 3308.1682920455933,
-      "p95_latency_ms": 6623.591040959582
+      "mean_latency_ms": 2277.3060676117893,
+      "p50_latency_ms": 1758.3865001797676,
+      "p95_latency_ms": 4775.759333046153,
+      "answerability_labeled_queries": 0,
+      "mean_answerable_at_10": 0.0,
+      "mean_answerable_mrr": 0.0
     },
     "cjk-en-mixed": {
       "n_queries": 4,
       "mean_recall_at_10": 1.0,
       "mean_mrr": 1.0,
       "mean_precision_at_5": 0.45,
-      "mean_average_precision_at_10": 0.6923115079365079,
-      "mean_ndcg_at_10": 0.8545172185026457,
-      "mean_latency_ms": 4472.171031520702,
-      "p50_latency_ms": 4849.859416950494,
-      "p95_latency_ms": 6956.100458977744
+      "mean_average_precision_at_10": 0.6982638888888888,
+      "mean_ndcg_at_10": 0.8567495925476645,
+      "mean_latency_ms": 4187.247843830846,
+      "p50_latency_ms": 5098.248125053942,
+      "p95_latency_ms": 5849.965583067387,
+      "answerability_labeled_queries": 0,
+      "mean_answerable_at_10": 0.0,
+      "mean_answerable_mrr": 0.0
     },
     "common": {
       "n_queries": 2,
@@ -57,9 +66,12 @@
       "mean_precision_at_5": 0.5,
       "mean_average_precision_at_10": 0.8089285714285714,
       "mean_ndcg_at_10": 0.9252914533260628,
-      "mean_latency_ms": 5701.527270488441,
-      "p50_latency_ms": 6623.591040959582,
-      "p95_latency_ms": 6623.591040959582
+      "mean_latency_ms": 2910.541750025004,
+      "p50_latency_ms": 4036.8049999233335,
+      "p95_latency_ms": 4036.8049999233335,
+      "answerability_labeled_queries": 0,
+      "mean_answerable_at_10": 0.0,
+      "mean_answerable_mrr": 0.0
     },
     "conceptual": {
       "n_queries": 1,
@@ -68,9 +80,12 @@
       "mean_precision_at_5": 0.6,
       "mean_average_precision_at_10": 0.8055555555555555,
       "mean_ndcg_at_10": 0.9060254355346823,
-      "mean_latency_ms": 1545.4755830578506,
-      "p50_latency_ms": 1545.4755830578506,
-      "p95_latency_ms": 1545.4755830578506
+      "mean_latency_ms": 1541.254041949287,
+      "p50_latency_ms": 1541.254041949287,
+      "p95_latency_ms": 1541.254041949287,
+      "answerability_labeled_queries": 0,
+      "mean_answerable_at_10": 0.0,
+      "mean_answerable_mrr": 0.0
     },
     "english": {
       "n_queries": 10,
@@ -79,9 +94,12 @@
       "mean_precision_at_5": 0.48,
       "mean_average_precision_at_10": 0.8728968253968254,
       "mean_ndcg_at_10": 0.9446278269048591,
-      "mean_latency_ms": 3621.3405581889674,
-      "p50_latency_ms": 2600.693125044927,
-      "p95_latency_ms": 8084.233624860644
+      "mean_latency_ms": 1617.4588208086789,
+      "p50_latency_ms": 1565.2758749201894,
+      "p95_latency_ms": 2504.1181249544024,
+      "answerability_labeled_queries": 0,
+      "mean_answerable_at_10": 0.0,
+      "mean_answerable_mrr": 0.0
     },
     "exact-alias": {
       "n_queries": 2,
@@ -90,9 +108,12 @@
       "mean_precision_at_5": 0.6,
       "mean_average_precision_at_10": 0.9583333333333333,
       "mean_ndcg_at_10": 0.9837339917445846,
-      "mean_latency_ms": 1919.517687521875,
-      "p50_latency_ms": 2600.693125044927,
-      "p95_latency_ms": 2600.693125044927
+      "mean_latency_ms": 1829.8161664279178,
+      "p50_latency_ms": 2504.1181249544024,
+      "p95_latency_ms": 2504.1181249544024,
+      "answerability_labeled_queries": 0,
+      "mean_answerable_at_10": 0.0,
+      "mean_answerable_mrr": 0.0
     },
     "exact-title": {
       "n_queries": 1,
@@ -101,9 +122,12 @@
       "mean_precision_at_5": 0.4,
       "mean_average_precision_at_10": 0.7666666666666666,
       "mean_ndcg_at_10": 0.9010126104210695,
-      "mean_latency_ms": 1367.25370795466,
-      "p50_latency_ms": 1367.25370795466,
-      "p95_latency_ms": 1367.25370795466
+      "mean_latency_ms": 1374.120332999155,
+      "p50_latency_ms": 1374.120332999155,
+      "p95_latency_ms": 1374.120332999155,
+      "answerability_labeled_queries": 0,
+      "mean_answerable_at_10": 0.0,
+      "mean_answerable_mrr": 0.0
     },
     "long": {
       "n_queries": 7,
@@ -112,9 +136,12 @@
       "mean_precision_at_5": 0.4857142857142857,
       "mean_average_precision_at_10": 0.7849206349206349,
       "mean_ndcg_at_10": 0.9003666274962127,
-      "mean_latency_ms": 4204.0358868627145,
-      "p50_latency_ms": 4388.983917189762,
-      "p95_latency_ms": 8084.233624860644
+      "mean_latency_ms": 2544.2928214158333,
+      "p50_latency_ms": 1720.096291974187,
+      "p95_latency_ms": 5098.248125053942,
+      "answerability_labeled_queries": 0,
+      "mean_answerable_at_10": 0.0,
+      "mean_answerable_mrr": 0.0
     },
     "methodology": {
       "n_queries": 2,
@@ -123,9 +150,12 @@
       "mean_precision_at_5": 0.4,
       "mean_average_precision_at_10": 0.6736111111111112,
       "mean_ndcg_at_10": 0.8452527860032869,
-      "mean_latency_ms": 2500.9543125052005,
-      "p50_latency_ms": 3308.1682920455933,
-      "p95_latency_ms": 3308.1682920455933
+      "mean_latency_ms": 1673.5959380166605,
+      "p50_latency_ms": 1883.720208890736,
+      "p95_latency_ms": 1883.720208890736,
+      "answerability_labeled_queries": 0,
+      "mean_answerable_at_10": 0.0,
+      "mean_answerable_mrr": 0.0
     },
     "mid-length": {
       "n_queries": 3,
@@ -134,9 +164,12 @@
       "mean_precision_at_5": 0.4666666666666666,
       "mean_average_precision_at_10": 0.7476190476190476,
       "mean_ndcg_at_10": 0.8900033115527876,
-      "mean_latency_ms": 4903.740944340825,
-      "p50_latency_ms": 4779.4635000173,
-      "p95_latency_ms": 6623.591040959582
+      "mean_latency_ms": 2568.267902980248,
+      "p50_latency_ms": 1883.720208890736,
+      "p95_latency_ms": 4036.8049999233335,
+      "answerability_labeled_queries": 0,
+      "mean_answerable_at_10": 0.0,
+      "mean_answerable_mrr": 0.0
     },
     "natural-language": {
       "n_queries": 2,
@@ -145,9 +178,12 @@
       "mean_precision_at_5": 0.5,
       "mean_average_precision_at_10": 0.7305555555555555,
       "mean_ndcg_at_10": 0.8727977490006325,
-      "mean_latency_ms": 2428.2771045109257,
-      "p50_latency_ms": 2621.826959075406,
-      "p95_latency_ms": 2621.826959075406
+      "mean_latency_ms": 1739.2413960769773,
+      "p50_latency_ms": 1758.3865001797676,
+      "p95_latency_ms": 1758.3865001797676,
+      "answerability_labeled_queries": 0,
+      "mean_answerable_at_10": 0.0,
+      "mean_answerable_mrr": 0.0
     },
     "off-topic": {
       "n_queries": 2,
@@ -156,9 +192,12 @@
       "mean_precision_at_5": 0.2,
       "mean_average_precision_at_10": 1.0,
       "mean_ndcg_at_10": 1.0,
-      "mean_latency_ms": 1814.5288330269977,
-      "p50_latency_ms": 1857.9852499533445,
-      "p95_latency_ms": 1857.9852499533445
+      "mean_latency_ms": 1158.1653540488333,
+      "p50_latency_ms": 1238.393458072096,
+      "p95_latency_ms": 1238.393458072096,
+      "answerability_labeled_queries": 0,
+      "mean_answerable_at_10": 0.0,
+      "mean_answerable_mrr": 0.0
     },
     "scientific": {
       "n_queries": 1,
@@ -167,20 +206,26 @@
       "mean_precision_at_5": 0.4,
       "mean_average_precision_at_10": 1.0,
       "mean_ndcg_at_10": 1.0,
-      "mean_latency_ms": 3660.5040000285953,
-      "p50_latency_ms": 3660.5040000285953,
-      "p95_latency_ms": 3660.5040000285953
+      "mean_latency_ms": 1671.6183328535408,
+      "p50_latency_ms": 1671.6183328535408,
+      "p95_latency_ms": 1671.6183328535408,
+      "answerability_labeled_queries": 0,
+      "mean_answerable_at_10": 0.0,
+      "mean_answerable_mrr": 0.0
     },
     "short": {
       "n_queries": 8,
       "mean_recall_at_10": 1.0,
       "mean_mrr": 0.9375,
       "mean_precision_at_5": 0.45,
-      "mean_average_precision_at_10": 0.8836557539682539,
-      "mean_ndcg_at_10": 0.9356416886222501,
-      "mean_latency_ms": 3229.393802001141,
-      "p50_latency_ms": 2600.693125044927,
-      "p95_latency_ms": 7281.469041015953
+      "mean_average_precision_at_10": 0.8866319444444444,
+      "mean_ndcg_at_10": 0.9367578756447594,
+      "mean_latency_ms": 2008.0351612705272,
+      "p50_latency_ms": 1374.120332999155,
+      "p95_latency_ms": 5849.965583067387,
+      "answerability_labeled_queries": 0,
+      "mean_answerable_at_10": 0.0,
+      "mean_answerable_mrr": 0.0
     },
     "synonym": {
       "n_queries": 1,
@@ -189,20 +234,26 @@
       "mean_precision_at_5": 0.6,
       "mean_average_precision_at_10": 1.0,
       "mean_ndcg_at_10": 1.0,
-      "mean_latency_ms": 1797.6370840333402,
-      "p50_latency_ms": 1797.6370840333402,
-      "p95_latency_ms": 1797.6370840333402
+      "mean_latency_ms": 1565.2758749201894,
+      "p50_latency_ms": 1565.2758749201894,
+      "p95_latency_ms": 1565.2758749201894,
+      "answerability_labeled_queries": 0,
+      "mean_answerable_at_10": 0.0,
+      "mean_answerable_mrr": 0.0
     },
     "technical": {
       "n_queries": 6,
       "mean_recall_at_10": 1.0,
       "mean_mrr": 1.0,
       "mean_precision_at_5": 0.5,
-      "mean_average_precision_at_10": 0.7930224867724868,
-      "mean_ndcg_at_10": 0.903343591766102,
-      "mean_latency_ms": 6254.486736026593,
-      "p50_latency_ms": 6956.100458977744,
-      "p95_latency_ms": 8084.233624860644
+      "mean_average_precision_at_10": 0.7969907407407407,
+      "mean_ndcg_at_10": 0.9048318411294479,
+      "mean_latency_ms": 3261.756451218389,
+      "p50_latency_ms": 4337.3060000594705,
+      "p95_latency_ms": 5849.965583067387,
+      "answerability_labeled_queries": 0,
+      "mean_answerable_at_10": 0.0,
+      "mean_answerable_mrr": 0.0
     },
     "vocab-mismatch": {
       "n_queries": 4,
@@ -211,9 +262,12 @@
       "mean_precision_at_5": 0.5,
       "mean_average_precision_at_10": 0.7902777777777777,
       "mean_ndcg_at_10": 0.8989851008840049,
-      "mean_latency_ms": 3201.4643127913587,
-      "p50_latency_ms": 2621.826959075406,
-      "p95_latency_ms": 6151.665958110243
+      "mean_latency_ms": 2454.8795000300743,
+      "p50_latency_ms": 1758.3865001797676,
+      "p95_latency_ms": 4775.759333046153,
+      "answerability_labeled_queries": 0,
+      "mean_answerable_at_10": 0.0,
+      "mean_answerable_mrr": 0.0
     },
     "workflow": {
       "n_queries": 1,
@@ -222,9 +276,12 @@
       "mean_precision_at_5": 0.4,
       "mean_average_precision_at_10": 0.7222222222222222,
       "mean_ndcg_at_10": 0.8710785440003371,
-      "mean_latency_ms": 4849.859416950494,
-      "p50_latency_ms": 4849.859416950494,
-      "p95_latency_ms": 4849.859416950494
+      "mean_latency_ms": 5098.248125053942,
+      "p50_latency_ms": 5098.248125053942,
+      "p95_latency_ms": 5098.248125053942,
+      "answerability_labeled_queries": 0,
+      "mean_answerable_at_10": 0.0,
+      "mean_answerable_mrr": 0.0
     }
   },
   "results": [
@@ -272,6 +329,48 @@
         "## 2026-W15 周记\n\n这周主题：[[agent-memory-patterns]]。很多本地 agent 在长期记忆上卡住，\n问题往往不是模型太弱，而是 retrieval 太差。",
         "## 2026-W14 周记\n\n本周主要在想**记忆保持力**这个问题。起因是发现自己读完 [[zettelkasten]] 相关\n的几本书（Ahrens 的《How to Take Smart Notes》，然后 Luhmann 原文的几篇\n论文），真正能\"用\"的想法其实不多。问题不在于没读懂，是没沉淀到能调用的\n程度。\n\n读懂 ≠ 记住 ≠ 会用。这三个之间的落差是学习系统设计的核心。"
       ],
+      "line_spans": [
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        }
+      ],
       "scores": [
         0.06311776759884281,
         0.06310137310697239,
@@ -296,13 +395,16 @@
         "notes/memory-consolidation.md": 3.0,
         "logs/2026-W14.md": 3.0
       },
-      "latency_ms": 6623.591040959582,
+      "filters": {},
+      "latency_ms": 4036.8049999233335,
       "reranker_active": true,
       "recall_at_10": 1.0,
       "mrr": 1.0,
       "precision_at_5": 0.6,
       "average_precision_at_10": 0.85,
       "ndcg_at_10": 0.9447176050778179,
+      "answerable_at_10": null,
+      "answerable_mrr": null,
       "last_expected_rank": 10,
       "rerank_k": "auto",
       "resolved_rerank_k": null,
@@ -358,6 +460,48 @@
         "## History\n\nThe phenomenon was first characterized by **Hermann Ebbinghaus** in\nthe 1880s through experiments on himself using nonsense syllables. He\ndocumented the forgetting curve — retention drops ",
         "## 2026-W15 周记\n\n这周主题：[[agent-memory-patterns]]。很多本地 agent 在长期记忆上卡住，\n问题往往不是模型太弱，而是 retrieval 太差。"
       ],
+      "line_spans": [
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        }
+      ],
       "scores": [
         0.06504494976203068,
         0.06403688524590165,
@@ -380,13 +524,16 @@
         "sources/wikipedia-forgetting-curve.md": 3.0,
         "notes/memory-consolidation.md": 3.0
       },
-      "latency_ms": 2762.234166963026,
+      "filters": {},
+      "latency_ms": 1698.2515000272542,
       "reranker_active": true,
       "recall_at_10": 1.0,
       "mrr": 0.5,
       "precision_at_5": 0.6,
       "average_precision_at_10": 0.6388888888888888,
       "ndcg_at_10": 0.7328286204777911,
+      "answerable_at_10": null,
+      "answerable_mrr": null,
       "last_expected_rank": 4,
       "rerank_k": "auto",
       "resolved_rerank_k": null,
@@ -443,6 +590,48 @@
         "```bash\nSEEKLINK_VAULT=tests/corpus python -m seeklink index\n```\n",
         "## Related\n- [[spaced-repetition]] — the practice that FSRS optimizes\n- [[forgetting-curve]] — the phenomenon being modeled\n- [[note-to-card-workflow]] — how permanent notes become reviewable cards"
       ],
+      "line_spans": [
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        }
+      ],
       "scores": [
         0.06505334374186833,
         0.06329098952049772,
@@ -465,13 +654,16 @@
         "sources/niklas-luhmann-zettelkasten.md": 3.0,
         "notes/atomic-notes.md": 3.0
       },
-      "latency_ms": 3308.1682920455933,
+      "filters": {},
+      "latency_ms": 1883.720208890736,
       "reranker_active": true,
       "recall_at_10": 1.0,
       "mrr": 1.0,
       "precision_at_5": 0.4,
       "average_precision_at_10": 0.625,
       "ndcg_at_10": 0.8194270280062367,
+      "answerable_at_10": null,
+      "answerable_mrr": null,
       "last_expected_rank": 8,
       "rerank_k": "auto",
       "resolved_rerank_k": null,
@@ -528,6 +720,48 @@
         "```\nR(t) = 1 / (1 + (t/S)^c)\n```\n",
         "```\nscore(c) = Σ_i w_i / (k + rank_i(c))\n```\n"
       ],
+      "line_spans": [
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        }
+      ],
       "scores": [
         0.04918032786885246,
         0.048131080389144903,
@@ -546,13 +780,16 @@
       "relevance": {
         "recipes/red-braised-pork.md": 3.0
       },
-      "latency_ms": 1771.072416100651,
+      "filters": {},
+      "latency_ms": 1238.393458072096,
       "reranker_active": true,
       "recall_at_10": 1.0,
       "mrr": 1.0,
       "precision_at_5": 0.2,
       "average_precision_at_10": 1.0,
       "ndcg_at_10": 1.0,
+      "answerable_at_10": null,
+      "answerable_mrr": null,
       "last_expected_rank": 1,
       "rerank_k": "auto",
       "resolved_rerank_k": null,
@@ -608,6 +845,48 @@
         "## Related\n- [[feynman-technique]]\n- [[zettelkasten]] — benefits from deep work, suffers without",
         "## Why FSRS beats SM-2\n\nSM-2 uses a fixed formula tied to a user-reported \"ease factor\" per card.\nIt doesn't learn from population data, and its intervals tend to grow\ntoo fast for hard cards and too "
       ],
+      "line_spans": [
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        }
+      ],
       "scores": [
         0.06557377049180328,
         0.06351569577376029,
@@ -628,13 +907,16 @@
         "notes/memory-consolidation.md": 3.0,
         "sources/wikipedia-forgetting-curve.md": 3.0
       },
-      "latency_ms": 3660.5040000285953,
+      "filters": {},
+      "latency_ms": 1671.6183328535408,
       "reranker_active": true,
       "recall_at_10": 1.0,
       "mrr": 1.0,
       "precision_at_5": 0.4,
       "average_precision_at_10": 1.0,
       "ndcg_at_10": 1.0,
+      "answerable_at_10": null,
+      "answerable_mrr": null,
       "last_expected_rank": 2,
       "rerank_k": "auto",
       "resolved_rerank_k": null,
@@ -691,6 +973,48 @@
         "## 与 spaced repetition 的区别\n\nZettelkasten 解决的是**写作 + 思考**问题：怎么让新想法和旧想法碰撞出火花。\n[[spaced-repetition]] 解决的是**记忆保持**问题：怎么让已知的事实留在脑子里。\n\n两者互补，不重复。典型工作流：\n- Zettelkasten 建立理解和结构\n- 从 permanent notes 蒸馏出关键 claims",
         "## Related\n- [[forgetting-curve]] —— 如果不巩固的衰减曲线\n- [[spaced-repetition]] —— 利用巩固窗口的实践"
       ],
+      "line_spans": [
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        }
+      ],
       "scores": [
         0.06478893337698202,
         0.06327607388058208,
@@ -715,13 +1039,16 @@
         "sources/wikipedia-spaced-repetition.md": 3.0,
         "logs/2026-W16.md": 3.0
       },
-      "latency_ms": 4779.4635000173,
+      "filters": {},
+      "latency_ms": 1784.2785001266748,
       "reranker_active": true,
       "recall_at_10": 1.0,
       "mrr": 1.0,
       "precision_at_5": 0.4,
       "average_precision_at_10": 0.7678571428571428,
       "ndcg_at_10": 0.9058653015743078,
+      "answerable_at_10": null,
+      "answerable_mrr": null,
       "last_expected_rank": 7,
       "rerank_k": "auto",
       "resolved_rerank_k": null,
@@ -778,6 +1105,48 @@
         "## Example\n\n**Note** ([[FSRS]]): argues FSRS beats SM-2 because it models\npopulation-fitted stability instead of per-card ease.\n\n**Card front**: \"Why does FSRS outperform SM-2 at the same retention\nta",
         "### 讨论记录\n\n整理了一组设计观察：\n\n1. LLM 本身 stateless，所有\"记忆\"都是 retrieval。\n2. Retrieval 质量 = agent 智商上限。返回错的 chunk = agent 自信地胡说。\n3. 现有方案多是 vector-only RAG，对 CJK 极差，对 exact-keyword 极差。\n4. 没人认真做 hybrid + rerank 这套工"
       ],
+      "line_spans": [
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        }
+      ],
       "scores": [
         0.06403612252369524,
         0.06264428275035797,
@@ -800,13 +1169,16 @@
         "notes/retrieval-augmented-generation.md": 3.0,
         "notes/reciprocal-rank-fusion.md": 3.0
       },
-      "latency_ms": 8084.233624860644,
+      "filters": {},
+      "latency_ms": 1882.878625066951,
       "reranker_active": true,
       "recall_at_10": 1.0,
       "mrr": 1.0,
       "precision_at_5": 0.6,
       "average_precision_at_10": 0.8666666666666667,
       "ndcg_at_10": 0.9469024295259745,
+      "answerable_at_10": null,
+      "answerable_mrr": null,
       "last_expected_rank": 5,
       "rerank_k": "auto",
       "resolved_rerank_k": null,
@@ -863,6 +1235,48 @@
         "# Attention mechanism\n\nThe operation at the core of Transformer architectures. Given a sequence\nof tokens, attention lets every position look at every other position\nwith learnable weights. For the ou",
         "### 当前想法\n\n**三者都要**，但不要求每个想法都进所有三个层。典型生命周期：\n- 读到一个想法 → fleeting note（草）\n- 想清楚了 → permanent note in zettelkasten\n- 想不想持续调用？想 → 蒸馏成 1-3 张 flashcard 进 Anki\n- 不想进 Anki 也 ok，zettelkasten 查得到就行\n\n关键是 **seekli"
       ],
+      "line_spans": [
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        }
+      ],
       "scores": [
         0.06530936012691697,
         0.06400409626216078,
@@ -885,13 +1299,16 @@
         "notes/retrieval-augmented-generation.md": 3.0,
         "logs/2026-W15.md": 3.0
       },
-      "latency_ms": 4664.467416005209,
+      "filters": {},
+      "latency_ms": 1558.648332953453,
       "reranker_active": true,
       "recall_at_10": 1.0,
       "mrr": 1.0,
       "precision_at_5": 0.6,
       "average_precision_at_10": 0.8666666666666667,
       "ndcg_at_10": 0.9469024295259745,
+      "answerable_at_10": null,
+      "answerable_mrr": null,
       "last_expected_rank": 5,
       "rerank_k": "auto",
       "resolved_rerank_k": null,
@@ -948,6 +1365,48 @@
         "## 与 spaced repetition 的区别\n\nZettelkasten 解决的是**写作 + 思考**问题：怎么让新想法和旧想法碰撞出火花。\n[[spaced-repetition]] 解决的是**记忆保持**问题：怎么让已知的事实留在脑子里。\n\n两者互补，不重复。典型工作流：\n- Zettelkasten 建立理解和结构\n- 从 permanent notes 蒸馏出关键 claims",
         "## 参考\n- [[spaced-repetition]] —— 对抗遗忘曲线的主要实践\n- [[FSRS]] —— 建模和拟合遗忘曲线的现代算法\n- [[memory-consolidation]] —— 生物学层面的记忆巩固过程"
       ],
+      "line_spans": [
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        }
+      ],
       "scores": [
         0.06530936012691699,
         0.06426850662704708,
@@ -968,13 +1427,16 @@
         "notes/attention-mechanism.md": 3.0,
         "cards/card-attention-formula.md": 3.0
       },
-      "latency_ms": 7281.469041015953,
+      "filters": {},
+      "latency_ms": 1165.9808331169188,
       "reranker_active": true,
       "recall_at_10": 1.0,
       "mrr": 1.0,
       "precision_at_5": 0.4,
       "average_precision_at_10": 1.0,
       "ndcg_at_10": 1.0,
+      "answerable_at_10": null,
+      "answerable_mrr": null,
       "last_expected_rank": 2,
       "rerank_k": "auto",
       "resolved_rerank_k": null,
@@ -1031,6 +1493,48 @@
         "```\nsim(a, b) = (a · b) / (|a| * |b|)\n```\n",
         "## The fix: jieba as custom tokenizer\n\n[jieba](https://github.com/fxsjy/jieba) is the standard Chinese word\nsegmenter. It uses a dictionary + HMM to split `语义搜索的研究` into\n`[语义, 搜索, 的, 研究]`. Plugging ji"
       ],
+      "line_spans": [
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        }
+      ],
       "scores": [
         0.04918032786885246,
         0.04838709677419355,
@@ -1049,13 +1553,16 @@
       "relevance": {
         "recipes/sourdough-starter.md": 3.0
       },
-      "latency_ms": 1857.9852499533445,
+      "filters": {},
+      "latency_ms": 1077.9372500255704,
       "reranker_active": true,
       "recall_at_10": 1.0,
       "mrr": 1.0,
       "precision_at_5": 0.2,
       "average_precision_at_10": 1.0,
       "ndcg_at_10": 1.0,
+      "answerable_at_10": null,
+      "answerable_mrr": null,
       "last_expected_rank": 1,
       "rerank_k": "auto",
       "resolved_rerank_k": null,
@@ -1112,6 +1619,48 @@
         "## When not to use Anki\n\n- If you haven't understood the material yet. Anki entrenches; it\n  doesn't teach. Understand first (Feynman), then memorize.\n- If the material has a 2-week shelf life. Use a ",
         "## Applications\n\nMedical education (pharmacology, anatomy), foreign language\nacquisition (vocabulary), bar exam preparation, and programming\ncertification all report significant improvements when swit"
       ],
+      "line_spans": [
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        }
+      ],
       "scores": [
         0.06430053288858155,
         0.06357688027340822,
@@ -1134,13 +1683,16 @@
         "sources/wikipedia-spaced-repetition.md": 3.0,
         "notes/forgetting-curve.md": 3.0
       },
-      "latency_ms": 2234.727249946445,
+      "filters": {},
+      "latency_ms": 1720.096291974187,
       "reranker_active": true,
       "recall_at_10": 1.0,
       "mrr": 1.0,
       "precision_at_5": 0.4,
       "average_precision_at_10": 0.6555555555555556,
       "ndcg_at_10": 0.8395700624665825,
+      "answerable_at_10": null,
+      "answerable_mrr": null,
       "last_expected_rank": 10,
       "rerank_k": "auto",
       "resolved_rerank_k": null,
@@ -1197,6 +1749,48 @@
         "### 遗忘曲线不是指数\n\n这个是真 surprise。传统教科书都说遗忘是 `e^(-t/τ)`（指数衰减）。但\nEbbinghaus 的原始数据和现代大样本研究都显示是**幂律**：",
         "## Related\n- [[spaced-repetition]] — the practice that FSRS optimizes\n- [[forgetting-curve]] — the phenomenon being modeled\n- [[note-to-card-workflow]] — how permanent notes become reviewable cards"
       ],
+      "line_spans": [
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        }
+      ],
       "scores": [
         0.06505334374186833,
         0.06427650713907986,
@@ -1219,13 +1813,16 @@
         "notes/forgetting-curve.md": 3.0,
         "logs/2026-W14.md": 3.0
       },
-      "latency_ms": 2621.826959075406,
+      "filters": {},
+      "latency_ms": 1758.3865001797676,
       "reranker_active": true,
       "recall_at_10": 1.0,
       "mrr": 1.0,
       "precision_at_5": 0.6,
       "average_precision_at_10": 0.8055555555555555,
       "ndcg_at_10": 0.9060254355346823,
+      "answerable_at_10": null,
+      "answerable_mrr": null,
       "last_expected_rank": 4,
       "rerank_k": "auto",
       "resolved_rerank_k": null,
@@ -1282,6 +1879,48 @@
         "## Related\n- [[feynman-technique]]\n- [[zettelkasten]] — benefits from deep work, suffers without",
         "## 2026-W17 — Zettelkasten 几本书的交叉笔记\n\n这周读完三本 zettelkasten 相关的：\n\n1. **Sönke Ahrens, How to Take Smart Notes (2017)** — 最流行的入门\n2. **Niklas Luhmann, Communicating with Slip Boxes (1981)** — Luhmann 自己写的方法"
       ],
+      "line_spans": [
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        }
+      ],
       "scores": [
         0.06505334374186833,
         0.04788306451612903,
@@ -1304,13 +1943,16 @@
         "sources/niklas-luhmann-zettelkasten.md": 3.0,
         "notes/atomic-notes.md": 3.0
       },
-      "latency_ms": 1797.6370840333402,
+      "filters": {},
+      "latency_ms": 1565.2758749201894,
       "reranker_active": true,
       "recall_at_10": 1.0,
       "mrr": 1.0,
       "precision_at_5": 0.6,
       "average_precision_at_10": 1.0,
       "ndcg_at_10": 1.0,
+      "answerable_at_10": null,
+      "answerable_mrr": null,
       "last_expected_rank": 3,
       "rerank_k": "auto",
       "resolved_rerank_k": null,
@@ -1367,16 +2009,58 @@
         "# SQLite FTS5 + CJK (jieba)\n\nSQLite's FTS5 extension provides full-text search out of the box, but\nits default tokenizers (`simple`, `porter`, `unicode61`) all assume\nwhitespace or Unicode word bounda",
         "```\nAttention(Q, K, V) = softmax(Q @ K.T / sqrt(d_k)) @ V\n```\n"
       ],
+      "line_spans": [
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        }
+      ],
       "scores": [
         0.06430053288858155,
-        0.0630272952853598,
+        0.06326767990074442,
         0.06236781762728467,
         0.061217078599080404,
         0.04669647292598113,
         0.04617537313432836,
         0.04596351361057244,
         0.045730413377472204,
-        0.04483608742004264,
+        0.04459570280465803,
         0.03007688828584351
       ],
       "expected_paths": [
@@ -1387,13 +2071,16 @@
         "notes/retrieval-augmented-generation.md": 3.0,
         "notes/vector-embeddings.md": 3.0
       },
-      "latency_ms": 6151.665958110243,
+      "filters": {},
+      "latency_ms": 4775.759333046153,
       "reranker_active": true,
       "recall_at_10": 1.0,
       "mrr": 1.0,
       "precision_at_5": 0.4,
       "average_precision_at_10": 0.7,
       "ndcg_at_10": 0.8503449055347546,
+      "answerable_at_10": null,
+      "answerable_mrr": null,
       "last_expected_rank": 5,
       "rerank_k": "auto",
       "resolved_rerank_k": null,
@@ -1449,6 +2136,48 @@
         "# 遗忘曲线 Forgetting curve\n\n赫尔曼·艾宾浩斯（Hermann Ebbinghaus, 1850-1909）在 1880 年代用自己做受试者，\n记忆了一批无意义音节（CVC 结构：WID、ZOF 等），然后在不同时间间隔后测量\n还能回忆多少。他画出的曲线是心理学史上第一条严谨的实验曲线，后来被称为\n**遗忘曲线**（forgetting curve）。\n\n基本形状：记住一个新东",
         "### 对系统的启示\n\n- search indexes usually rank the current corpus, not what the user has\n  recently recalled\n- 如果想给笔记做 FSRS 式调度，需要存**每次访问时间戳**（现在没存）\n- recency and review scheduling should be optional signa"
       ],
+      "line_spans": [
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        }
+      ],
       "scores": [
         0.04865990111891752,
         0.0471386476426799,
@@ -1471,13 +2200,16 @@
         "notes/zettelkasten.md": 3.0,
         "sources/niklas-luhmann-zettelkasten.md": 3.0
       },
-      "latency_ms": 1693.7403329648077,
+      "filters": {},
+      "latency_ms": 1463.471667142585,
       "reranker_active": true,
       "recall_at_10": 1.0,
       "mrr": 1.0,
       "precision_at_5": 0.4,
       "average_precision_at_10": 0.7222222222222222,
       "ndcg_at_10": 0.8710785440003371,
+      "answerable_at_10": null,
+      "answerable_mrr": null,
       "last_expected_rank": 6,
       "rerank_k": "auto",
       "resolved_rerank_k": null,
@@ -1503,8 +2235,8 @@
         "cards/card-fsrs-core-idea.md",
         "logs/2026-W16.md",
         "sources/wikipedia-forgetting-curve.md",
-        "sources/wikipedia-spaced-repetition.md",
         "sources/anki-and-flashcards-intro.md",
+        "sources/wikipedia-spaced-repetition.md",
         "notes/forgetting-curve.md",
         "notes/memory-consolidation.md",
         "notes/spaced-repetition.md"
@@ -1515,8 +2247,8 @@
         "Card: FSRS core idea",
         "2026-W16",
         "Forgetting curve (Wikipedia summary)",
-        "Spaced repetition (Wikipedia summary)",
         "Anki and flashcards — a practical intro",
+        "Spaced repetition (Wikipedia summary)",
         "遗忘曲线 Forgetting curve",
         "记忆巩固 Memory consolidation",
         "Spaced repetition"
@@ -1527,11 +2259,53 @@
         "# Card: FSRS core idea\n\n**Q**: What does FSRS do differently from SM-2?\n\n**A**: FSRS fits a **17-parameter power-law memory model** on\npopulation review data, outputting per-card intervals that target",
         "### FSRS 不是\"黑盒算法\"\n\n以为 FSRS 是某种神经网络。其实不是——它是一个**17 参数的经验公式**，\n通过在 11M 条真实 review log 上 L-BFGS 拟合出来的。每个参数都有物理\n含义（stability growth, difficulty decay, etc.），可以逐个解读。\n\n这意味着：\n- 可以在**你自己的 review log** 上重新拟合参数",
         "## Mathematical models\n\n- **Ebbinghaus (1885)**: proposed an exponential-decay-like form with\n  decreasing marginal rate.\n- **Wickelgren (1972)**: power-function memory trace model.\n- **Wixted & Ebbes",
-        "## Modern implementations\n\nThe first computer-based spaced repetition system was **SuperMemo**,\ndeveloped by Piotr Wozniak starting in 1985. SuperMemo introduced the\nSM-2 algorithm, which is still wid",
         "## Algorithms\n\nAnki's default scheduler has been **SM-2** (derived from SuperMemo's\n1985 algorithm) for most of its history. Since 2024, **FSRS** is\nshipped as an optional (now default on 2.1.66+) rep",
+        "## Modern implementations\n\nThe first computer-based spaced repetition system was **SuperMemo**,\ndeveloped by Piotr Wozniak starting in 1985. SuperMemo introduced the\nSM-2 algorithm, which is still wid",
         "其中 `R(t)` 是时间 `t` 后的 retrievability（可回忆概率），`S` 是 stability\n（保持期常数），`c` 是经验指数。现代模型（如 FSRS）用类似的幂律或指数衰减，\n并让 `S` 随每次复习增长——这就是**间隔重复**的理论基础。",
         "## 和 FSRS 的关系\n\n[[FSRS]] 不建模睡眠——它只建模时间。但实际使用中，规律睡眠的人能在\nFSRS 的 90% 目标上稳定超出，睡眠紊乱的人会稳定低 5-10%。这不是算法的\n锅，是生理的锅。",
         "## Related\n- [[FSRS]] — state-of-the-art scheduler\n- [[forgetting-curve]] — what the spacing fights against\n- [[feynman-technique]] — complementary practice for deep understanding\n- [[zettelkasten]] —"
+      ],
+      "line_spans": [
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        }
       ],
       "scores": [
         0.06428490111891752,
@@ -1539,9 +2313,9 @@
         0.04839549075403121,
         0.04692742126540875,
         0.04680818916672962,
-        0.04666516279419505,
         0.046634615384615385,
-        0.04570188828584351,
+        0.04643206256109482,
+        0.045934988518943745,
         0.04390451832907076,
         0.030158730158730156
       ],
@@ -1557,14 +2331,17 @@
         "logs/2026-W16.md": 3.0,
         "sources/anki-and-flashcards-intro.md": 3.0
       },
-      "latency_ms": 6956.100458977744,
+      "filters": {},
+      "latency_ms": 5849.965583067387,
       "reranker_active": true,
       "recall_at_10": 1.0,
       "mrr": 1.0,
       "precision_at_5": 0.6,
-      "average_precision_at_10": 0.7470238095238095,
-      "ndcg_at_10": 0.8838242945899706,
-      "last_expected_rank": 7,
+      "average_precision_at_10": 0.7708333333333333,
+      "ndcg_at_10": 0.8927537907700456,
+      "answerable_at_10": null,
+      "answerable_mrr": null,
+      "last_expected_rank": 6,
       "rerank_k": "auto",
       "resolved_rerank_k": null,
       "rerank_k_reason": null,
@@ -1620,6 +2397,48 @@
         "### 当前想法\n\n**三者都要**，但不要求每个想法都进所有三个层。典型生命周期：\n- 读到一个想法 → fleeting note（草）\n- 想清楚了 → permanent note in zettelkasten\n- 想不想持续调用？想 → 蒸馏成 1-3 张 flashcard 进 Anki\n- 不想进 Anki 也 ok，zettelkasten 查得到就行\n\n关键是 **seekli",
         "## Related\n- [[zettelkasten]] — the note system this serves\n- [[note-to-card-workflow]] — turning atomic notes into SRS cards\n- [[feynman-technique]] — explaining-for-strangers discipline"
       ],
+      "line_spans": [
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        }
+      ],
       "scores": [
         0.04918032786885246,
         0.04690554740957967,
@@ -1642,13 +2461,16 @@
         "sources/niklas-luhmann-zettelkasten.md": 3.0,
         "notes/atomic-notes.md": 3.0
       },
-      "latency_ms": 1367.25370795466,
+      "filters": {},
+      "latency_ms": 1374.120332999155,
       "reranker_active": true,
       "recall_at_10": 1.0,
       "mrr": 1.0,
       "precision_at_5": 0.4,
       "average_precision_at_10": 0.7666666666666666,
       "ndcg_at_10": 0.9010126104210695,
+      "answerable_at_10": null,
+      "answerable_mrr": null,
       "last_expected_rank": 10,
       "rerank_k": "auto",
       "resolved_rerank_k": null,
@@ -1704,6 +2526,48 @@
         "### 检索系统的设计要求\n\n个人 vault + agent 场景需要的不只是\"又一个语义搜索\"，而是把信息检索里\n成熟的 hybrid retrieval 结构做成一个本地工具：\n- BM25 + vector + graph + title 四路召回（[[RRF]] 融合）\n- 可选 cross-encoder 重排（[[attention-mechanism]]）\n- CJK 一等公民（j",
         "## Relevance to retrieval\n\nA **cross-encoder reranker** (like Qwen3-Reranker-0.6B) uses attention\nacross the concatenated `(query, passage)` pair — that's what makes it\nmore accurate than a bi-encoder"
       ],
+      "line_spans": [
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        }
+      ],
       "scores": [
         0.06480532786885246,
         0.06427650713907986,
@@ -1726,13 +2590,16 @@
         "cards/card-rrf-formula.md": 3.0,
         "notes/retrieval-augmented-generation.md": 3.0
       },
-      "latency_ms": 2600.693125044927,
+      "filters": {},
+      "latency_ms": 2504.1181249544024,
       "reranker_active": true,
       "recall_at_10": 1.0,
       "mrr": 1.0,
       "precision_at_5": 0.6,
       "average_precision_at_10": 1.0,
       "ndcg_at_10": 1.0,
+      "answerable_at_10": null,
+      "answerable_mrr": null,
       "last_expected_rank": 3,
       "rerank_k": "auto",
       "resolved_rerank_k": null,
@@ -1789,6 +2656,48 @@
         "## 与 spaced repetition 的区别\n\nZettelkasten 解决的是**写作 + 思考**问题：怎么让新想法和旧想法碰撞出火花。\n[[spaced-repetition]] 解决的是**记忆保持**问题：怎么让已知的事实留在脑子里。\n\n两者互补，不重复。典型工作流：\n- Zettelkasten 建立理解和结构\n- 从 permanent notes 蒸馏出关键 claims",
         "### 讨论记录\n\n整理了一组设计观察：\n\n1. LLM 本身 stateless，所有\"记忆\"都是 retrieval。\n2. Retrieval 质量 = agent 智商上限。返回错的 chunk = agent 自信地胡说。\n3. 现有方案多是 vector-only RAG，对 CJK 极差，对 exact-keyword 极差。\n4. 没人认真做 hybrid + rerank 这套工"
       ],
+      "line_spans": [
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        }
+      ],
       "scores": [
         0.04891591750396616,
         0.04813947436898257,
@@ -1811,13 +2720,16 @@
         "sources/wikipedia-forgetting-curve.md": 3.0,
         "notes/memory-consolidation.md": 3.0
       },
-      "latency_ms": 1238.3422499988228,
+      "filters": {},
+      "latency_ms": 1155.514207901433,
       "reranker_active": true,
       "recall_at_10": 1.0,
       "mrr": 1.0,
       "precision_at_5": 0.6,
       "average_precision_at_10": 0.9166666666666666,
       "ndcg_at_10": 0.9674679834891693,
+      "answerable_at_10": null,
+      "answerable_mrr": null,
       "last_expected_rank": 4,
       "rerank_k": "auto",
       "resolved_rerank_k": null,
@@ -1873,6 +2785,48 @@
         "Query `Q`, key `K`, value `V` are linear projections of the input.\nScaling by `sqrt(d_k)` prevents softmax saturation at high dimension.\n\nSee [[attention-mechanism]] for why each piece is there.",
         "### 对 seeklink 的启发\n\nDoto 的观点等于说\"**好搜索 = 不需要目录**\"。这和 [[agent-memory-patterns]]\n里的\"retrieval quality = agent intelligence\"是同一个 insight，只是\n对 human 用户。\n\n如果 seeklink 的搜索够准，你的 vault 可以扁平——logs/ notes/ cards"
       ],
+      "line_spans": [
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        }
+      ],
       "scores": [
         0.06454091750396616,
         0.062349324975892004,
@@ -1895,13 +2849,16 @@
         "notes/vector-embeddings.md": 3.0,
         "notes/retrieval-augmented-generation.md": 3.0
       },
-      "latency_ms": 1545.4755830578506,
+      "filters": {},
+      "latency_ms": 1541.254041949287,
       "reranker_active": true,
       "recall_at_10": 1.0,
       "mrr": 1.0,
       "precision_at_5": 0.6,
       "average_precision_at_10": 0.8055555555555555,
       "ndcg_at_10": 0.9060254355346823,
+      "answerable_at_10": null,
+      "answerable_mrr": null,
       "last_expected_rank": 4,
       "rerank_k": "auto",
       "resolved_rerank_k": null,
@@ -1958,6 +2915,48 @@
         "## Bi-encoder vs cross-encoder\n\n- **Bi-encoder**: embed query and document separately, compare via dot\n  product. Fast (~ms per query over millions of docs via approximate\n  nearest neighbor).\n- **Cro",
         "### 对系统的启示\n\n- search indexes usually rank the current corpus, not what the user has\n  recently recalled\n- 如果想给笔记做 FSRS 式调度，需要存**每次访问时间戳**（现在没存）\n- recency and review scheduling should be optional signa"
       ],
+      "line_spans": [
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        }
+      ],
       "scores": [
         0.06557377049180328,
         0.06042078392621871,
@@ -1980,13 +2979,16 @@
         "notes/vector-embeddings.md": 3.0,
         "notes/retrieval-augmented-generation.md": 3.0
       },
-      "latency_ms": 4388.983917189762,
+      "filters": {},
+      "latency_ms": 4337.3060000594705,
       "reranker_active": true,
       "recall_at_10": 1.0,
       "mrr": 1.0,
       "precision_at_5": 0.4,
       "average_precision_at_10": 0.5777777777777777,
       "ndcg_at_10": 0.7920874914199382,
+      "answerable_at_10": null,
+      "answerable_mrr": null,
       "last_expected_rank": 9,
       "rerank_k": "auto",
       "resolved_rerank_k": null,
@@ -2043,6 +3045,48 @@
         "## Related\n- [[deep-work-deliberate-practice]] —— 包含费曼技巧的更大框架\n- [[atomic-notes]] —— 产出物",
         "## Why this matters for learning systems\n\nSpaced repetition, Zettelkasten, and Feynman technique all assume\ndeliberate practice conditions. If you're reviewing Anki cards while\nwatching YouTube, you'r"
       ],
+      "line_spans": [
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        },
+        {
+          "line_start": 0,
+          "line_end": 0
+        }
+      ],
       "scores": [
         0.06478893337698204,
         0.0625225468975469,
@@ -2065,13 +3109,16 @@
         "notes/atomic-notes.md": 3.0,
         "sources/anki-and-flashcards-intro.md": 3.0
       },
-      "latency_ms": 4849.859416950494,
+      "filters": {},
+      "latency_ms": 5098.248125053942,
       "reranker_active": true,
       "recall_at_10": 1.0,
       "mrr": 1.0,
       "precision_at_5": 0.4,
       "average_precision_at_10": 0.7222222222222222,
       "ndcg_at_10": 0.8710785440003371,
+      "answerable_at_10": null,
+      "answerable_mrr": null,
       "last_expected_rank": 6,
       "rerank_k": "auto",
       "resolved_rerank_k": null,

@@ -1,0 +1,1343 @@
+{
+  "config": "A",
+  "queries_file": "tests/blind/queries.filtered.yaml",
+  "vault": "tests/corpus",
+  "n_queries": 8,
+  "with_reranker": false,
+  "reranking": {
+    "enabled": false,
+    "rerank_k": 0,
+    "resolved_k_counts": {
+      "0": 8
+    },
+    "metadata_expansion": false
+  },
+  "diagnostics": {
+    "failure_buckets": {
+      "rank_1_hit": 7,
+      "top_10_hit": 1
+    }
+  },
+  "aggregate": {
+    "n_queries": 8,
+    "mean_recall_at_10": 1.0,
+    "mean_mrr": 0.9375,
+    "mean_precision_at_5": 0.2,
+    "mean_average_precision_at_10": 0.9375,
+    "mean_ndcg_at_10": 0.9538662191964322,
+    "mean_latency_ms": 50.034916785079986,
+    "p50_latency_ms": 16.437292098999023,
+    "p95_latency_ms": 291.34404193609953,
+    "answerability_labeled_queries": 8,
+    "mean_answerable_at_10": 1.0,
+    "mean_answerable_mrr": 0.9375
+  },
+  "by_tag": {
+    "agents": {
+      "n_queries": 1,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 1.0,
+      "mean_precision_at_5": 0.2,
+      "mean_average_precision_at_10": 1.0,
+      "mean_ndcg_at_10": 1.0,
+      "mean_latency_ms": 13.837957987561822,
+      "p50_latency_ms": 13.837957987561822,
+      "p95_latency_ms": 13.837957987561822,
+      "answerability_labeled_queries": 1,
+      "mean_answerable_at_10": 1.0,
+      "mean_answerable_mrr": 1.0
+    },
+    "card": {
+      "n_queries": 1,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 1.0,
+      "mean_precision_at_5": 0.2,
+      "mean_average_precision_at_10": 1.0,
+      "mean_ndcg_at_10": 1.0,
+      "mean_latency_ms": 12.64908304437995,
+      "p50_latency_ms": 12.64908304437995,
+      "p95_latency_ms": 12.64908304437995,
+      "answerability_labeled_queries": 1,
+      "mean_answerable_at_10": 1.0,
+      "mean_answerable_mrr": 1.0
+    },
+    "cjk": {
+      "n_queries": 2,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 1.0,
+      "mean_precision_at_5": 0.2,
+      "mean_average_precision_at_10": 1.0,
+      "mean_ndcg_at_10": 1.0,
+      "mean_latency_ms": 154.91741697769612,
+      "p50_latency_ms": 291.34404193609953,
+      "p95_latency_ms": 291.34404193609953,
+      "answerability_labeled_queries": 2,
+      "mean_answerable_at_10": 1.0,
+      "mean_answerable_mrr": 1.0
+    },
+    "english": {
+      "n_queries": 5,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 0.9,
+      "mean_precision_at_5": 0.2,
+      "mean_average_precision_at_10": 0.9,
+      "mean_ndcg_at_10": 0.9261859507142916,
+      "mean_latency_ms": 14.801441645249724,
+      "p50_latency_ms": 14.861291972920299,
+      "p95_latency_ms": 16.85337512753904,
+      "answerability_labeled_queries": 5,
+      "mean_answerable_at_10": 1.0,
+      "mean_answerable_mrr": 0.9
+    },
+    "filtered": {
+      "n_queries": 8,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 0.9375,
+      "mean_precision_at_5": 0.2,
+      "mean_average_precision_at_10": 0.9375,
+      "mean_ndcg_at_10": 0.9538662191964322,
+      "mean_latency_ms": 50.034916785079986,
+      "p50_latency_ms": 16.437292098999023,
+      "p95_latency_ms": 291.34404193609953,
+      "answerability_labeled_queries": 8,
+      "mean_answerable_at_10": 1.0,
+      "mean_answerable_mrr": 0.9375
+    },
+    "folder-filter": {
+      "n_queries": 5,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 0.9,
+      "mean_precision_at_5": 0.2,
+      "mean_average_precision_at_10": 0.9,
+      "mean_ndcg_at_10": 0.9261859507142916,
+      "mean_latency_ms": 15.858366852626204,
+      "p50_latency_ms": 16.437292098999023,
+      "p95_latency_ms": 18.490792019292712,
+      "answerability_labeled_queries": 5,
+      "mean_answerable_at_10": 1.0,
+      "mean_answerable_mrr": 0.9
+    },
+    "logs": {
+      "n_queries": 2,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 1.0,
+      "mean_precision_at_5": 0.2,
+      "mean_average_precision_at_10": 1.0,
+      "mean_ndcg_at_10": 1.0,
+      "mean_latency_ms": 17.464042059145868,
+      "p50_latency_ms": 18.490792019292712,
+      "p95_latency_ms": 18.490792019292712,
+      "answerability_labeled_queries": 2,
+      "mean_answerable_at_10": 1.0,
+      "mean_answerable_mrr": 1.0
+    },
+    "memory": {
+      "n_queries": 1,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 1.0,
+      "mean_precision_at_5": 0.2,
+      "mean_average_precision_at_10": 1.0,
+      "mean_ndcg_at_10": 1.0,
+      "mean_latency_ms": 291.34404193609953,
+      "p50_latency_ms": 291.34404193609953,
+      "p95_latency_ms": 291.34404193609953,
+      "answerability_labeled_queries": 1,
+      "mean_answerable_at_10": 1.0,
+      "mean_answerable_mrr": 1.0
+    },
+    "mixed": {
+      "n_queries": 1,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 1.0,
+      "mean_precision_at_5": 0.2,
+      "mean_average_precision_at_10": 1.0,
+      "mean_ndcg_at_10": 1.0,
+      "mean_latency_ms": 16.437292098999023,
+      "p50_latency_ms": 16.437292098999023,
+      "p95_latency_ms": 16.437292098999023,
+      "answerability_labeled_queries": 1,
+      "mean_answerable_at_10": 1.0,
+      "mean_answerable_mrr": 1.0
+    },
+    "recipe": {
+      "n_queries": 1,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 1.0,
+      "mean_precision_at_5": 0.2,
+      "mean_average_precision_at_10": 1.0,
+      "mean_ndcg_at_10": 1.0,
+      "mean_latency_ms": 14.861291972920299,
+      "p50_latency_ms": 14.861291972920299,
+      "p95_latency_ms": 14.861291972920299,
+      "answerability_labeled_queries": 1,
+      "mean_answerable_at_10": 1.0,
+      "mean_answerable_mrr": 1.0
+    },
+    "retrieval": {
+      "n_queries": 1,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 1.0,
+      "mean_precision_at_5": 0.2,
+      "mean_average_precision_at_10": 1.0,
+      "mean_ndcg_at_10": 1.0,
+      "mean_latency_ms": 15.805500093847513,
+      "p50_latency_ms": 15.805500093847513,
+      "p95_latency_ms": 15.805500093847513,
+      "answerability_labeled_queries": 1,
+      "mean_answerable_at_10": 1.0,
+      "mean_answerable_mrr": 1.0
+    },
+    "tag-filter": {
+      "n_queries": 3,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 1.0,
+      "mean_precision_at_5": 0.20000000000000004,
+      "mean_average_precision_at_10": 1.0,
+      "mean_ndcg_at_10": 1.0,
+      "mean_latency_ms": 106.99583333916962,
+      "p50_latency_ms": 15.805500093847513,
+      "p95_latency_ms": 291.34404193609953,
+      "answerability_labeled_queries": 3,
+      "mean_answerable_at_10": 1.0,
+      "mean_answerable_mrr": 1.0
+    },
+    "workflow": {
+      "n_queries": 1,
+      "mean_recall_at_10": 1.0,
+      "mean_mrr": 0.5,
+      "mean_precision_at_5": 0.2,
+      "mean_average_precision_at_10": 0.5,
+      "mean_ndcg_at_10": 0.6309297535714575,
+      "mean_latency_ms": 16.85337512753904,
+      "p50_latency_ms": 16.85337512753904,
+      "p95_latency_ms": 16.85337512753904,
+      "answerability_labeled_queries": 1,
+      "mean_answerable_at_10": 1.0,
+      "mean_answerable_mrr": 0.5
+    }
+  },
+  "results": [
+    {
+      "query": "why keyword search still helps embeddings",
+      "config": "A",
+      "tags": [
+        "filtered",
+        "tag-filter",
+        "english",
+        "retrieval"
+      ],
+      "hits": [
+        "notes/bm25-intuition.md"
+      ],
+      "titles": [
+        "BM25 intuition"
+      ],
+      "snippets": [
+        "## Why it still matters in 2026\n\nVector embedders are strong at semantic match, but they lose on exact\nvocabulary. \"FSRS\" is a proper noun that means one thing; if the\nembedder maps it near general \"s"
+      ],
+      "line_spans": [
+        {
+          "line_start": 33,
+          "line_end": 42
+        }
+      ],
+      "scores": [
+        0.020543032786885247
+      ],
+      "expected_paths": [
+        "notes/bm25-intuition.md"
+      ],
+      "relevance": {
+        "notes/bm25-intuition.md": 3.0
+      },
+      "filters": {
+        "tags": [
+          "bm25"
+        ]
+      },
+      "latency_ms": 15.805500093847513,
+      "reranker_active": false,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.2,
+      "average_precision_at_10": 1.0,
+      "ndcg_at_10": 1.0,
+      "answerable_at_10": 1.0,
+      "answerable_mrr": 1.0,
+      "last_expected_rank": 1,
+      "rerank_k": 0,
+      "resolved_rerank_k": 0,
+      "rerank_k_reason": null,
+      "first_stage": {
+        "candidate_count": 1,
+        "channel_source_counts": {
+          "bm25": 0,
+          "vector": 1,
+          "title": 0,
+          "metadata": 0,
+          "indegree": 1
+        },
+        "filtered_vector": {
+          "enabled": true,
+          "allowed_source_count": 1,
+          "vector_k_requested": 177,
+          "vector_k_cap_hit": false,
+          "vector_candidates_after_filter": 1
+        },
+        "expected_path_ranks": {
+          "notes/bm25-intuition.md": {
+            "bm25": null,
+            "vector": 4,
+            "title": null,
+            "metadata": null,
+            "indegree": 1,
+            "rrf": 1,
+            "rerank_candidate": 1
+          }
+        },
+        "hit_channel_ranks": [
+          {
+            "path": "notes/bm25-intuition.md",
+            "bm25": null,
+            "vector": 4,
+            "title": null,
+            "metadata": null,
+            "indegree": 1,
+            "rrf": 1,
+            "rerank_candidate": 1
+          }
+        ]
+      },
+      "expansions_used": [],
+      "failure_bucket": "rank_1_hit"
+    },
+    {
+      "query": "how agents remember between sessions",
+      "config": "A",
+      "tags": [
+        "filtered",
+        "tag-filter",
+        "english",
+        "agents"
+      ],
+      "hits": [
+        "notes/agent-memory-patterns.md"
+      ],
+      "titles": [
+        "Agent memory patterns"
+      ],
+      "snippets": [
+        "# Agent memory patterns\n\nLLMs are stateless between calls. Any \"memory\" an agent exhibits comes\nfrom something external that persists across invocations. A few patterns\nin current practice:"
+      ],
+      "line_spans": [
+        {
+          "line_start": 5,
+          "line_end": 9
+        }
+      ],
+      "scores": [
+        0.021047065044949763
+      ],
+      "expected_paths": [
+        "notes/agent-memory-patterns.md"
+      ],
+      "relevance": {
+        "notes/agent-memory-patterns.md": 3.0
+      },
+      "filters": {
+        "tags": [
+          "agents",
+          "memory"
+        ]
+      },
+      "latency_ms": 13.837957987561822,
+      "reranker_active": false,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.2,
+      "average_precision_at_10": 1.0,
+      "ndcg_at_10": 1.0,
+      "answerable_at_10": 1.0,
+      "answerable_mrr": 1.0,
+      "last_expected_rank": 1,
+      "rerank_k": 0,
+      "resolved_rerank_k": 0,
+      "rerank_k_reason": null,
+      "first_stage": {
+        "candidate_count": 1,
+        "channel_source_counts": {
+          "bm25": 0,
+          "vector": 1,
+          "title": 0,
+          "metadata": 0,
+          "indegree": 1
+        },
+        "filtered_vector": {
+          "enabled": true,
+          "allowed_source_count": 1,
+          "vector_k_requested": 177,
+          "vector_k_cap_hit": false,
+          "vector_candidates_after_filter": 1
+        },
+        "expected_path_ranks": {
+          "notes/agent-memory-patterns.md": {
+            "bm25": null,
+            "vector": 2,
+            "title": null,
+            "metadata": null,
+            "indegree": 1,
+            "rrf": 1,
+            "rerank_candidate": 1
+          }
+        },
+        "hit_channel_ranks": [
+          {
+            "path": "notes/agent-memory-patterns.md",
+            "bm25": null,
+            "vector": 2,
+            "title": null,
+            "metadata": null,
+            "indegree": 1,
+            "rrf": 1,
+            "rerank_candidate": 1
+          }
+        ]
+      },
+      "expansions_used": [],
+      "failure_bucket": "rank_1_hit"
+    },
+    {
+      "query": "记忆为什么在睡眠中稳定下来",
+      "config": "A",
+      "tags": [
+        "filtered",
+        "tag-filter",
+        "cjk",
+        "memory"
+      ],
+      "hits": [
+        "notes/memory-consolidation.md"
+      ],
+      "titles": [
+        "记忆巩固 Memory consolidation"
+      ],
+      "snippets": [
+        "## 关键发现\n\n- **睡眠剥夺直接降低新记忆的保留率**。一整晚不睡后学的东西，一周后剩下\n  的比正常睡眠少 30-40%。\n- **巩固不是被动的重放**。睡眠中大脑会主动\"重新体验\"白天的关键片段，\n  这个过程压缩了时间（几十毫秒 → 几秒），并把记忆和旧知识网络建立连接。\n- **间隔重复 + 睡眠 = 最优组合**。[[spaced-repetition]] 的每次复习启动\n  一"
+      ],
+      "line_spans": [
+        {
+          "line_start": 12,
+          "line_end": 19
+        }
+      ],
+      "scores": [
+        0.021311475409836064
+      ],
+      "expected_paths": [
+        "notes/memory-consolidation.md"
+      ],
+      "relevance": {
+        "notes/memory-consolidation.md": 3.0
+      },
+      "filters": {
+        "tags": [
+          "memory",
+          "sleep"
+        ]
+      },
+      "latency_ms": 291.34404193609953,
+      "reranker_active": false,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.2,
+      "average_precision_at_10": 1.0,
+      "ndcg_at_10": 1.0,
+      "answerable_at_10": 1.0,
+      "answerable_mrr": 1.0,
+      "last_expected_rank": 1,
+      "rerank_k": 0,
+      "resolved_rerank_k": 0,
+      "rerank_k_reason": null,
+      "first_stage": {
+        "candidate_count": 1,
+        "channel_source_counts": {
+          "bm25": 0,
+          "vector": 1,
+          "title": 0,
+          "metadata": 0,
+          "indegree": 1
+        },
+        "filtered_vector": {
+          "enabled": true,
+          "allowed_source_count": 1,
+          "vector_k_requested": 177,
+          "vector_k_cap_hit": false,
+          "vector_candidates_after_filter": 1
+        },
+        "expected_path_ranks": {
+          "notes/memory-consolidation.md": {
+            "bm25": null,
+            "vector": 1,
+            "title": null,
+            "metadata": null,
+            "indegree": 1,
+            "rrf": 1,
+            "rerank_candidate": 1
+          }
+        },
+        "hit_channel_ranks": [
+          {
+            "path": "notes/memory-consolidation.md",
+            "bm25": null,
+            "vector": 1,
+            "title": null,
+            "metadata": null,
+            "indegree": 1,
+            "rrf": 1,
+            "rerank_candidate": 1
+          }
+        ]
+      },
+      "expansions_used": [],
+      "failure_bucket": "rank_1_hit"
+    },
+    {
+      "query": "turn durable notes into review cards",
+      "config": "A",
+      "tags": [
+        "filtered",
+        "folder-filter",
+        "english",
+        "workflow"
+      ],
+      "hits": [
+        "notes/spaced-repetition.md",
+        "notes/note-to-card-workflow.md",
+        "notes/fsrs-algorithm.md",
+        "notes/zettelkasten.md",
+        "notes/atomic-notes.md",
+        "notes/feynman-technique.md",
+        "notes/deep-work-deliberate-practice.md",
+        "notes/agent-memory-patterns.md",
+        "notes/forgetting-curve.md",
+        "notes/retrieval-augmented-generation.md"
+      ],
+      "titles": [
+        "Spaced repetition",
+        "Note-to-card workflow",
+        "FSRS algorithm",
+        "Zettelkasten",
+        "Atomic notes",
+        "Feynman technique",
+        "Deep work and deliberate practice",
+        "Agent memory patterns",
+        "遗忘曲线 Forgetting curve",
+        "Retrieval-augmented generation"
+      ],
+      "snippets": [
+        "## How it works in practice\n\nApps like Anki, SuperMemo, and Mochi implement spaced repetition via\nflashcards. You create a card (question front, answer back), and the app\nschedules it. You rate each r",
+        "## Common failure: over-carding\n\nDon't make a flashcard for every sentence of your notes. The goal is\n**review-worthy claims**, not \"does this look like a fact\". Three\ncards per permanent note is plen",
+        "## Related\n- [[spaced-repetition]] — the practice that FSRS optimizes\n- [[forgetting-curve]] — the phenomenon being modeled\n- [[note-to-card-workflow]] — how permanent notes become reviewable cards",
+        "## 三类 zettel\n\n1. **Fleeting notes（灵光笔记）** - 脑子里冒出来的，随手记，几天内整理或丢弃\n2. **Literature notes（文献笔记）** - 读书/看论文时的摘录 + 自己的话复述\n3. **Permanent notes（永久笔记）** - 真正的 zettel，用自己的话写清楚一个\n   原子思想，放进卡片盒，编号，链接到相关卡片\n\nPerm",
+        "## Related\n- [[zettelkasten]] — the note system this serves\n- [[note-to-card-workflow]] — turning atomic notes into SRS cards\n- [[feynman-technique]] — explaining-for-strangers discipline",
+        "## 与 Zettelkasten 的关系\n\n写 permanent note 的过程基本就是一次 Feynman pass：你在用自己的话重新\n组织一个想法。如果你的 zettel 是复制粘贴 + 摘录，它就不是一张工作型\nzettel，它是装饰品。见 [[zettelkasten]] 对 reformulation 的讨论。",
+        "## Why this matters for learning systems\n\nSpaced repetition, Zettelkasten, and Feynman technique all assume\ndeliberate practice conditions. If you're reviewing Anki cards while\nwatching YouTube, you'r",
+        "## 3. Retrieval-based (RAG)\n\nStore turns, notes, and tool outputs as documents; index them with\n[[vector-embeddings]] + [[BM25]]; retrieve relevant ones at each turn.\nSee [[retrieval-augmented-generat",
+        "## 实践启示\n\n- 学习后**当天晚上**做一次短复习比三天后多一次复习效果更好。\n- 长间隔不等于懒复习——只要每次都\"踩\"在曲线下降的关键点。\n- 课堂教学的一次性讲授，如果没有后续复习机制，从遗忘曲线看基本是浪费。",
+        "# Retrieval-augmented generation\n\nRAG is the pattern of augmenting an LLM's prompt with retrieved documents\nat query time, so the model can answer from up-to-date or private\ninformation it wasn't trai"
+      ],
+      "line_spans": [
+        {
+          "line_start": 16,
+          "line_end": 25
+        },
+        {
+          "line_start": 39,
+          "line_end": 47
+        },
+        {
+          "line_start": 47,
+          "line_end": 50
+        },
+        {
+          "line_start": 15,
+          "line_end": 22
+        },
+        {
+          "line_start": 43,
+          "line_end": 46
+        },
+        {
+          "line_start": 26,
+          "line_end": 30
+        },
+        {
+          "line_start": 25,
+          "line_end": 35
+        },
+        {
+          "line_start": 22,
+          "line_end": 28
+        },
+        {
+          "line_start": 35,
+          "line_end": 39
+        },
+        {
+          "line_start": 5,
+          "line_end": 15
+        }
+      ],
+      "scores": [
+        0.020711725550435225,
+        0.020679156908665106,
+        0.020543032786885247,
+        0.019930069930069932,
+        0.019150725247004414,
+        0.018452380952380953,
+        0.018138561096307577,
+        0.017623102554609405,
+        0.01700605393505779,
+        0.016882621951219513
+      ],
+      "expected_paths": [
+        "notes/note-to-card-workflow.md"
+      ],
+      "relevance": {
+        "notes/note-to-card-workflow.md": 3.0
+      },
+      "filters": {
+        "folder": "notes"
+      },
+      "latency_ms": 16.85337512753904,
+      "reranker_active": false,
+      "recall_at_10": 1.0,
+      "mrr": 0.5,
+      "precision_at_5": 0.2,
+      "average_precision_at_10": 0.5,
+      "ndcg_at_10": 0.6309297535714575,
+      "answerable_at_10": 1.0,
+      "answerable_mrr": 0.5,
+      "last_expected_rank": 2,
+      "rerank_k": 0,
+      "resolved_rerank_k": 0,
+      "rerank_k_reason": null,
+      "first_stage": {
+        "candidate_count": 16,
+        "channel_source_counts": {
+          "bm25": 0,
+          "vector": 16,
+          "title": 0,
+          "metadata": 0,
+          "indegree": 16
+        },
+        "filtered_vector": {
+          "enabled": true,
+          "allowed_source_count": 16,
+          "vector_k_requested": 177,
+          "vector_k_cap_hit": false,
+          "vector_candidates_after_filter": 16
+        },
+        "expected_path_ranks": {
+          "notes/note-to-card-workflow.md": {
+            "bm25": null,
+            "vector": 1,
+            "title": null,
+            "metadata": null,
+            "indegree": 10,
+            "rrf": 2,
+            "rerank_candidate": 2
+          }
+        },
+        "hit_channel_ranks": [
+          {
+            "path": "notes/spaced-repetition.md",
+            "bm25": null,
+            "vector": 3,
+            "title": null,
+            "metadata": null,
+            "indegree": 2,
+            "rrf": 1,
+            "rerank_candidate": 1
+          },
+          {
+            "path": "notes/note-to-card-workflow.md",
+            "bm25": null,
+            "vector": 1,
+            "title": null,
+            "metadata": null,
+            "indegree": 10,
+            "rrf": 2,
+            "rerank_candidate": 2
+          },
+          {
+            "path": "notes/fsrs-algorithm.md",
+            "bm25": null,
+            "vector": 4,
+            "title": null,
+            "metadata": null,
+            "indegree": 1,
+            "rrf": 3,
+            "rerank_candidate": 3
+          },
+          {
+            "path": "notes/zettelkasten.md",
+            "bm25": null,
+            "vector": 5,
+            "title": null,
+            "metadata": null,
+            "indegree": 6,
+            "rrf": 4,
+            "rerank_candidate": 4
+          },
+          {
+            "path": "notes/atomic-notes.md",
+            "bm25": null,
+            "vector": 7,
+            "title": null,
+            "metadata": null,
+            "indegree": 11,
+            "rrf": 5,
+            "rerank_candidate": 5
+          },
+          {
+            "path": "notes/feynman-technique.md",
+            "bm25": null,
+            "vector": 10,
+            "title": null,
+            "metadata": null,
+            "indegree": 12,
+            "rrf": 6,
+            "rerank_candidate": 6
+          },
+          {
+            "path": "notes/deep-work-deliberate-practice.md",
+            "bm25": null,
+            "vector": 11,
+            "title": null,
+            "metadata": null,
+            "indegree": 14,
+            "rrf": 7,
+            "rerank_candidate": 7
+          },
+          {
+            "path": "notes/agent-memory-patterns.md",
+            "bm25": null,
+            "vector": 14,
+            "title": null,
+            "metadata": null,
+            "indegree": 13,
+            "rrf": 8,
+            "rerank_candidate": 8
+          },
+          {
+            "path": "notes/forgetting-curve.md",
+            "bm25": null,
+            "vector": 19,
+            "title": null,
+            "metadata": null,
+            "indegree": 9,
+            "rrf": 9,
+            "rerank_candidate": 9
+          },
+          {
+            "path": "notes/retrieval-augmented-generation.md",
+            "bm25": null,
+            "vector": 22,
+            "title": null,
+            "metadata": null,
+            "indegree": 4,
+            "rrf": 10,
+            "rerank_candidate": 10
+          }
+        ]
+      },
+      "expansions_used": [],
+      "failure_bucket": "top_10_hit"
+    },
+    {
+      "query": "scaled dot product formula",
+      "config": "A",
+      "tags": [
+        "filtered",
+        "folder-filter",
+        "english",
+        "card"
+      ],
+      "hits": [
+        "cards/card-attention-formula.md",
+        "cards/card-rrf-formula.md",
+        "cards/card-fsrs-core-idea.md"
+      ],
+      "titles": [
+        "Card: Attention formula",
+        "Card: RRF formula",
+        "Card: FSRS core idea"
+      ],
+      "snippets": [
+        "# Card: Attention formula\n\n**Q**: Write the scaled dot-product attention formula.\n\n**A**:",
+        "```\nscore(c) = Σ_i w_i / (k + rank_i(c))\n```\n",
+        "# Card: FSRS core idea\n\n**Q**: What does FSRS do differently from SM-2?\n\n**A**: FSRS fits a **17-parameter power-law memory model** on\npopulation review data, outputting per-card intervals that target"
+      ],
+      "line_spans": [
+        {
+          "line_start": 4,
+          "line_end": 8
+        },
+        {
+          "line_start": 10,
+          "line_end": 12
+        },
+        {
+          "line_start": 4,
+          "line_end": 14
+        }
+      ],
+      "scores": [
+        0.03770491803278689,
+        0.020386904761904762,
+        0.015708274894810657
+      ],
+      "expected_paths": [
+        "cards/card-attention-formula.md"
+      ],
+      "relevance": {
+        "cards/card-attention-formula.md": 3.0
+      },
+      "filters": {
+        "folder": "cards"
+      },
+      "latency_ms": 12.64908304437995,
+      "reranker_active": false,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.2,
+      "average_precision_at_10": 1.0,
+      "ndcg_at_10": 1.0,
+      "answerable_at_10": 1.0,
+      "answerable_mrr": 1.0,
+      "last_expected_rank": 1,
+      "rerank_k": 0,
+      "resolved_rerank_k": 0,
+      "rerank_k_reason": null,
+      "first_stage": {
+        "candidate_count": 3,
+        "channel_source_counts": {
+          "bm25": 1,
+          "vector": 3,
+          "title": 0,
+          "metadata": 0,
+          "indegree": 3
+        },
+        "filtered_vector": {
+          "enabled": true,
+          "allowed_source_count": 3,
+          "vector_k_requested": 177,
+          "vector_k_cap_hit": false,
+          "vector_candidates_after_filter": 3
+        },
+        "expected_path_ranks": {
+          "cards/card-attention-formula.md": {
+            "bm25": 1,
+            "vector": 1,
+            "title": null,
+            "metadata": null,
+            "indegree": 1,
+            "rrf": 1,
+            "rerank_candidate": 1
+          }
+        },
+        "hit_channel_ranks": [
+          {
+            "path": "cards/card-attention-formula.md",
+            "bm25": 1,
+            "vector": 1,
+            "title": null,
+            "metadata": null,
+            "indegree": 1,
+            "rrf": 1,
+            "rerank_candidate": 1
+          },
+          {
+            "path": "cards/card-rrf-formula.md",
+            "bm25": null,
+            "vector": 4,
+            "title": null,
+            "metadata": null,
+            "indegree": 3,
+            "rrf": 2,
+            "rerank_candidate": 2
+          },
+          {
+            "path": "cards/card-fsrs-core-idea.md",
+            "bm25": null,
+            "vector": 32,
+            "title": null,
+            "metadata": null,
+            "indegree": 2,
+            "rrf": 3,
+            "rerank_candidate": 3
+          }
+        ]
+      },
+      "expansions_used": [],
+      "failure_bucket": "rank_1_hit"
+    },
+    {
+      "query": "wild yeast starter timing",
+      "config": "A",
+      "tags": [
+        "filtered",
+        "folder-filter",
+        "english",
+        "recipe"
+      ],
+      "hits": [
+        "recipes/sourdough-starter.md",
+        "recipes/pad-thai.md",
+        "recipes/red-braised-pork.md"
+      ],
+      "titles": [
+        "Sourdough starter from scratch",
+        "Pad Thai",
+        "红烧肉 Red-braised pork"
+      ],
+      "snippets": [
+        "# Sourdough starter from scratch\n\nTakes 7-10 days to build a viable starter. No yeast, no commercial\ncultures. Just flour, water, and wild yeast from the air.",
+        "## Method\n\n1. **Make sauce**: whisk tamarind, palm sugar, fish sauce, soy sauce in\n   a bowl until sugar dissolves. Taste — should be equal parts sweet,\n   salty, sour. Adjust.\n2. **Prep**: have all i",
+        "## 失败排查\n\n- 肉老 → 火太大，或炖的时间不够\n- 颜色暗 → 糖色炒过了变苦，或老抽放多了\n- 汁太清 → 最后收汁时间不够，或水加多了"
+      ],
+      "line_spans": [
+        {
+          "line_start": 5,
+          "line_end": 8
+        },
+        {
+          "line_start": 29,
+          "line_end": 41
+        },
+        {
+          "line_start": 40,
+          "line_end": 44
+        }
+      ],
+      "scores": [
+        0.021155347384855583,
+        0.018616662923871548,
+        0.01817204301075269
+      ],
+      "expected_paths": [
+        "recipes/sourdough-starter.md"
+      ],
+      "relevance": {
+        "recipes/sourdough-starter.md": 3.0
+      },
+      "filters": {
+        "folder": "recipes"
+      },
+      "latency_ms": 14.861291972920299,
+      "reranker_active": false,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.2,
+      "average_precision_at_10": 1.0,
+      "ndcg_at_10": 1.0,
+      "answerable_at_10": 1.0,
+      "answerable_mrr": 1.0,
+      "last_expected_rank": 1,
+      "rerank_k": 0,
+      "resolved_rerank_k": 0,
+      "rerank_k_reason": null,
+      "first_stage": {
+        "candidate_count": 3,
+        "channel_source_counts": {
+          "bm25": 0,
+          "vector": 3,
+          "title": 0,
+          "metadata": 0,
+          "indegree": 3
+        },
+        "filtered_vector": {
+          "enabled": true,
+          "allowed_source_count": 3,
+          "vector_k_requested": 177,
+          "vector_k_cap_hit": false,
+          "vector_candidates_after_filter": 3
+        },
+        "expected_path_ranks": {
+          "recipes/sourdough-starter.md": {
+            "bm25": null,
+            "vector": 1,
+            "title": null,
+            "metadata": null,
+            "indegree": 3,
+            "rrf": 1,
+            "rerank_candidate": 1
+          }
+        },
+        "hit_channel_ranks": [
+          {
+            "path": "recipes/sourdough-starter.md",
+            "bm25": null,
+            "vector": 1,
+            "title": null,
+            "metadata": null,
+            "indegree": 3,
+            "rrf": 1,
+            "rerank_candidate": 1
+          },
+          {
+            "path": "recipes/pad-thai.md",
+            "bm25": null,
+            "vector": 13,
+            "title": null,
+            "metadata": null,
+            "indegree": 1,
+            "rrf": 2,
+            "rerank_candidate": 2
+          },
+          {
+            "path": "recipes/red-braised-pork.md",
+            "bm25": null,
+            "vector": 15,
+            "title": null,
+            "metadata": null,
+            "indegree": 2,
+            "rrf": 3,
+            "rerank_candidate": 3
+          }
+        ]
+      },
+      "expansions_used": [],
+      "failure_bucket": "rank_1_hit"
+    },
+    {
+      "query": "本地 agent retrieval 设计要求",
+      "config": "A",
+      "tags": [
+        "filtered",
+        "folder-filter",
+        "cjk",
+        "logs"
+      ],
+      "hits": [
+        "logs/2026-W15.md",
+        "logs/2026-W17.md",
+        "logs/2026-W18.md",
+        "logs/2026-W16.md",
+        "logs/2026-W14.md"
+      ],
+      "titles": [
+        "2026-W15",
+        "2026-W17",
+        "2026-W18",
+        "2026-W16",
+        "2026-W14"
+      ],
+      "snippets": [
+        "### 检索系统的设计要求\n\n个人 vault + agent 场景需要的不只是\"又一个语义搜索\"，而是把信息检索里\n成熟的 hybrid retrieval 结构做成一个本地工具：\n- BM25 + vector + graph + title 四路召回（[[RRF]] 融合）\n- 可选 cross-encoder 重排（[[attention-mechanism]]）\n- CJK 一等公民（j",
+        "### 对 seeklink 的启发\n\nDoto 的观点等于说\"**好搜索 = 不需要目录**\"。这和 [[agent-memory-patterns]]\n里的\"retrieval quality = agent intelligence\"是同一个 insight，只是\n对 human 用户。\n\n如果 seeklink 的搜索够准，你的 vault 可以扁平——logs/ notes/ cards",
+        "### 2. Query expansion ≈ 用户搜索前的多角度自问自答\n\nAgent 自己会做。人不会。这就是为什么笔记软件 UI 需要内置 expansion，\nCLI agent 场景可以跳过。见 [[retrieval-augmented-generation]]。",
+        "### 对系统的启示\n\n- search indexes usually rank the current corpus, not what the user has\n  recently recalled\n- 如果想给笔记做 FSRS 式调度，需要存**每次访问时间戳**（现在没存）\n- recency and review scheduling should be optional signa",
+        "### 下周计划\n\n- 再读一遍 [[FSRS]] paper，理解它的 90% retrievability 目标是怎么校的\n- 调查 [[forgetting-curve]] 对\"会用\"的影响（不是\"还记得\"）\n- 比较纯关键词、向量搜索、混合检索在个人笔记里的召回差异"
+      ],
+      "line_spans": [
+        {
+          "line_start": 15,
+          "line_end": 22
+        },
+        {
+          "line_start": 25,
+          "line_end": 33
+        },
+        {
+          "line_start": 14,
+          "line_end": 17
+        },
+        {
+          "line_start": 34,
+          "line_end": 40
+        },
+        {
+          "line_start": 31,
+          "line_end": 35
+        }
+      ],
+      "scores": [
+        0.037625594923320994,
+        0.020816532258064516,
+        0.020488400488400487,
+        0.020386904761904762,
+        0.020302648171500633
+      ],
+      "expected_paths": [
+        "logs/2026-W15.md"
+      ],
+      "relevance": {
+        "logs/2026-W15.md": 3.0
+      },
+      "filters": {
+        "folder": "logs"
+      },
+      "latency_ms": 18.490792019292712,
+      "reranker_active": false,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.2,
+      "average_precision_at_10": 1.0,
+      "ndcg_at_10": 1.0,
+      "answerable_at_10": 1.0,
+      "answerable_mrr": 1.0,
+      "last_expected_rank": 1,
+      "rerank_k": 0,
+      "resolved_rerank_k": 0,
+      "rerank_k_reason": null,
+      "first_stage": {
+        "candidate_count": 5,
+        "channel_source_counts": {
+          "bm25": 1,
+          "vector": 5,
+          "title": 0,
+          "metadata": 0,
+          "indegree": 5
+        },
+        "filtered_vector": {
+          "enabled": true,
+          "allowed_source_count": 5,
+          "vector_k_requested": 177,
+          "vector_k_cap_hit": false,
+          "vector_candidates_after_filter": 5
+        },
+        "expected_path_ranks": {
+          "logs/2026-W15.md": {
+            "bm25": 1,
+            "vector": 1,
+            "title": null,
+            "metadata": null,
+            "indegree": 2,
+            "rrf": 1,
+            "rerank_candidate": 1
+          }
+        },
+        "hit_channel_ranks": [
+          {
+            "path": "logs/2026-W15.md",
+            "bm25": 1,
+            "vector": 1,
+            "title": null,
+            "metadata": null,
+            "indegree": 2,
+            "rrf": 1,
+            "rerank_candidate": 1
+          },
+          {
+            "path": "logs/2026-W17.md",
+            "bm25": null,
+            "vector": 2,
+            "title": null,
+            "metadata": null,
+            "indegree": 4,
+            "rrf": 2,
+            "rerank_candidate": 2
+          },
+          {
+            "path": "logs/2026-W18.md",
+            "bm25": null,
+            "vector": 3,
+            "title": null,
+            "metadata": null,
+            "indegree": 5,
+            "rrf": 3,
+            "rerank_candidate": 3
+          },
+          {
+            "path": "logs/2026-W16.md",
+            "bm25": null,
+            "vector": 4,
+            "title": null,
+            "metadata": null,
+            "indegree": 3,
+            "rrf": 4,
+            "rerank_candidate": 4
+          },
+          {
+            "path": "logs/2026-W14.md",
+            "bm25": null,
+            "vector": 5,
+            "title": null,
+            "metadata": null,
+            "indegree": 1,
+            "rrf": 5,
+            "rerank_candidate": 5
+          }
+        ]
+      },
+      "expansions_used": [],
+      "failure_bucket": "rank_1_hit"
+    },
+    {
+      "query": "CJK first vault embedding advantage",
+      "config": "A",
+      "tags": [
+        "filtered",
+        "folder-filter",
+        "mixed",
+        "logs"
+      ],
+      "hits": [
+        "logs/2026-W18.md",
+        "logs/2026-W17.md",
+        "logs/2026-W15.md",
+        "logs/2026-W14.md",
+        "logs/2026-W16.md"
+      ],
+      "titles": [
+        "2026-W18",
+        "2026-W17",
+        "2026-W15",
+        "2026-W14",
+        "2026-W16"
+      ],
+      "snippets": [
+        "### 3. CJK 处理上 seeklink 的 unfair advantage\n\n国内做 RAG 的产品都用 openai 的 embedder 或者 BGE-large。jina-v2-zh\n是 2024 年做中文 embedder 做得最细的一家，但英文场景少人用所以没\nlisticle 报道。对 CJK-first vault 是 underappreciated 的好东西。\n见 [[",
+        "### 下周\n\n用一轮 blind test 检查「扁平 vault + 强搜索」是否真的能减少目录依赖。",
+        "### 检索系统的设计要求\n\n个人 vault + agent 场景需要的不只是\"又一个语义搜索\"，而是把信息检索里\n成熟的 hybrid retrieval 结构做成一个本地工具：\n- BM25 + vector + graph + title 四路召回（[[RRF]] 融合）\n- 可选 cross-encoder 重排（[[attention-mechanism]]）\n- CJK 一等公民（j",
+        "### 几个候选方案\n\n1. **纯 Zettelkasten**：每个想法写一张 permanent note，用 wikilink 连接。\n   问题：我查找卡片的姿势本来就是搜索，卡片数到 200+ 以后拓扑已经没法靠\n   脑子维护。需要 seeklink 这种工具。\n2. **Anki + FSRS**：把所有 claim 做成卡片喂给 SRS。[[spaced-repetition]]",
+        "### 对系统的启示\n\n- search indexes usually rank the current corpus, not what the user has\n  recently recalled\n- 如果想给笔记做 FSRS 式调度，需要存**每次访问时间戳**（现在没存）\n- recency and review scheduling should be optional signa"
+      ],
+      "line_spans": [
+        {
+          "line_start": 19,
+          "line_end": 24
+        },
+        {
+          "line_start": 35,
+          "line_end": 37
+        },
+        {
+          "line_start": 15,
+          "line_end": 22
+        },
+        {
+          "line_start": 10,
+          "line_end": 19
+        },
+        {
+          "line_start": 34,
+          "line_end": 40
+        }
+      ],
+      "scores": [
+        0.02074441687344913,
+        0.019839015151515153,
+        0.019764082811747713,
+        0.017738545607398064,
+        0.016526610644257703
+      ],
+      "expected_paths": [
+        "logs/2026-W18.md"
+      ],
+      "relevance": {
+        "logs/2026-W18.md": 3.0
+      },
+      "filters": {
+        "folder": "logs"
+      },
+      "latency_ms": 16.437292098999023,
+      "reranker_active": false,
+      "recall_at_10": 1.0,
+      "mrr": 1.0,
+      "precision_at_5": 0.2,
+      "average_precision_at_10": 1.0,
+      "ndcg_at_10": 1.0,
+      "answerable_at_10": 1.0,
+      "answerable_mrr": 1.0,
+      "last_expected_rank": 1,
+      "rerank_k": 0,
+      "resolved_rerank_k": 0,
+      "rerank_k_reason": null,
+      "first_stage": {
+        "candidate_count": 5,
+        "channel_source_counts": {
+          "bm25": 0,
+          "vector": 5,
+          "title": 0,
+          "metadata": 0,
+          "indegree": 5
+        },
+        "filtered_vector": {
+          "enabled": true,
+          "allowed_source_count": 5,
+          "vector_k_requested": 177,
+          "vector_k_cap_hit": false,
+          "vector_candidates_after_filter": 5
+        },
+        "expected_path_ranks": {
+          "logs/2026-W18.md": {
+            "bm25": null,
+            "vector": 2,
+            "title": null,
+            "metadata": null,
+            "indegree": 5,
+            "rrf": 1,
+            "rerank_candidate": 1
+          }
+        },
+        "hit_channel_ranks": [
+          {
+            "path": "logs/2026-W18.md",
+            "bm25": null,
+            "vector": 2,
+            "title": null,
+            "metadata": null,
+            "indegree": 5,
+            "rrf": 1,
+            "rerank_candidate": 1
+          },
+          {
+            "path": "logs/2026-W17.md",
+            "bm25": null,
+            "vector": 6,
+            "title": null,
+            "metadata": null,
+            "indegree": 4,
+            "rrf": 2,
+            "rerank_candidate": 2
+          },
+          {
+            "path": "logs/2026-W15.md",
+            "bm25": null,
+            "vector": 7,
+            "title": null,
+            "metadata": null,
+            "indegree": 2,
+            "rrf": 3,
+            "rerank_candidate": 3
+          },
+          {
+            "path": "logs/2026-W14.md",
+            "bm25": null,
+            "vector": 18,
+            "title": null,
+            "metadata": null,
+            "indegree": 1,
+            "rrf": 4,
+            "rerank_candidate": 4
+          },
+          {
+            "path": "logs/2026-W16.md",
+            "bm25": null,
+            "vector": 25,
+            "title": null,
+            "metadata": null,
+            "indegree": 3,
+            "rrf": 5,
+            "rerank_candidate": 5
+          }
+        ]
+      },
+      "expansions_used": [],
+      "failure_bucket": "rank_1_hit"
+    }
+  ]
+}

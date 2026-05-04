@@ -9,6 +9,8 @@
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-05-04
+
 ### 变更
 - 在 README 中新增可直接复制给 agent 的配置说明，并在 `llms.txt` 中强化本地 Markdown 笔记库检索的发现提示。
 - 扩展 PyPI 关键词，覆盖 agent、本地搜索、Markdown 搜索和 llms.txt 发现路径。
@@ -22,6 +24,8 @@
 
 ### 开发
 - 盲测 runner 现在支持 source 级 folder/tag 过滤、filtered-vector 诊断，以及可选的 answerability 标签，用于检查 top-10 命中是否真的包含 agent 需要的答案文本。
+- 发布验证现在包含一个 8 条查询的过滤检索 fixture。在捆绑 fixture vault 上关闭 reranker 时，它的 Recall@10 为 1.000，Answerable@10 为 1.000；常规 22 条查询 fixture 在启用可选 MLX reranker 时仍为 Recall@10 0.985、MRR 0.977、nDCG@10 0.901。
+- 将 `tests/blind/results/` 刷新为 v0.6 发布质量快照：v0.5 baseline、v0.6 shipping run、v0.6 filtered fixture，以及 v0.6 expansion upper bound。
 
 ## [0.5.0] - 2026-05-04
 
@@ -173,7 +177,8 @@
 - 原生 CJK 分词，通过 jieba 注册为自定义 FTS5 分词器。
 - MCP 服务器传输（`seeklink serve`）—— 于 v0.2.0 移除。
 
-[Unreleased]: https://github.com/simonsysun/seeklink/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/simonsysun/seeklink/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/simonsysun/seeklink/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/simonsysun/seeklink/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/simonsysun/seeklink/compare/v0.3.2...v0.4.0
 [0.3.2]: https://github.com/simonsysun/seeklink/releases/tag/v0.3.2

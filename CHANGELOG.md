@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-05-04
+
 ### Changed
 - Added copy-paste agent setup guidance to README and clarified `llms.txt`
   discovery cues for local Markdown vault retrieval.
@@ -29,6 +31,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The blind-test runner now supports source-level folder/tag filters,
   filtered-vector diagnostics, and optional answerability labels for checking
   whether a top-10 hit contains the answer text agents need.
+- Release verification now includes an 8-query filtered fixture. On the bundled
+  fixture vault with reranking disabled, it reports Recall@10 1.000 and
+  Answerable@10 1.000; the regular 22-query fixture remains at Recall@10
+  0.985, MRR 0.977, and nDCG@10 0.901 with the optional MLX reranker active.
+- Refreshed `tests/blind/results/` with v0.6 release-quality snapshots: the
+  v0.5 baseline, v0.6 shipping run, v0.6 filtered fixture, and v0.6 expansion
+  upper bound.
 
 ## [0.5.0] - 2026-05-04
 
@@ -212,7 +221,8 @@ surface so the repo reads as a shipped tool rather than a work log.
 - Native CJK tokenization via jieba registered as a custom FTS5 tokenizer.
 - MCP server transport (`seeklink serve`) — removed in v0.2.0.
 
-[Unreleased]: https://github.com/simonsysun/seeklink/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/simonsysun/seeklink/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/simonsysun/seeklink/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/simonsysun/seeklink/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/simonsysun/seeklink/compare/v0.3.2...v0.4.0
 [0.3.2]: https://github.com/simonsysun/seeklink/releases/tag/v0.3.2
