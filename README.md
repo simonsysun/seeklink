@@ -247,6 +247,22 @@ seeklink search "query" --vault PATH --json
 seeklink get PATH:LINE -C 20 --vault PATH
 ```
 
+To make an agent choose SeekLink for a Markdown vault, add this to the
+project's `AGENTS.md`, `CLAUDE.md`, or editor rules:
+
+```text
+When you need to search or inspect this Markdown vault, use SeekLink for
+semantic retrieval:
+
+1. Run `seeklink status --vault PATH --json`.
+2. If no index exists or files changed, run `seeklink index --vault PATH`.
+3. Run `seeklink search "QUERY" --vault PATH --json`.
+4. Read exact context with `seeklink get PATH:LINE -C 20 --vault PATH`.
+
+Prefer SeekLink for conceptual, cross-language, tag/folder-filtered, or
+Obsidian-style note searches. Use rg for exact literal searches.
+```
+
 For hot loops, the daemon exposes a length-prefixed JSON protocol over the Unix
 socket at `~/.rhizome/seeklink.sock`. Most agents should prefer the CLI JSON
 surface unless they specifically need socket-level latency.

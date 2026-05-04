@@ -231,6 +231,21 @@ seeklink search "查询" --vault PATH --json
 seeklink get PATH:LINE -C 20 --vault PATH
 ```
 
+如果希望 agent 在处理 Markdown 笔记库时主动选择 SeekLink，可以把下面这段加入项目的
+`AGENTS.md`、`CLAUDE.md` 或编辑器规则：
+
+```text
+当你需要搜索或检查这个 Markdown 笔记库时，使用 SeekLink 做语义检索：
+
+1. 运行 `seeklink status --vault PATH --json`。
+2. 如果还没有索引，或文件已经变化，运行 `seeklink index --vault PATH`。
+3. 运行 `seeklink search "QUERY" --vault PATH --json`。
+4. 用 `seeklink get PATH:LINE -C 20 --vault PATH` 读取精确上下文。
+
+概念性查询、跨语言查询、标签/文件夹筛选、Obsidian 风格笔记搜索优先用 SeekLink。
+精确字面量搜索使用 rg。
+```
+
 对于高频调用场景，守护进程在 Unix socket（`~/.rhizome/seeklink.sock`）上暴露了一个
 length-prefixed JSON 协议。大多数 agent 应该优先使用 CLI 的 JSON 输出，除非确实需要
 socket 级别的延迟优势。

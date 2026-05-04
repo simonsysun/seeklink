@@ -9,6 +9,10 @@
 
 ## [Unreleased]
 
+### 变更
+- 在 README 中新增可直接复制给 agent 的配置说明，并在 `llms.txt` 中强化本地 Markdown 笔记库检索的发现提示。
+- 扩展 PyPI 关键词，覆盖 agent、本地搜索、Markdown 搜索和 llms.txt 发现路径。
+
 ## [0.5.0] - 2026-05-04
 
 ### 变更

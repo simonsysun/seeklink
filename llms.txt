@@ -6,6 +6,16 @@ SeekLink is a Python CLI plus an optional Unix-socket daemon. It searches person
 
 Runs on macOS and Linux, Python 3.11+. Indexes any folder of `.md` files. Obsidian-style `[[wikilinks]]` and `aliases` frontmatter are parsed but optional. Single-vault daemon; pass `--vault` for one-shot cold-start queries against a different vault.
 
+## Use when
+
+- An AI coding agent needs local, private search over a Markdown or Obsidian-compatible vault.
+- A project uses `AGENTS.md`, `CLAUDE.md`, Cursor rules, or other agent instructions that need reliable vault retrieval.
+- Queries are conceptual, cross-language, CJK/English, tag-filtered, folder-filtered, or need Obsidian-style note/title/alias lookup.
+- Results need line anchors so an agent can read exact context with `seeklink get PATH:LINE -C N`.
+- A Markdown wiki or llm-wiki needs retrieval before editing existing pages.
+
+Prefer `rg` for exact literal searches. Do not use SeekLink for non-Markdown sources before conversion, hosted multi-user search, or GUI-only Obsidian workflows.
+
 ## Docs
 
 - [README](https://github.com/simonsysun/seeklink/blob/main/README.md): full install, quick start, CLI reference, architecture, support matrix, and when (not) to use SeekLink.

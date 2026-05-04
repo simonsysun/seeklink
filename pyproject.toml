@@ -18,8 +18,12 @@ keywords = [
     "zettelkasten",
     "rag",
     "retrieval",
+    "local-search",
+    "markdown-search",
+    "obsidian-search",
     "bm25",
     "vector-search",
+    "local-rag",
     "sqlite-vec",
     "fts5",
     "cjk",
@@ -30,6 +34,10 @@ keywords = [
     "local-first",
     "offline",
     "cli",
+    "ai-agent",
+    "agent-tools",
+    "llm-tools",
+    "llms-txt",
 ]
 classifiers = [
     "Development Status :: 4 - Beta",

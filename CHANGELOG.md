@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Added copy-paste agent setup guidance to README and clarified `llms.txt`
+  discovery cues for local Markdown vault retrieval.
+- Expanded PyPI keywords for agent, local-search, Markdown-search, and
+  llms.txt discoverability.
+
 ## [0.5.0] - 2026-05-04
 
 ### Changed
