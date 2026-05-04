@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-05-04
+
 ### Changed
 - Full-vault indexing now embeds in smaller batches to reduce long-tail embedding stalls on real Markdown vaults.
 - `seeklink index --vault PATH` now prints full-vault progress to stderr while keeping the final `Done:` summary on stdout.
@@ -43,6 +45,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Source checkouts now declare a build backend, so `uv sync --dev` installs the
   working tree's `seeklink` console script instead of falling through to a stale
   globally installed command during local verification.
+- Refreshed `tests/blind/results/` with v0.5 release-quality snapshots only. On
+  the bundled 22-query fixture, config A reports mean Recall@10 0.985, MRR
+  0.977, and nDCG@10 0.901; latency measurements remain in the JSON result
+  file because they are hardware- and load-dependent.
 
 ## [0.4.0] - 2026-04-29
 
@@ -170,7 +176,8 @@ surface so the repo reads as a shipped tool rather than a work log.
 - Native CJK tokenization via jieba registered as a custom FTS5 tokenizer.
 - MCP server transport (`seeklink serve`) — removed in v0.2.0.
 
-[Unreleased]: https://github.com/simonsysun/seeklink/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/simonsysun/seeklink/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/simonsysun/seeklink/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/simonsysun/seeklink/compare/v0.3.2...v0.4.0
 [0.3.2]: https://github.com/simonsysun/seeklink/releases/tag/v0.3.2
 [0.3.1]: https://github.com/simonsysun/seeklink/releases/tag/v0.3.1

@@ -13,6 +13,13 @@
     },
     "metadata_expansion": false
   },
+  "diagnostics": {
+    "failure_buckets": {
+      "partial_rank_1_hit": 1,
+      "rank_1_hit": 20,
+      "top_10_hit": 1
+    }
+  },
   "aggregate": {
     "n_queries": 22,
     "mean_recall_at_10": 0.9848484848484849,
@@ -20,9 +27,9 @@
     "mean_precision_at_5": 0.4636363636363636,
     "mean_average_precision_at_10": 0.8044642857142857,
     "mean_ndcg_at_10": 0.900787321732989,
-    "mean_latency_ms": 689.979617388665,
-    "p50_latency_ms": 454.4194168411195,
-    "p95_latency_ms": 2123.518749838695
+    "mean_latency_ms": 1689.24806619444,
+    "p50_latency_ms": 834.2376668006182,
+    "p95_latency_ms": 6478.5435411613435
   },
   "by_tag": {
     "cjk": {
@@ -32,9 +39,9 @@
       "mean_precision_at_5": 0.45,
       "mean_average_precision_at_10": 0.8289682539682539,
       "mean_ndcg_at_10": 0.9182124851461249,
-      "mean_latency_ms": 576.4667708717752,
-      "p50_latency_ms": 455.57920821011066,
-      "p95_latency_ms": 1507.7104999218136
+      "mean_latency_ms": 1037.7324373403098,
+      "p50_latency_ms": 862.1221659705043,
+      "p95_latency_ms": 2450.245208106935
     },
     "cjk-en-mixed": {
       "n_queries": 4,
@@ -43,9 +50,9 @@
       "mean_precision_at_5": 0.55,
       "mean_average_precision_at_10": 0.8103670634920634,
       "mean_ndcg_at_10": 0.9108449423747695,
-      "mean_latency_ms": 1627.4328439030796,
-      "p50_latency_ms": 2123.518749838695,
-      "p95_latency_ms": 2124.3579171132296
+      "mean_latency_ms": 5424.516551778652,
+      "p50_latency_ms": 6478.5435411613435,
+      "p95_latency_ms": 9839.611040893942
     },
     "common": {
       "n_queries": 2,
@@ -54,9 +61,9 @@
       "mean_precision_at_5": 0.7,
       "mean_average_precision_at_10": 0.8999999999999999,
       "mean_ndcg_at_10": 0.9638048435172528,
-      "mean_latency_ms": 550.7969579193741,
-      "p50_latency_ms": 674.9914579559118,
-      "p95_latency_ms": 674.9914579559118
+      "mean_latency_ms": 998.4772704774514,
+      "p50_latency_ms": 1170.021333033219,
+      "p95_latency_ms": 1170.021333033219
     },
     "conceptual": {
       "n_queries": 1,
@@ -65,9 +72,9 @@
       "mean_precision_at_5": 0.4,
       "mean_average_precision_at_10": 0.4444444444444444,
       "mean_ndcg_at_10": 0.6394562303262419,
-      "mean_latency_ms": 459.66804097406566,
-      "p50_latency_ms": 459.66804097406566,
-      "p95_latency_ms": 459.66804097406566
+      "mean_latency_ms": 781.5628331154585,
+      "p50_latency_ms": 781.5628331154585,
+      "p95_latency_ms": 781.5628331154585
     },
     "english": {
       "n_queries": 10,
@@ -76,9 +83,9 @@
       "mean_precision_at_5": 0.44000000000000006,
       "mean_average_precision_at_10": 0.7825,
       "mean_ndcg_at_10": 0.8828241427457681,
-      "mean_latency_ms": 405.80860399641097,
-      "p50_latency_ms": 442.2634579241276,
-      "p95_latency_ms": 502.0728330127895
+      "mean_latency_ms": 716.3531750440598,
+      "p50_latency_ms": 776.9261670764536,
+      "p95_latency_ms": 932.9272080212831
     },
     "exact-alias": {
       "n_queries": 2,
@@ -87,9 +94,9 @@
       "mean_precision_at_5": 0.6,
       "mean_average_precision_at_10": 0.861111111111111,
       "mean_ndcg_at_10": 0.9367467095119257,
-      "mean_latency_ms": 322.402979596518,
-      "p50_latency_ms": 364.7692920640111,
-      "p95_latency_ms": 364.7692920640111
+      "mean_latency_ms": 587.0695830089971,
+      "p50_latency_ms": 862.1221659705043,
+      "p95_latency_ms": 862.1221659705043
     },
     "exact-title": {
       "n_queries": 1,
@@ -98,9 +105,9 @@
       "mean_precision_at_5": 0.4,
       "mean_average_precision_at_10": 0.6666666666666666,
       "mean_ndcg_at_10": 0.8385465274895063,
-      "mean_latency_ms": 442.2634579241276,
-      "p50_latency_ms": 442.2634579241276,
-      "p95_latency_ms": 442.2634579241276
+      "mean_latency_ms": 863.8961249962449,
+      "p50_latency_ms": 863.8961249962449,
+      "p95_latency_ms": 863.8961249962449
     },
     "long": {
       "n_queries": 7,
@@ -109,9 +116,9 @@
       "mean_precision_at_5": 0.4571428571428572,
       "mean_average_precision_at_10": 0.7694444444444445,
       "mean_ndcg_at_10": 0.8788547657390694,
-      "mean_latency_ms": 865.3258689945297,
-      "p50_latency_ms": 459.66804097406566,
-      "p95_latency_ms": 2124.3579171132296
+      "mean_latency_ms": 2902.850773451584,
+      "p50_latency_ms": 790.3837079647928,
+      "p95_latency_ms": 9839.611040893942
     },
     "methodology": {
       "n_queries": 2,
@@ -120,9 +127,9 @@
       "mean_precision_at_5": 0.4,
       "mean_average_precision_at_10": 0.7936507936507937,
       "mean_ndcg_at_10": 0.8964327114982722,
-      "mean_latency_ms": 471.6230003396049,
-      "p50_latency_ms": 488.8265838380903,
-      "p95_latency_ms": 488.8265838380903
+      "mean_latency_ms": 897.029957966879,
+      "p50_latency_ms": 928.5699580796063,
+      "p95_latency_ms": 928.5699580796063
     },
     "mid-length": {
       "n_queries": 3,
@@ -131,9 +138,9 @@
       "mean_precision_at_5": 0.5333333333333333,
       "mean_average_precision_at_10": 0.7957671957671958,
       "mean_ndcg_at_10": 0.9068250366770166,
-      "mean_latency_ms": 518.6711108932892,
-      "p50_latency_ms": 454.4194168411195,
-      "p95_latency_ms": 674.9914579559118
+      "mean_latency_ms": 954.1481662696848,
+      "p50_latency_ms": 865.4899578541517,
+      "p95_latency_ms": 1170.021333033219
     },
     "natural-language": {
       "n_queries": 2,
@@ -142,9 +149,9 @@
       "mean_precision_at_5": 0.5,
       "mean_average_precision_at_10": 0.7611111111111111,
       "mean_ndcg_at_10": 0.8932362459962785,
-      "mean_latency_ms": 454.5007289852947,
-      "p50_latency_ms": 458.9643329381943,
-      "p95_latency_ms": 458.9643329381943
+      "mean_latency_ms": 768.2894584722817,
+      "p50_latency_ms": 812.1479169931263,
+      "p95_latency_ms": 812.1479169931263
     },
     "off-topic": {
       "n_queries": 2,
@@ -153,9 +160,9 @@
       "mean_precision_at_5": 0.2,
       "mean_average_precision_at_10": 1.0,
       "mean_ndcg_at_10": 1.0,
-      "mean_latency_ms": 326.32643752731383,
-      "p50_latency_ms": 398.47895805723965,
-      "p95_latency_ms": 398.47895805723965
+      "mean_latency_ms": 557.0011880481616,
+      "p50_latency_ms": 596.7908340971917,
+      "p95_latency_ms": 596.7908340971917
     },
     "scientific": {
       "n_queries": 1,
@@ -164,9 +171,9 @@
       "mean_precision_at_5": 0.4,
       "mean_average_precision_at_10": 1.0,
       "mean_ndcg_at_10": 1.0,
-      "mean_latency_ms": 441.12604204565287,
-      "p50_latency_ms": 441.12604204565287,
-      "p95_latency_ms": 441.12604204565287
+      "mean_latency_ms": 790.3837079647928,
+      "p50_latency_ms": 790.3837079647928,
+      "p95_latency_ms": 790.3837079647928
     },
     "short": {
       "n_queries": 8,
@@ -175,9 +182,9 @@
       "mean_precision_at_5": 0.45,
       "mean_average_precision_at_10": 0.8406001984126984,
       "mean_ndcg_at_10": 0.9251306139778754,
-      "mean_latency_ms": 582.0796041516587,
-      "p50_latency_ms": 398.47895805723965,
-      "p95_latency_ms": 2123.518749838695
+      "mean_latency_ms": 1126.6460366314277,
+      "p50_latency_ms": 834.2376668006182,
+      "p95_latency_ms": 4451.341666979715
     },
     "synonym": {
       "n_queries": 1,
@@ -186,9 +193,9 @@
       "mean_precision_at_5": 0.4,
       "mean_average_precision_at_10": 0.6666666666666666,
       "mean_ndcg_at_10": 0.7653606369886218,
-      "mean_latency_ms": 454.11891699768603,
-      "p50_latency_ms": 454.11891699768603,
-      "p95_latency_ms": 454.11891699768603
+      "mean_latency_ms": 776.9261670764536,
+      "p50_latency_ms": 776.9261670764536,
+      "p95_latency_ms": 776.9261670764536
     },
     "technical": {
       "n_queries": 6,
@@ -197,9 +204,9 @@
       "mean_precision_at_5": 0.43333333333333335,
       "mean_average_precision_at_10": 0.7694113756613756,
       "mean_ndcg_at_10": 0.890098132868879,
-      "mean_latency_ms": 1091.8562984249245,
-      "p50_latency_ms": 1507.7104999218136,
-      "p95_latency_ms": 2123.518749838695
+      "mean_latency_ms": 2610.1841665804386,
+      "p50_latency_ms": 2450.245208106935,
+      "p95_latency_ms": 6478.5435411613435
     },
     "vocab-mismatch": {
       "n_queries": 4,
@@ -208,9 +215,9 @@
       "mean_precision_at_5": 0.4,
       "mean_average_precision_at_10": 0.7138888888888889,
       "mean_ndcg_at_10": 0.8458469396412003,
-      "mean_latency_ms": 717.7077187225223,
-      "p50_latency_ms": 458.9643329381943,
-      "p95_latency_ms": 1507.7104999218136
+      "mean_latency_ms": 1190.937573031988,
+      "p50_latency_ms": 812.1479169931263,
+      "p95_latency_ms": 2450.245208106935
     },
     "workflow": {
       "n_queries": 1,
@@ -219,9 +226,9 @@
       "mean_precision_at_5": 0.6,
       "mean_average_precision_at_10": 0.9166666666666666,
       "mean_ndcg_at_10": 0.9674679834891693,
-      "mean_latency_ms": 2124.3579171132296,
-      "p50_latency_ms": 2124.3579171132296,
-      "p95_latency_ms": 2124.3579171132296
+      "mean_latency_ms": 9839.611040893942,
+      "p50_latency_ms": 9839.611040893942,
+      "p95_latency_ms": 9839.611040893942
     }
   },
   "results": [
@@ -281,13 +288,19 @@
         0.018659420289855073,
         0.01865325077399381
       ],
+      "expected_paths": [
+        "notes/spaced-repetition.md",
+        "notes/forgetting-curve.md",
+        "notes/memory-consolidation.md",
+        "logs/2026-W14.md"
+      ],
       "relevance": {
         "notes/spaced-repetition.md": 3.0,
         "notes/forgetting-curve.md": 3.0,
         "notes/memory-consolidation.md": 3.0,
         "logs/2026-W14.md": 3.0
       },
-      "latency_ms": 674.9914579559118,
+      "latency_ms": 1170.021333033219,
       "reranker_active": true,
       "recall_at_10": 1.0,
       "mrr": 1.0,
@@ -448,7 +461,8 @@
           }
         ]
       },
-      "expansions_used": []
+      "expansions_used": [],
+      "failure_bucket": "rank_1_hit"
     },
     {
       "query": "遗忘规律",
@@ -505,12 +519,17 @@
         0.01920374707259953,
         0.019150725247004414
       ],
+      "expected_paths": [
+        "notes/forgetting-curve.md",
+        "sources/wikipedia-forgetting-curve.md",
+        "notes/memory-consolidation.md"
+      ],
       "relevance": {
         "notes/forgetting-curve.md": 3.0,
         "sources/wikipedia-forgetting-curve.md": 3.0,
         "notes/memory-consolidation.md": 3.0
       },
-      "latency_ms": 455.57920821011066,
+      "latency_ms": 834.2376668006182,
       "reranker_active": true,
       "recall_at_10": 1.0,
       "mrr": 1.0,
@@ -662,7 +681,8 @@
           }
         ]
       },
-      "expansions_used": []
+      "expansions_used": [],
+      "failure_bucket": "rank_1_hit"
     },
     {
       "query": "卡片盒笔记法",
@@ -720,12 +740,17 @@
         0.018705882352941176,
         0.018697478991596638
       ],
+      "expected_paths": [
+        "notes/zettelkasten.md",
+        "sources/niklas-luhmann-zettelkasten.md",
+        "notes/atomic-notes.md"
+      ],
       "relevance": {
         "notes/zettelkasten.md": 3.0,
         "sources/niklas-luhmann-zettelkasten.md": 3.0,
         "notes/atomic-notes.md": 3.0
       },
-      "latency_ms": 454.4194168411195,
+      "latency_ms": 865.4899578541517,
       "reranker_active": true,
       "recall_at_10": 1.0,
       "mrr": 1.0,
@@ -877,7 +902,8 @@
           }
         ]
       },
-      "expansions_used": []
+      "expansions_used": [],
+      "failure_bucket": "rank_1_hit"
     },
     {
       "query": "红烧肉做法",
@@ -935,10 +961,13 @@
         0.018697478991596638,
         0.018434343434343435
       ],
+      "expected_paths": [
+        "recipes/red-braised-pork.md"
+      ],
       "relevance": {
         "recipes/red-braised-pork.md": 3.0
       },
-      "latency_ms": 254.173916997388,
+      "latency_ms": 517.2115419991314,
       "reranker_active": true,
       "recall_at_10": 1.0,
       "mrr": 1.0,
@@ -952,7 +981,7 @@
       "first_stage": {
         "candidate_count": 20,
         "channel_source_counts": {
-          "bm25": 0,
+          "bm25": 1,
           "vector": 20,
           "title": 0,
           "metadata": 0,
@@ -960,25 +989,25 @@
         },
         "expected_path_ranks": {
           "recipes/red-braised-pork.md": {
-            "bm25": null,
+            "bm25": 1,
             "vector": 1,
             "title": null,
             "metadata": null,
             "indegree": 18,
-            "rrf": 2,
-            "rerank_candidate": 2
+            "rrf": 1,
+            "rerank_candidate": 1
           }
         },
         "hit_channel_ranks": [
           {
             "path": "recipes/red-braised-pork.md",
-            "bm25": null,
+            "bm25": 1,
             "vector": 1,
             "title": null,
             "metadata": null,
             "indegree": 18,
-            "rrf": 2,
-            "rerank_candidate": 2
+            "rrf": 1,
+            "rerank_candidate": 1
           },
           {
             "path": "recipes/pad-thai.md",
@@ -997,8 +1026,8 @@
             "title": null,
             "metadata": null,
             "indegree": 3,
-            "rrf": 1,
-            "rerank_candidate": 1
+            "rrf": 2,
+            "rerank_candidate": 2
           },
           {
             "path": "cards/card-rrf-formula.md",
@@ -1072,7 +1101,8 @@
           }
         ]
       },
-      "expansions_used": []
+      "expansions_used": [],
+      "failure_bucket": "rank_1_hit"
     },
     {
       "query": "睡眠对记忆的影响",
@@ -1130,11 +1160,15 @@
         0.019047619047619046,
         0.018815471394037067
       ],
+      "expected_paths": [
+        "notes/memory-consolidation.md",
+        "sources/wikipedia-forgetting-curve.md"
+      ],
       "relevance": {
         "notes/memory-consolidation.md": 3.0,
         "sources/wikipedia-forgetting-curve.md": 3.0
       },
-      "latency_ms": 441.12604204565287,
+      "latency_ms": 790.3837079647928,
       "reranker_active": true,
       "recall_at_10": 1.0,
       "mrr": 1.0,
@@ -1277,7 +1311,8 @@
           }
         ]
       },
-      "expansions_used": []
+      "expansions_used": [],
+      "failure_bucket": "rank_1_hit"
     },
     {
       "query": "spaced repetition algorithm",
@@ -1335,13 +1370,19 @@
         0.018901098901098902,
         0.018503350707371555
       ],
+      "expected_paths": [
+        "notes/fsrs-algorithm.md",
+        "notes/spaced-repetition.md",
+        "sources/wikipedia-spaced-repetition.md",
+        "logs/2026-W16.md"
+      ],
       "relevance": {
         "notes/fsrs-algorithm.md": 3.0,
         "notes/spaced-repetition.md": 3.0,
         "sources/wikipedia-spaced-repetition.md": 3.0,
         "logs/2026-W16.md": 3.0
       },
-      "latency_ms": 426.60245788283646,
+      "latency_ms": 826.9332079216838,
       "reranker_active": true,
       "recall_at_10": 1.0,
       "mrr": 1.0,
@@ -1502,7 +1543,8 @@
           }
         ]
       },
-      "expansions_used": []
+      "expansions_used": [],
+      "failure_bucket": "rank_1_hit"
     },
     {
       "query": "why is BM25 still useful",
@@ -1560,12 +1602,17 @@
         0.018925373134328356,
         0.018722943722943725
       ],
+      "expected_paths": [
+        "notes/bm25-intuition.md",
+        "notes/retrieval-augmented-generation.md",
+        "notes/reciprocal-rank-fusion.md"
+      ],
       "relevance": {
         "notes/bm25-intuition.md": 3.0,
         "notes/retrieval-augmented-generation.md": 3.0,
         "notes/reciprocal-rank-fusion.md": 3.0
       },
-      "latency_ms": 502.0728330127895,
+      "latency_ms": 932.9272080212831,
       "reranker_active": true,
       "recall_at_10": 1.0,
       "mrr": 1.0,
@@ -1717,7 +1764,8 @@
           }
         ]
       },
-      "expansions_used": []
+      "expansions_used": [],
+      "failure_bucket": "rank_1_hit"
     },
     {
       "query": "agent memory architectures",
@@ -1775,12 +1823,17 @@
         0.01872284148875874,
         0.018504273504273503
       ],
+      "expected_paths": [
+        "notes/agent-memory-patterns.md",
+        "notes/retrieval-augmented-generation.md",
+        "logs/2026-W15.md"
+      ],
       "relevance": {
         "notes/agent-memory-patterns.md": 3.0,
         "notes/retrieval-augmented-generation.md": 3.0,
         "logs/2026-W15.md": 3.0
       },
-      "latency_ms": 306.9909999612719,
+      "latency_ms": 772.4960830528289,
       "reranker_active": true,
       "recall_at_10": 1.0,
       "mrr": 1.0,
@@ -1932,7 +1985,8 @@
           }
         ]
       },
-      "expansions_used": []
+      "expansions_used": [],
+      "failure_bucket": "rank_1_hit"
     },
     {
       "query": "attention mechanism",
@@ -1990,11 +2044,15 @@
         0.018705882352941176,
         0.018366500829187397
       ],
+      "expected_paths": [
+        "notes/attention-mechanism.md",
+        "cards/card-attention-formula.md"
+      ],
       "relevance": {
         "notes/attention-mechanism.md": 3.0,
         "cards/card-attention-formula.md": 3.0
       },
-      "latency_ms": 337.8165829926729,
+      "latency_ms": 575.5512921605259,
       "reranker_active": true,
       "recall_at_10": 1.0,
       "mrr": 1.0,
@@ -2137,7 +2195,8 @@
           }
         ]
       },
-      "expansions_used": []
+      "expansions_used": [],
+      "failure_bucket": "rank_1_hit"
     },
     {
       "query": "sourdough bread starter",
@@ -2195,10 +2254,13 @@
         0.018778467908902693,
         0.018496271748135874
       ],
+      "expected_paths": [
+        "recipes/sourdough-starter.md"
+      ],
       "relevance": {
         "recipes/sourdough-starter.md": 3.0
       },
-      "latency_ms": 398.47895805723965,
+      "latency_ms": 596.7908340971917,
       "reranker_active": true,
       "recall_at_10": 1.0,
       "mrr": 1.0,
@@ -2332,7 +2394,8 @@
           }
         ]
       },
-      "expansions_used": []
+      "expansions_used": [],
+      "failure_bucket": "rank_1_hit"
     },
     {
       "query": "how to stop forgetting things I study",
@@ -2391,12 +2454,17 @@
         0.018806921675774135,
         0.018771526980482203
       ],
+      "expected_paths": [
+        "notes/spaced-repetition.md",
+        "sources/wikipedia-spaced-repetition.md",
+        "notes/forgetting-curve.md"
+      ],
       "relevance": {
         "notes/spaced-repetition.md": 3.0,
         "sources/wikipedia-spaced-repetition.md": 3.0,
         "notes/forgetting-curve.md": 3.0
       },
-      "latency_ms": 450.0371250323951,
+      "latency_ms": 724.4309999514371,
       "reranker_active": true,
       "recall_at_10": 1.0,
       "mrr": 1.0,
@@ -2548,7 +2616,8 @@
           }
         ]
       },
-      "expansions_used": []
+      "expansions_used": [],
+      "failure_bucket": "rank_1_hit"
     },
     {
       "query": "学完就忘怎么办",
@@ -2606,12 +2675,17 @@
         0.01887274155538099,
         0.018659420289855073
       ],
+      "expected_paths": [
+        "notes/spaced-repetition.md",
+        "notes/forgetting-curve.md",
+        "logs/2026-W14.md"
+      ],
       "relevance": {
         "notes/spaced-repetition.md": 3.0,
         "notes/forgetting-curve.md": 3.0,
         "logs/2026-W14.md": 3.0
       },
-      "latency_ms": 458.9643329381943,
+      "latency_ms": 812.1479169931263,
       "reranker_active": true,
       "recall_at_10": 1.0,
       "mrr": 1.0,
@@ -2763,7 +2837,8 @@
           }
         ]
       },
-      "expansions_used": []
+      "expansions_used": [],
+      "failure_bucket": "rank_1_hit"
     },
     {
       "query": "second brain slip box",
@@ -2821,12 +2896,17 @@
         0.018979427188382414,
         0.018970365563486913
       ],
+      "expected_paths": [
+        "notes/zettelkasten.md",
+        "sources/niklas-luhmann-zettelkasten.md",
+        "notes/atomic-notes.md"
+      ],
       "relevance": {
         "notes/zettelkasten.md": 3.0,
         "sources/niklas-luhmann-zettelkasten.md": 3.0,
         "notes/atomic-notes.md": 3.0
       },
-      "latency_ms": 454.11891699768603,
+      "latency_ms": 776.9261670764536,
       "reranker_active": true,
       "recall_at_10": 0.6666666666666666,
       "mrr": 1.0,
@@ -2978,7 +3058,8 @@
           }
         ]
       },
-      "expansions_used": []
+      "expansions_used": [],
+      "failure_bucket": "partial_rank_1_hit"
     },
     {
       "query": "把文档切块放进向量库",
@@ -3036,11 +3117,15 @@
         0.022286185539225494,
         0.017442484736205337
       ],
+      "expected_paths": [
+        "notes/retrieval-augmented-generation.md",
+        "notes/vector-embeddings.md"
+      ],
       "relevance": {
         "notes/retrieval-augmented-generation.md": 3.0,
         "notes/vector-embeddings.md": 3.0
       },
-      "latency_ms": 1507.7104999218136,
+      "latency_ms": 2450.245208106935,
       "reranker_active": true,
       "recall_at_10": 1.0,
       "mrr": 1.0,
@@ -3183,7 +3268,8 @@
           }
         ]
       },
-      "expansions_used": []
+      "expansions_used": [],
+      "failure_bucket": "rank_1_hit"
     },
     {
       "query": "Luhmann 原子笔记",
@@ -3240,12 +3326,17 @@
         0.018872549019607842,
         0.01857638888888889
       ],
+      "expected_paths": [
+        "notes/atomic-notes.md",
+        "notes/zettelkasten.md",
+        "sources/niklas-luhmann-zettelkasten.md"
+      ],
       "relevance": {
         "notes/atomic-notes.md": 3.0,
         "notes/zettelkasten.md": 3.0,
         "sources/niklas-luhmann-zettelkasten.md": 3.0
       },
-      "latency_ms": 488.8265838380903,
+      "latency_ms": 928.5699580796063,
       "reranker_active": true,
       "recall_at_10": 1.0,
       "mrr": 1.0,
@@ -3397,7 +3488,8 @@
           }
         ]
       },
-      "expansions_used": []
+      "expansions_used": [],
+      "failure_bucket": "rank_1_hit"
     },
     {
       "query": "FSRS 算法原理",
@@ -3455,13 +3547,19 @@
         0.6076631698328916,
         0.4378234991142018
       ],
+      "expected_paths": [
+        "notes/fsrs-algorithm.md",
+        "cards/card-fsrs-core-idea.md",
+        "logs/2026-W16.md",
+        "sources/anki-and-flashcards-intro.md"
+      ],
       "relevance": {
         "notes/fsrs-algorithm.md": 3.0,
         "cards/card-fsrs-core-idea.md": 3.0,
         "logs/2026-W16.md": 3.0,
         "sources/anki-and-flashcards-intro.md": 3.0
       },
-      "latency_ms": 2123.518749838695,
+      "latency_ms": 4451.341666979715,
       "reranker_active": true,
       "recall_at_10": 1.0,
       "mrr": 1.0,
@@ -3622,7 +3720,8 @@
           }
         ]
       },
-      "expansions_used": []
+      "expansions_used": [],
+      "failure_bucket": "rank_1_hit"
     },
     {
       "query": "Zettelkasten",
@@ -3680,12 +3779,17 @@
         0.03300653594771242,
         0.032060321190755976
       ],
+      "expected_paths": [
+        "notes/zettelkasten.md",
+        "sources/niklas-luhmann-zettelkasten.md",
+        "notes/atomic-notes.md"
+      ],
       "relevance": {
         "notes/zettelkasten.md": 3.0,
         "sources/niklas-luhmann-zettelkasten.md": 3.0,
         "notes/atomic-notes.md": 3.0
       },
-      "latency_ms": 442.2634579241276,
+      "latency_ms": 863.8961249962449,
       "reranker_active": true,
       "recall_at_10": 1.0,
       "mrr": 1.0,
@@ -3837,7 +3941,8 @@
           }
         ]
       },
-      "expansions_used": []
+      "expansions_used": [],
+      "failure_bucket": "rank_1_hit"
     },
     {
       "query": "RRF",
@@ -3895,12 +4000,17 @@
         0.0200695479384004,
         0.01865325077399381
       ],
+      "expected_paths": [
+        "notes/reciprocal-rank-fusion.md",
+        "cards/card-rrf-formula.md",
+        "notes/retrieval-augmented-generation.md"
+      ],
       "relevance": {
         "notes/reciprocal-rank-fusion.md": 3.0,
         "cards/card-rrf-formula.md": 3.0,
         "notes/retrieval-augmented-generation.md": 3.0
       },
-      "latency_ms": 280.03666712902486,
+      "latency_ms": 312.01700004749,
       "reranker_active": true,
       "recall_at_10": 1.0,
       "mrr": 1.0,
@@ -4052,7 +4162,8 @@
           }
         ]
       },
-      "expansions_used": []
+      "expansions_used": [],
+      "failure_bucket": "rank_1_hit"
     },
     {
       "query": "遗忘曲线",
@@ -4110,12 +4221,17 @@
         0.01893123446561723,
         0.018846411804158282
       ],
+      "expected_paths": [
+        "notes/forgetting-curve.md",
+        "sources/wikipedia-forgetting-curve.md",
+        "notes/memory-consolidation.md"
+      ],
       "relevance": {
         "notes/forgetting-curve.md": 3.0,
         "sources/wikipedia-forgetting-curve.md": 3.0,
         "notes/memory-consolidation.md": 3.0
       },
-      "latency_ms": 364.7692920640111,
+      "latency_ms": 862.1221659705043,
       "reranker_active": true,
       "recall_at_10": 1.0,
       "mrr": 1.0,
@@ -4267,7 +4383,8 @@
           }
         ]
       },
-      "expansions_used": []
+      "expansions_used": [],
+      "failure_bucket": "rank_1_hit"
     },
     {
       "query": "how transformers relate to information retrieval",
@@ -4325,12 +4442,17 @@
         0.01877200704225352,
         0.018537339814405654
       ],
+      "expected_paths": [
+        "notes/attention-mechanism.md",
+        "notes/vector-embeddings.md",
+        "notes/retrieval-augmented-generation.md"
+      ],
       "relevance": {
         "notes/attention-mechanism.md": 3.0,
         "notes/vector-embeddings.md": 3.0,
         "notes/retrieval-augmented-generation.md": 3.0
       },
-      "latency_ms": 459.66804097406566,
+      "latency_ms": 781.5628331154585,
       "reranker_active": true,
       "recall_at_10": 1.0,
       "mrr": 0.5,
@@ -4482,7 +4604,8 @@
           }
         ]
       },
-      "expansions_used": []
+      "expansions_used": [],
+      "failure_bucket": "top_10_hit"
     },
     {
       "query": "为什么 hybrid 搜索比纯向量好",
@@ -4540,12 +4663,17 @@
         0.013636835281429878,
         0.009412589587609823
       ],
+      "expected_paths": [
+        "notes/bm25-intuition.md",
+        "notes/vector-embeddings.md",
+        "notes/retrieval-augmented-generation.md"
+      ],
       "relevance": {
         "notes/bm25-intuition.md": 3.0,
         "notes/vector-embeddings.md": 3.0,
         "notes/retrieval-augmented-generation.md": 3.0
       },
-      "latency_ms": 1773.0281248223037,
+      "latency_ms": 6478.5435411613435,
       "reranker_active": true,
       "recall_at_10": 1.0,
       "mrr": 1.0,
@@ -4697,7 +4825,8 @@
           }
         ]
       },
-      "expansions_used": []
+      "expansions_used": [],
+      "failure_bucket": "rank_1_hit"
     },
     {
       "query": "从笔记到 Anki 卡片的流程",
@@ -4755,12 +4884,17 @@
         0.06371499425196533,
         0.06371499425196533
       ],
+      "expected_paths": [
+        "notes/note-to-card-workflow.md",
+        "notes/atomic-notes.md",
+        "sources/anki-and-flashcards-intro.md"
+      ],
       "relevance": {
         "notes/note-to-card-workflow.md": 3.0,
         "notes/atomic-notes.md": 3.0,
         "sources/anki-and-flashcards-intro.md": 3.0
       },
-      "latency_ms": 2124.3579171132296,
+      "latency_ms": 9839.611040893942,
       "reranker_active": true,
       "recall_at_10": 1.0,
       "mrr": 1.0,
@@ -4912,7 +5046,8 @@
           }
         ]
       },
-      "expansions_used": []
+      "expansions_used": [],
+      "failure_bucket": "rank_1_hit"
     }
   ]
 }
