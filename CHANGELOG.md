@@ -37,6 +37,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Blind-test result JSON now includes per-query `failure_bucket` labels and
   aggregate bucket counts, making it easier to distinguish candidate-generation,
   rerank-budget, and reranker-ordering failures during search-quality work.
+- Source checkouts now declare a build backend, so `uv sync --dev` installs the
+  working tree's `seeklink` console script instead of falling through to a stale
+  globally installed command during local verification.
 
 ## [0.4.0] - 2026-04-29
 

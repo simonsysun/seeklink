@@ -1545,7 +1545,7 @@ wheels = [
 [[package]]
 name = "seeklink"
 version = "0.4.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "fastembed" },
     { name = "jieba" },
