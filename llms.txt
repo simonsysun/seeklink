@@ -24,7 +24,9 @@ Runs on macOS and Linux, Python 3.11+. Indexes any folder of `.md` files. Obsidi
 ## Install
 
 - PyPI: `pip install seeklink` or `uv tool install seeklink`.
+- Apple Silicon reranker: `pip install "seeklink[mlx]"` or `uv tool install "seeklink[mlx]"`.
 - Source: `git clone https://github.com/simonsysun/seeklink && cd seeklink && uv sync --dev`.
+- Runtime requirement: Python's `sqlite3` must link against SQLite >= 3.45 with FTS5. `seeklink status --vault PATH` checks this.
 
 ## Agent contract
 
@@ -42,7 +44,7 @@ seeklink get    PATH:LINE -l N         # read window around a hit
 seeklink get    PATH:LINE -C N         # read N lines before/after a hit
 ```
 
-Set `SEEKLINK_VAULT=<path>` once to omit `--vault` on every call and route through the resident daemon (first call after boot: ~2s; warm: ~1-2s with reranker, ~10ms without). If that env/model config changes, `search` and `index` auto-restart a stale daemon instead of silently serving the old vault.
+Set `SEEKLINK_VAULT=<path>` once to omit `--vault` on repeated calls. `search` and single-file `index path/to/file.md` use the resident daemon; full-vault `index` runs in the CLI process so progress stays on stderr. First-ever model downloads can take much longer than normal daemon startup. Warm search latency depends on whether the optional MLX reranker is installed and active; `search --json` reports whether reranking was active for that query. If vault/model config changes, `search` and single-file `index` auto-restart a stale daemon instead of silently serving the old vault.
 
 ### Output contract
 
@@ -80,5 +82,7 @@ No other codes.
 ### Common failure modes
 
 - Empty results on a fresh vault → index not built yet. Run `seeklink index --vault PATH`.
-- Daemon won't auto-spawn → `--vault` was passed, which intentionally forces cold-start. Without `--vault`, `search` / `index` should auto-spawn and auto-restart stale daemons when `vault` / `embedder` / `reranker` no longer match.
-- Line numbers look wrong → file was edited after indexing. Re-index. `status` prints a freshness warning on cold-start.
+- Reranker unavailable → install `seeklink[mlx]` on Apple Silicon or accept first-stage hybrid RRF ranking. Use `--no-rerank` when a deterministic no-rerank path is preferred.
+- SQLite capability error → use a Python build whose `sqlite3` module links against SQLite >= 3.45 with FTS5.
+- Daemon won't auto-spawn → `--vault` was passed, which intentionally forces cold-start. Without `--vault`, `search` and single-file `index` should auto-spawn and auto-restart stale daemons when `vault` / `embedder` / `reranker` no longer match.
+- Line numbers look wrong → file was edited after indexing. Re-index. `status` prints a freshness warning on cold-start; agents should run `status --json` after long editing sessions.

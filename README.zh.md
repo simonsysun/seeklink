@@ -26,6 +26,17 @@ uv tool install seeklink
 pip install seeklink
 ```
 
+如果要在 Apple Silicon 上启用本地 MLX reranker，请安装可选 extra：
+
+```bash
+uv tool install "seeklink[mlx]"
+# 或者
+pip install "seeklink[mlx]"
+```
+
+SeekLink 需要 Python 的 `sqlite3` 模块链接到 SQLite 3.45 或更新版本，并启用 FTS5。
+`seeklink status --vault PATH` 会检查这个运行时条件；如果 SQLite 太旧，会给出明确错误。
+
 ## 快速开始
 
 ```bash
@@ -45,10 +56,12 @@ seeklink search "agent 记忆系统"
 seeklink get notes/agent-memory-patterns.md:1 -C 20
 ```
 
-当设置了 `SEEKLINK_VAULT` 且不传 `--vault` 时，`seeklink search` 和 `seeklink index`
-会自动使用一个常驻守护进程（daemon），它把嵌入模型和可选的 reranker 保持在内存里，
-避免每次调用都重新加载。`seeklink status` 和 `seeklink get` 始终走冷启动路径：
-status 只读 SQLite 元数据，get 直接从磁盘读文件。
+当设置了 `SEEKLINK_VAULT` 且不传 `--vault` 时，`seeklink search` 和单文件
+`seeklink index path/to/file.md` 会自动使用一个常驻守护进程（daemon），它把嵌入模型
+和可选的 reranker 保持在内存里，避免每次调用都重新加载。全库 `seeklink index`
+会在 CLI 进程内运行，这样进度可以稳定输出到 stderr，最终 `Done:` 摘要保留在 stdout。
+`seeklink status` 和 `seeklink get` 始终走冷启动路径：status 只读 SQLite 元数据，
+get 直接从磁盘读文件。
 
 ## 输出格式
 
@@ -132,8 +145,9 @@ chunker 配置生成的，SeekLink 会重建派生索引内容。单文件索引
 seeklink daemon --vault PATH
 ```
 
-通常不需要手动运行。`search` 和 `index` 在合适的时候会自动启动和重启守护进程。
-给 `search` 或 `index` 传 `--vault` 会强制走一次性冷启动路径，因为守护进程在启动时就绑定到了一个笔记库。
+通常不需要手动运行。`search` 和单文件 `index` 在合适的时候会自动启动和重启守护进程。
+全库 `index` 仍然在 CLI 进程内运行，以便输出进度。给 `search` 或单文件 `index`
+传 `--vault` 会强制走一次性冷启动路径，因为守护进程在启动时就绑定到了一个笔记库。
 
 ## 搜索原理
 
@@ -154,9 +168,10 @@ trigram 分词器，而不是崩溃。
 默认向量维度是 768。高级自定义 embedder 实验可以设置 `SEEKLINK_EMBEDDING_DIM`，
 但它必须和 embedder 的实际输出一致，并且需要重新运行一次完整的 `seeklink index`。
 
-在 Apple Silicon 上，SeekLink 可以用 `mlx-community/Qwen3-Reranker-0.6B-mxfp8`
-对候选结果进行重排序。Reranking 是本地且可选的——用 `--no-rerank` 跳过单次查询，
-或设置 `SEEKLINK_RERANKER_MODEL=""` 全局禁用。
+在 Apple Silicon 上，如果安装了 `seeklink[mlx]`，SeekLink 可以用
+`mlx-community/Qwen3-Reranker-0.6B-mxfp8` 对候选结果进行重排序。Reranking 是本地且
+可选的；如果 MLX 不可用，SeekLink 会回退到第一阶段的混合 RRF 排名。用
+`--no-rerank` 可以跳过单次查询，或设置 `SEEKLINK_RERANKER_MODEL=""` 全局禁用。
 
 ## Frontmatter
 
@@ -188,12 +203,13 @@ SeekLink 在笔记库内写入一个 SQLite 数据库：
 | 维度 | 状态 |
 |---|---|
 | Python | 3.11、3.12、3.13、3.14 |
+| SQLite | Python `sqlite3` 链接到 SQLite 3.45+，并启用 FTS5 |
 | 操作系统 | macOS 和 Linux |
 | Windows | 不作为一等路径支持 |
 | 文件格式 | Markdown `.md` |
 | 笔记库类型 | 普通文件夹或 Obsidian 兼容 vault |
 | 中文/CJK | jieba 路径，静态 SQLite 环境下自动降级为 trigram |
-| Reranker | Apple Silicon 上通过 MLX 可用；其他平台自动禁用 |
+| Reranker | Apple Silicon 上通过可选 `seeklink[mlx]` extra 启用；其他平台自动禁用 |
 | 守护进程 | 一台机器一个笔记库 |
 
 ## 不适用的场景

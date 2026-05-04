@@ -328,13 +328,30 @@ class TestIngestVault:
         stats = ingest_vault(db, vault, embedder)
         assert stats["ingested"] == 1  # only visible.md
 
-    def test_skips_todo_dir(self, db: Database, embedder: Embedder, vault: Path):
-        """ingest_vault should skip files in the todo directory."""
+    def test_indexes_common_pkm_dirs(
+        self, db: Database, embedder: Embedder, vault: Path
+    ):
+        """todo/ and archive/ are ordinary PKM folders, not implicit ignores."""
         _write_md(vault, "note.md", "# Note\n\nContent.")
         _write_md(vault, "todo/todo.md", "# Todo\n\nTasks.")
+        _write_md(vault, "archive/old.md", "# Archived\n\nOlder note.")
 
         stats = ingest_vault(db, vault, embedder)
-        assert stats["ingested"] == 1  # only note.md
+        assert stats["ingested"] == 3
+        assert db.get_source_by_path("todo/todo.md") is not None
+        assert db.get_source_by_path("archive/old.md") is not None
+
+    def test_full_vault_index_keeps_single_file_indexed_archive_note(
+        self, db: Database, embedder: Embedder, vault: Path
+    ):
+        path = _write_md(vault, "archive/old.md", "# Archived\n\nOlder note.")
+        first = ingest_file(db, path, vault, embedder)
+        assert first is not None
+
+        stats = ingest_vault(db, vault, embedder)
+
+        assert stats["pruned"] == 0
+        assert db.get_source_by_path("archive/old.md") is not None
 
     def test_batches_embeddings_across_files(self, db: Database, vault: Path):
         fake = FakeBatchEmbedder()

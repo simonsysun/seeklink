@@ -10,8 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.5.0] - 2026-05-04
 
 ### Changed
+- Full-vault `seeklink index` now prints progress to stderr and keeps the final
+  `Done:` summary on stdout, including the `SEEKLINK_VAULT` daily-use path.
 - Full-vault indexing now embeds in smaller batches to reduce long-tail embedding stalls on real Markdown vaults.
-- `seeklink index --vault PATH` now prints full-vault progress to stderr while keeping the final `Done:` summary on stdout.
 - Indexes now record the embedder, vector dimension, distance metric, and
   chunker version used to build their vectors; full-vault indexing rebuilds
   derived index contents when that configuration changes.
@@ -20,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   changing the default 768-dimensional model.
 
 ### Fixed
+- Full-vault indexing no longer hard-skips `todo/` or `archive/` directories;
+  those are common PKM folders and should be indexed unless hidden or removed.
 - Chinese question-style queries now strip common question particles before
   FTS5 matching, so terms like `卵生动物有哪些？` can use the BM25 channel
   instead of falling back to vector-only retrieval.
@@ -37,8 +40,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `seeklink search` now refuses to query an existing vector index whose stored
   embedder/chunker metadata does not match the active configuration, instead of
   silently mixing query vectors with incompatible document vectors.
+- Reranker scoring now uses a numerically stable two-class softmax, avoiding
+  overflow on extreme model logits.
 
 ### Dev
+- Apple Silicon MLX reranking is now exposed as an optional `seeklink[mlx]`
+  extra, while the base install remains usable without MLX.
+- `numpy` is now declared as a direct runtime dependency because SeekLink
+  imports it directly.
+- The PyPI publish workflow now runs the test suite, checks the built
+  distributions, and validates manually triggered release tags before
+  publishing.
 - Blind-test result JSON now includes per-query `failure_bucket` labels and
   aggregate bucket counts, making it easier to distinguish candidate-generation,
   rerank-budget, and reranker-ordering failures during search-quality work.
@@ -46,9 +58,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   working tree's `seeklink` console script instead of falling through to a stale
   globally installed command during local verification.
 - Refreshed `tests/blind/results/` with v0.5 release-quality snapshots only. On
-  the bundled 22-query fixture, config A reports mean Recall@10 0.985, MRR
-  0.977, and nDCG@10 0.901; latency measurements remain in the JSON result
-  file because they are hardware- and load-dependent.
+  the bundled 22-query fixture with the optional MLX reranker active, config A
+  reports mean Recall@10 0.985, MRR 0.977, and nDCG@10 0.901; latency
+  measurements remain in the JSON result file because they are hardware- and
+  load-dependent.
 
 ## [0.4.0] - 2026-04-29
 

@@ -24,6 +24,21 @@ def _run_seeklink(vault: Path, *args: str) -> subprocess.CompletedProcess[str]:
     )
 
 
+def _run_seeklink_with_env_vault(
+    vault: Path, *args: str
+) -> subprocess.CompletedProcess[str]:
+    env = os.environ.copy()
+    env["SEEKLINK_RERANKER_MODEL"] = ""
+    env["SEEKLINK_VAULT"] = str(vault)
+    return subprocess.run(
+        [sys.executable, "-m", "seeklink", *args],
+        capture_output=True,
+        text=True,
+        env=env,
+        timeout=180,
+    )
+
+
 def _fresh_corpus(tmp_path: Path) -> Path:
     source = Path(__file__).resolve().parent / "corpus"
     vault = tmp_path / "corpus"
@@ -87,3 +102,15 @@ def test_documented_non_daemon_cli_workflow(tmp_path: Path):
     get_context = _run_seeklink(vault, "get", hit, "-C", "2")
     assert get_context.returncode == 0, get_context.stderr
     assert get_context.stdout.strip()
+
+
+def test_full_vault_index_progress_with_env_vault(tmp_path: Path):
+    """Full-vault index keeps progress on stderr even when SEEKLINK_VAULT is set."""
+    vault = _fresh_corpus(tmp_path)
+
+    index = _run_seeklink_with_env_vault(vault, "index")
+
+    assert index.returncode == 0, index.stderr
+    assert "Done:" in index.stdout
+    assert "Scanning vault..." in index.stderr
+    assert "Embedding" in index.stderr

@@ -73,6 +73,16 @@ class RecordingModel:
         return logits
 
 
+class ExtremeLogitModel(RecordingModel):
+    def __call__(self, input_ids):
+        arr = np.asarray(input_ids)
+        self.shapes.append(tuple(arr.shape))
+        logits = np.zeros((arr.shape[0], arr.shape[1], 3), dtype=np.float32)
+        logits[:, -1, 1] = 10000.0
+        logits[:, -1, 2] = 9999.0
+        return logits
+
+
 def _ready_reranker(model: RecordingModel) -> Reranker:
     reranker = Reranker()
     reranker._model = model
@@ -112,3 +122,11 @@ def test_rerank_returns_none_when_inference_fails(fake_mlx):
     reranker = _ready_reranker(RecordingModel(fail_all=True))
 
     assert reranker.rerank("query", ["passage"]) is None
+
+
+def test_rerank_softmax_handles_extreme_logits(fake_mlx):
+    reranker = _ready_reranker(ExtremeLogitModel())
+
+    scores = reranker.rerank("query", ["passage"])
+
+    assert scores == pytest.approx([1.0 / (1.0 + math.exp(-1.0))])

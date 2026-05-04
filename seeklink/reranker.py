@@ -130,7 +130,10 @@ class Reranker:
 
         yes_s = last_logits[self._token_yes].item()
         no_s = last_logits[self._token_no].item()
-        return math.exp(yes_s) / (math.exp(yes_s) + math.exp(no_s))
+        max_s = max(yes_s, no_s)
+        yes_e = math.exp(yes_s - max_s)
+        no_e = math.exp(no_s - max_s)
+        return yes_e / (yes_e + no_e)
 
     def rerank(
         self, query: str, passages: list[str]

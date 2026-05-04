@@ -3,16 +3,16 @@
 Subcommands:
   daemon   — run the Unix-socket daemon (eager-loaded models, never exits)
   search   — search the vault (daemon-first; cold-start fallback)
-  index    — index notes (daemon-first; cold-start fallback)
+  index    — index notes (full-vault in-process; single-file daemon-first)
   status   — show vault / index stats (always cold-start; no model load)
   get      — print a line range of a vault file (direct filesystem read)
 
-Dispatch: when `--vault` is not passed to `search` / `index`, the CLI
-tries the daemon socket first (auto-spawning the daemon on first call)
+Dispatch: when `--vault` is not passed to `search` / single-file `index`,
+the CLI tries the daemon socket first (auto-spawning the daemon on first call)
 and falls back to an in-process cold-start if the daemon is unreachable.
 Passing `--vault` always uses cold-start because the daemon is bound to
 a single vault (selected via SEEKLINK_VAULT or cwd at daemon-start time).
-`status` and `get` never route through the daemon.
+Full-vault `index`, `status`, and `get` never route through the daemon.
 
 Agents integrating SeekLink should invoke the CLI via `subprocess` or
 connect to the daemon socket via `seeklink.cli_client` for structured
@@ -508,31 +508,22 @@ def _cmd_search(args: argparse.Namespace) -> None:
 def _cmd_index(args: argparse.Namespace) -> None:
     _setup_logging()
 
-    if _should_use_daemon(args):
+    if args.path and _should_use_daemon(args):
         daemon_args: dict = {}
-        if args.path:
-            daemon_args["path"] = args.path
+        daemon_args["path"] = args.path
         resp = _try_daemon("index", daemon_args)
         if resp is not None:
             result = resp["result"]
-            if args.path:
-                # single-file index: {"path": "...", "status": "indexed"|"skipped"|...}
-                status = result.get("status", "?")
-                if status == "skipped":
-                    print(f"Skipped: {result.get('path', args.path)}")
-                else:
-                    print(f"Indexed: {result.get('path', args.path)} ({status})")
+            # single-file index: {"path": "...", "status": "indexed"|"skipped"|...}
+            status = result.get("status", "?")
+            if status == "skipped":
+                print(f"Skipped: {result.get('path', args.path)}")
             else:
-                stats = result
-                print(
-                    f"Done: {stats.get('ingested', 0)} indexed, "
-                    f"{stats.get('unchanged', 0)} unchanged, "
-                    f"{stats.get('skipped', 0)} skipped, "
-                    f"{stats.get('errors', 0)} errors"
-                )
+                print(f"Indexed: {result.get('path', args.path)} ({status})")
             return
 
-    # Cold-start fallback
+    # Cold-start fallback. Full-vault indexing always stays on this path so
+    # progress can stream to stderr without expanding the daemon protocol.
     from seeklink.app import init_app
     from seeklink.ingest import ingest_file, ingest_vault
 

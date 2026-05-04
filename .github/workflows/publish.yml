@@ -13,10 +13,9 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Existing tag to publish (e.g. v0.2.1). Leave blank to use the branch HEAD."
-        required: false
+        description: "Existing tag to publish (e.g. v0.5.0). Required for manual publish."
+        required: true
         type: string
-        default: ""
 
 jobs:
   build:
@@ -28,27 +27,46 @@ jobs:
         with:
           # workflow_dispatch may override with a specific tag; otherwise
           # use the ref that triggered the workflow (tag push = that tag).
-          ref: ${{ github.event.inputs.tag != '' && github.event.inputs.tag || github.ref }}
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.ref }}
 
       - name: Set up uv
         uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+
+      - name: Install dependencies
+        run: uv sync --dev
+
+      - name: Run tests
+        run: uv run python -m pytest tests/ -q
 
       - name: Build distributions
         run: uv build
 
       - name: Sanity-check version matches tag
-        # When triggered by a tag push, ensure pyproject.toml version matches
-        # the tag name. Skipped for workflow_dispatch (where we assume the
-        # invoker knows what they're doing).
-        if: github.event_name == 'push'
+        # Ensure pyproject.toml version matches the tag name for both automatic
+        # tag publishes and manual retries.
         run: |
-          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG_NAME="${{ github.event.inputs.tag }}"
+          else
+            TAG_NAME="${GITHUB_REF_NAME}"
+          fi
+          case "$TAG_NAME" in
+            v*) ;;
+            *)
+              echo "::error::Release tag must start with v (got ${TAG_NAME})"
+              exit 1
+              ;;
+          esac
+          TAG_VERSION="${TAG_NAME#v}"
           PKG_VERSION=$(grep -E '^version = ' pyproject.toml | head -1 | sed -E 's/version = "([^"]+)"/\1/')
           echo "Tag: v${TAG_VERSION}   pyproject: ${PKG_VERSION}"
           if [ "$TAG_VERSION" != "$PKG_VERSION" ]; then
             echo "::error::Tag v${TAG_VERSION} does not match pyproject version ${PKG_VERSION}"
             exit 1
           fi
+
+      - name: Check distributions
+        run: uvx twine check dist/*
 
       - name: Upload artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

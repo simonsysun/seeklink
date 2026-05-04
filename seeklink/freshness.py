@@ -25,7 +25,6 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 STALE_WARN_THRESHOLD = 1  # warn even for a single issue (catch early)
-_SKIP_DIRS = {"todo", "archive"}  # match ingest._SKIP_DIRS
 
 
 def check_freshness(db, vault_root: Path, warn_fp=sys.stderr) -> int:
@@ -59,7 +58,7 @@ def check_freshness(db, vault_root: Path, warn_fp=sys.stderr) -> int:
             rel = md_path.relative_to(vault_root)
         except ValueError:
             continue
-        if any(part.startswith(".") or part in _SKIP_DIRS for part in rel.parts):
+        if any(part.startswith(".") for part in rel.parts):
             continue
         disk_paths.add(str(rel))
 

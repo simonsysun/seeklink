@@ -1549,8 +1549,14 @@ source = { editable = "." }
 dependencies = [
     { name = "fastembed" },
     { name = "jieba" },
+    { name = "numpy" },
     { name = "sqlite-vec" },
     { name = "sqlitefts" },
+]
+
+[package.optional-dependencies]
+mlx = [
+    { name = "mlx-lm", marker = "platform_machine == 'arm64' and sys_platform == 'darwin'" },
 ]
 
 [package.dev-dependencies]
@@ -1569,9 +1575,12 @@ dev = [
 requires-dist = [
     { name = "fastembed", specifier = ">=0.7.4" },
     { name = "jieba", specifier = ">=0.42.1" },
+    { name = "mlx-lm", marker = "platform_machine == 'arm64' and sys_platform == 'darwin' and extra == 'mlx'", specifier = ">=0.31.2" },
+    { name = "numpy", specifier = ">=1.26" },
     { name = "sqlite-vec", specifier = ">=0.1.6" },
     { name = "sqlitefts", specifier = ">=1.0.1" },
 ]
+provides-extras = ["mlx"]
 
 [package.metadata.requires-dev]
 dev = [

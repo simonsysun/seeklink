@@ -30,6 +30,18 @@ uv tool install seeklink
 pip install seeklink
 ```
 
+For Apple Silicon reranking support, install the optional MLX extra:
+
+```bash
+uv tool install "seeklink[mlx]"
+# or
+pip install "seeklink[mlx]"
+```
+
+SeekLink requires Python's `sqlite3` module to be linked against SQLite
+3.45 or newer with FTS5 enabled. `seeklink status --vault PATH` checks this and
+prints a clear error if the runtime SQLite is too old.
+
 ## Quick Start
 
 ```bash
@@ -49,11 +61,13 @@ seeklink search "agent memory systems"
 seeklink get notes/agent-memory-patterns.md:1 -C 20
 ```
 
-`seeklink search` and `seeklink index` auto-use a resident daemon when
-`SEEKLINK_VAULT` is set and `--vault` is not passed. The daemon keeps the
-embedder and optional reranker in memory. `seeklink status` and `seeklink get`
-always stay cold-start: status only reads SQLite metadata, and get reads the
-file directly from disk.
+`seeklink search` and single-file `seeklink index path/to/file.md` auto-use a
+resident daemon when `SEEKLINK_VAULT` is set and `--vault` is not passed. The
+daemon keeps the embedder and optional reranker in memory. Full-vault
+`seeklink index` runs in-process so progress stays on stderr and the final
+`Done:` summary stays on stdout. `seeklink status` and `seeklink get` always
+stay cold-start: status only reads SQLite metadata, and get reads the file
+directly from disk.
 
 ## Output
 
@@ -142,10 +156,11 @@ configuration is compatible.
 seeklink daemon --vault PATH
 ```
 
-You normally do not run this directly. `search` and `index` auto-spawn and
-auto-restart the daemon when appropriate. Passing `--vault` to `search` or
-`index` forces a one-shot cold-start path because the daemon is bound to one
-vault at startup.
+You normally do not run this directly. `search` and single-file `index`
+auto-spawn and auto-restart the daemon when appropriate. Full-vault `index`
+still runs in-process for progress output. Passing `--vault` to `search` or
+single-file `index` forces a one-shot cold-start path because the daemon is
+bound to one vault at startup.
 
 ## How Search Works
 
@@ -168,9 +183,10 @@ set `SEEKLINK_EMBEDDING_DIM`, but it must match the embedder output and requires
 a full `seeklink index` rebuild.
 
 On Apple Silicon, SeekLink can rerank candidates with
-`mlx-community/Qwen3-Reranker-0.6B-mxfp8`. Reranking is local and optional. Use
-`--no-rerank` for one query or set `SEEKLINK_RERANKER_MODEL=""` to disable it
-globally.
+`mlx-community/Qwen3-Reranker-0.6B-mxfp8` when installed with `seeklink[mlx]`.
+Reranking is local and optional; if MLX is unavailable, SeekLink falls back to
+first-stage hybrid RRF ranking. Use `--no-rerank` for one query or set
+`SEEKLINK_RERANKER_MODEL=""` to disable it globally.
 
 ## Frontmatter
 
@@ -203,12 +219,13 @@ and a wikilink graph. Delete `.seeklink/` and run `seeklink index` to rebuild.
 | Area | Status |
 |---|---|
 | Python | 3.11, 3.12, 3.13, 3.14 |
+| SQLite | Python `sqlite3` linked against SQLite 3.45+ with FTS5 |
 | OS | macOS and Linux |
 | Windows | Not supported as a first-class path |
 | File format | Markdown `.md` |
 | Vault style | Plain folder or Obsidian-compatible vault |
 | CJK | Native path via jieba, with trigram fallback on static SQLite builds |
-| Reranker | Apple Silicon via MLX; disabled elsewhere |
+| Reranker | Optional `seeklink[mlx]` extra on Apple Silicon; disabled elsewhere |
 | Daemon | Single vault per machine |
 
 ## Not For

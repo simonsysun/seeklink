@@ -27,8 +27,6 @@ from seeklink.models import Source
 
 logger = logging.getLogger(__name__)
 
-# Non-hidden top-level dirs excluded from indexing (mirrors freshness._SKIP_DIRS)
-_SKIP_DIRS = {"todo", "archive"}
 _EMBED_BATCH_SIZE = 16
 
 # Regex for YAML frontmatter block (handles empty frontmatter too).
@@ -229,7 +227,7 @@ def ingest_vault(
             rel = md_path.relative_to(vault_root)
         except ValueError:
             continue
-        if any(part.startswith(".") or part in _SKIP_DIRS for part in rel.parts):
+        if any(part.startswith(".") for part in rel.parts):
             continue
         rel_path = str(rel)
         seen_paths.add(rel_path)
