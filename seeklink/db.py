@@ -58,7 +58,7 @@ def _contains_cjk(text: str) -> bool:
     return any("\u3400" <= ch <= "\u9fff" for ch in text)
 
 
-def _prepare_jieba_fts_query(query: str) -> FTSQuery:
+def _prepare_cjk_fts_query(query: str, *, separator: str = " ") -> FTSQuery:
     """Strip common Chinese question particles from FTS5 MATCH queries.
 
     FTS5 treats space-separated query tokens as mandatory terms. For Chinese
@@ -71,7 +71,7 @@ def _prepare_jieba_fts_query(query: str) -> FTSQuery:
     tokens = [token for token, _start, _end in JiebaTokenizer().tokenize(query)]
     kept = [token for token in tokens if token not in _CJK_QUERY_STOPWORDS]
     return FTSQuery(
-        " ".join(kept) if kept else query,
+        separator.join(kept) if kept else query,
         stripped_cjk_question_terms=len(kept) != len(tokens),
     )
 
@@ -121,9 +121,11 @@ class Database:
 
     def prepare_fts_query(self, query: str) -> FTSQuery:
         """Return the FTS5 MATCH query used by this database connection."""
-        if self._fts_tokenizer != "jieba":
-            return FTSQuery(query)
-        return _prepare_jieba_fts_query(query)
+        if self._fts_tokenizer == "jieba":
+            return _prepare_cjk_fts_query(query, separator=" ")
+        if _contains_cjk(query):
+            return _prepare_cjk_fts_query(query, separator="")
+        return FTSQuery(query)
 
     def close(self) -> None:
         self._conn.close()

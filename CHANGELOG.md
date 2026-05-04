@@ -24,6 +24,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Chinese question-style queries that use the normalized BM25 path now apply
   that channel as a lighter ranking signal, reducing no-reranker over-promotion
   of adjacent keyword-heavy passages.
+- Chinese question-style queries now keep their BM25 fallback on Python builds
+  that use SQLite's built-in trigram tokenizer instead of the optional jieba FTS
+  tokenizer.
 - Long paragraphs that follow a buffered heading now split at sentence
   boundaries instead of becoming one oversized chunk, reducing pathological
   chunks in generated/list-heavy Markdown while preserving fenced-code

@@ -9,7 +9,7 @@ import numpy as np
 import pytest
 
 import seeklink.db as db_module
-from seeklink.db import CapabilityError, Database
+from seeklink.db import CapabilityError, Database, FTSQuery
 from seeklink.models import Chunk, Source, Suggestion, WikiLink
 
 
@@ -297,6 +297,18 @@ class TestChunkCRUD:
         assert question.stripped_cjk_question_terms is True
         assert "有哪些" not in question.query
         assert ordinary.stripped_cjk_question_terms is False
+
+    def test_prepare_fts_query_strips_chinese_questions_for_trigram_fallback(
+        self, db: Database
+    ):
+        db._fts_tokenizer = "trigram"  # type: ignore[attr-defined]
+
+        question = db.prepare_fts_query("卵生动物有哪些？")
+
+        assert question == FTSQuery(
+            query="卵生动物",
+            stripped_cjk_question_terms=True,
+        )
 
     def test_cascade_delete_cleans_fts(self, db: Database):
         src = _make_source(db)
