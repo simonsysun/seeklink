@@ -124,6 +124,7 @@ class ResultRow:
     titles: list[str | None]
     snippets: list[str]
     scores: list[float]
+    expected_paths: list[str]
     relevance: dict[str, float]
     latency_ms: float
     reranker_active: bool
@@ -138,6 +139,7 @@ class ResultRow:
     rerank_k_reason: str | None = None
     first_stage: dict[str, object] = field(default_factory=dict)
     expansions_used: list[str] = field(default_factory=list)
+    failure_bucket: str = "not_diagnosed"
 
 
 def load_queries(path: Path) -> list[QuerySpec]:
@@ -255,6 +257,57 @@ def _first_stage_payload(
     }
 
 
+def _first_expected_rank(hits: list[str], expected_paths: list[str]) -> int | None:
+    expected = set(expected_paths)
+    for rank, path in enumerate(hits[:10], start=1):
+        if path in expected:
+            return rank
+    return None
+
+
+def _expected_rank_payloads(first_stage: dict[str, object]) -> list[dict[str, object]]:
+    raw = first_stage.get("expected_path_ranks")
+    if not isinstance(raw, dict):
+        return []
+    return [value for value in raw.values() if isinstance(value, dict)]
+
+
+def classify_failure_bucket(
+    *,
+    hits: list[str],
+    expected_paths: list[str],
+    recall_at_10: float,
+    reranker_active: bool,
+    first_stage: dict[str, object],
+) -> str:
+    """Classify a query result using existing first-stage diagnostics.
+
+    Buckets are intentionally coarse. They are meant to direct the next
+    debugging step, not to prove causality for every individual query.
+    """
+    first_rank = _first_expected_rank(hits, expected_paths)
+    if first_rank == 1:
+        return "rank_1_hit" if recall_at_10 >= 1.0 else "partial_rank_1_hit"
+    if first_rank is not None:
+        return "top_10_hit" if recall_at_10 >= 1.0 else "partial_top_10_hit"
+
+    if "expected_path_ranks" not in first_stage:
+        return "not_diagnosed"
+    payloads = _expected_rank_payloads(first_stage)
+    if not payloads:
+        return "expected_source_missing"
+
+    if not any(payload.get("rrf") is not None for payload in payloads):
+        return "candidate_generation_miss"
+
+    if reranker_active:
+        if any(payload.get("rerank_candidate") is not None for payload in payloads):
+            return "reranker_ordering_miss"
+        return "rerank_budget_miss"
+
+    return "first_stage_top10_miss"
+
+
 def _result_row(
     *,
     spec: QuerySpec,
@@ -272,6 +325,15 @@ def _result_row(
     expansions_used: list[str] | None = None,
 ) -> ResultRow:
     """Build a ResultRow and compute all per-query metrics in one place."""
+    recall = recall_at_k(hits, spec.expected_paths)
+    mrr = reciprocal_rank(hits, spec.expected_paths)
+    precision_5 = precision_at_k(hits, spec.expected_paths, k=5)
+    average_precision_10 = average_precision_at_k(
+        hits, spec.expected_paths, k=10
+    )
+    ndcg_10 = ndcg_at_k(
+        hits, spec.expected_paths, k=10, relevance=spec.relevance
+    )
     return ResultRow(
         query=spec.query,
         config=config,
@@ -280,24 +342,28 @@ def _result_row(
         titles=titles,
         snippets=snippets,
         scores=scores,
+        expected_paths=list(spec.expected_paths),
         relevance=dict(spec.relevance),
         latency_ms=latency_ms,
         reranker_active=reranker_active,
         rerank_k=rerank_k if reranker_active else 0,
         first_stage=dict(first_stage or {}),
-        recall_at_10=recall_at_k(hits, spec.expected_paths),
-        mrr=reciprocal_rank(hits, spec.expected_paths),
-        precision_at_5=precision_at_k(hits, spec.expected_paths, k=5),
-        average_precision_at_10=average_precision_at_k(
-            hits, spec.expected_paths, k=10
-        ),
-        ndcg_at_10=ndcg_at_k(
-            hits, spec.expected_paths, k=10, relevance=spec.relevance
-        ),
+        recall_at_10=recall,
+        mrr=mrr,
+        precision_at_5=precision_5,
+        average_precision_at_10=average_precision_10,
+        ndcg_at_10=ndcg_10,
         last_expected_rank=last_expected_rank(hits, spec.expected_paths, k=10),
         resolved_rerank_k=resolved_rerank_k if reranker_active else 0,
         rerank_k_reason=rerank_k_reason if reranker_active else None,
         expansions_used=list(expansions_used or []),
+        failure_bucket=classify_failure_bucket(
+            hits=hits,
+            expected_paths=spec.expected_paths,
+            recall_at_10=recall,
+            reranker_active=reranker_active,
+            first_stage=first_stage or {},
+        ),
     )
 
 
@@ -552,6 +618,13 @@ def resolved_rerank_k_counts(rows: list[ResultRow]) -> dict[str, int]:
     return dict(sorted(counts.items(), key=lambda item: int(item[0])))
 
 
+def failure_bucket_counts(rows: list[ResultRow]) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for row in rows:
+        counts[row.failure_bucket] = counts.get(row.failure_bucket, 0) + 1
+    return dict(sorted(counts.items()))
+
+
 def aggregate_by_tag(rows: list[ResultRow]) -> dict[str, dict[str, float | int]]:
     """Aggregate metrics for each QuerySpec tag.
 
@@ -660,6 +733,9 @@ def main() -> None:
                         "rerank_k": state.active_rerank_k,
                         "resolved_k_counts": resolved_rerank_k_counts(records),
                         "metadata_expansion": state.metadata_expansion,
+                    },
+                    "diagnostics": {
+                        "failure_buckets": failure_bucket_counts(records),
                     },
                     "aggregate": aggregate,
                     "by_tag": by_tag,

@@ -73,16 +73,25 @@ The runner records per-query:
 - `latency_ms`
 - reranker budget metadata
 - first-stage channel diagnostics for config `A`
+- a `failure_bucket` label that classifies each query as a rank-1 hit,
+  top-10 ordering gap, candidate-generation miss, rerank-budget miss,
+  reranker-ordering miss, missing expected source, or not diagnosed
 
 The aggregate output includes mean Recall@10, MRR, nDCG@10, latency, and p95
-latency.
+latency. It also includes `diagnostics.failure_buckets`, a compact count of the
+per-query labels.
 
-Use the diagnostics to separate two failure types:
+Use `failure_bucket` first, then inspect `first_stage` when a bucket needs
+detail:
 
-- Candidate-generation failure: the expected note never appears in first-stage
+- Candidate-generation miss: the expected note never appears in first-stage
   candidates.
-- Ranking failure: the expected note appears but is pushed down by fusion or
-  reranking.
+- Rerank-budget miss: the expected note appears in first-stage results but not
+  inside the reranker candidate budget.
+- Reranker-ordering miss: the expected note reaches the reranker candidate pool
+  but does not land in the top 10.
+- First-stage top-10 miss: reranking is disabled and the expected note is below
+  the top-10 output.
 
 ## Running It
 

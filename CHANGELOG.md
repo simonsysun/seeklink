@@ -33,6 +33,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   embedder/chunker metadata does not match the active configuration, instead of
   silently mixing query vectors with incompatible document vectors.
 
+### Dev
+- Blind-test result JSON now includes per-query `failure_bucket` labels and
+  aggregate bucket counts, making it easier to distinguish candidate-generation,
+  rerank-budget, and reranker-ordering failures during search-quality work.
+
 ## [0.4.0] - 2026-04-29
 
 ### Added

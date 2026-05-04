@@ -12,6 +12,7 @@ from tests.blind.run import (
     RunnerState,
     aggregate_by_tag,
     aggregate_rows,
+    failure_bucket_counts,
     resolved_rerank_k_counts,
 )
 
@@ -165,6 +166,137 @@ class TestFirstStagePayload:
         ]
 
 
+class TestFailureBuckets:
+    def test_rank_hits_are_classified_before_diagnostics(self):
+        assert blind_run.classify_failure_bucket(
+            hits=["answer.md"],
+            expected_paths=["answer.md"],
+            recall_at_10=1.0,
+            reranker_active=True,
+            first_stage={},
+        ) == "rank_1_hit"
+        assert blind_run.classify_failure_bucket(
+            hits=["support.md", "answer.md"],
+            expected_paths=["answer.md", "other.md"],
+            recall_at_10=0.5,
+            reranker_active=True,
+            first_stage={},
+        ) == "partial_top_10_hit"
+
+    def test_missing_expected_source_bucket(self):
+        bucket = blind_run.classify_failure_bucket(
+            hits=["wrong.md"],
+            expected_paths=["missing.md"],
+            recall_at_10=0.0,
+            reranker_active=True,
+            first_stage={"expected_path_ranks": {"missing.md": None}},
+        )
+
+        assert bucket == "expected_source_missing"
+
+    def test_candidate_generation_miss_bucket(self):
+        bucket = blind_run.classify_failure_bucket(
+            hits=["wrong.md"],
+            expected_paths=["answer.md"],
+            recall_at_10=0.0,
+            reranker_active=True,
+            first_stage={
+                "expected_path_ranks": {
+                    "answer.md": {
+                        "bm25": None,
+                        "vector": None,
+                        "title": None,
+                        "metadata": None,
+                        "indegree": None,
+                        "rrf": None,
+                        "rerank_candidate": None,
+                    }
+                }
+            },
+        )
+
+        assert bucket == "candidate_generation_miss"
+
+    def test_rerank_budget_and_ordering_buckets(self):
+        base_payload = {
+            "bm25": None,
+            "vector": 18,
+            "title": None,
+            "metadata": None,
+            "indegree": None,
+            "rrf": 18,
+            "rerank_candidate": None,
+        }
+        assert blind_run.classify_failure_bucket(
+            hits=["wrong.md"],
+            expected_paths=["answer.md"],
+            recall_at_10=0.0,
+            reranker_active=True,
+            first_stage={"expected_path_ranks": {"answer.md": base_payload}},
+        ) == "rerank_budget_miss"
+
+        in_budget = {**base_payload, "rerank_candidate": 9}
+        assert blind_run.classify_failure_bucket(
+            hits=["wrong.md"],
+            expected_paths=["answer.md"],
+            recall_at_10=0.0,
+            reranker_active=True,
+            first_stage={"expected_path_ranks": {"answer.md": in_budget}},
+        ) == "reranker_ordering_miss"
+
+    def test_no_rerank_first_stage_miss_and_counts(self):
+        bucket = blind_run.classify_failure_bucket(
+            hits=["wrong.md"],
+            expected_paths=["answer.md"],
+            recall_at_10=0.0,
+            reranker_active=False,
+            first_stage={
+                "expected_path_ranks": {
+                    "answer.md": {
+                        "bm25": 15,
+                        "vector": None,
+                        "title": None,
+                        "metadata": None,
+                        "indegree": None,
+                        "rrf": 15,
+                        "rerank_candidate": None,
+                    }
+                }
+            },
+        )
+
+        rows = [
+            _row(
+                query="q1",
+                tags=[],
+                recall=1.0,
+                mrr=1.0,
+                ndcg=1.0,
+                p5=0.2,
+                ap=1.0,
+                latency=100.0,
+            ),
+            _row(
+                query="q2",
+                tags=[],
+                recall=0.0,
+                mrr=0.0,
+                ndcg=0.0,
+                p5=0.0,
+                ap=0.0,
+                latency=100.0,
+            ),
+        ]
+        rows[0].failure_bucket = "rank_1_hit"
+        rows[1].failure_bucket = bucket
+
+        assert bucket == "first_stage_top10_miss"
+        assert failure_bucket_counts(rows) == {
+            "first_stage_top10_miss": 1,
+            "rank_1_hit": 1,
+        }
+
+
 def _row(
     *,
     query: str,
@@ -184,6 +316,7 @@ def _row(
         titles=[],
         snippets=[],
         scores=[],
+        expected_paths=[],
         relevance={},
         latency_ms=latency,
         reranker_active=True,
