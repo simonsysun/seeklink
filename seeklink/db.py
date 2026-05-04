@@ -80,7 +80,7 @@ class Database:
     types: sources, chunks, wiki_links, suggestions.
     """
 
-    SCHEMA_VERSION = 3
+    SCHEMA_VERSION = 4
 
     def __init__(self, path: str | Path = ":memory:"):
         self._path = str(path)
@@ -210,6 +210,10 @@ class Database:
 
         if version == 2:
             self._migrate_v2_to_v3()
+            version = 3
+
+        if version == 3:
+            self._migrate_v3_to_v4()
             return
 
         # -- Tables (order matters for FK references) --
@@ -266,6 +270,14 @@ class Database:
                 status TEXT DEFAULT 'pending',
                 created_at TEXT DEFAULT (datetime('now')),
                 resolved_at TEXT
+            )
+        """)
+
+        self._conn.execute("""
+            CREATE TABLE IF NOT EXISTS index_metadata (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL,
+                updated_at TEXT DEFAULT (datetime('now'))
             )
         """)
 
@@ -478,6 +490,18 @@ class Database:
         self._conn.execute(f"PRAGMA user_version = {self.SCHEMA_VERSION}")
         self._conn.commit()
 
+    def _migrate_v3_to_v4(self) -> None:
+        """Migrate schema from v3 to v4: add index-configuration metadata."""
+        self._conn.execute("""
+            CREATE TABLE IF NOT EXISTS index_metadata (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL,
+                updated_at TEXT DEFAULT (datetime('now'))
+            )
+        """)
+        self._conn.execute(f"PRAGMA user_version = {self.SCHEMA_VERSION}")
+        self._conn.commit()
+
     def _migrate_v2_to_v3(self) -> None:
         """Migrate schema from v2 to v3: add source-level headings.
 
@@ -559,7 +583,7 @@ class Database:
             FROM sources
         """)
 
-        self._conn.execute(f"PRAGMA user_version = {self.SCHEMA_VERSION}")
+        self._conn.execute("PRAGMA user_version = 3")
         self._conn.commit()
 
     def _create_trigger(self, name: str, ddl: str) -> None:
@@ -649,6 +673,49 @@ class Database:
 
         self._conn.execute("PRAGMA user_version = 2")
         self._conn.commit()
+
+    # ── Index metadata ───────────────────────────────────────────
+
+    def get_index_metadata(self) -> dict[str, str]:
+        """Return persisted index-configuration metadata."""
+        rows = self._conn.execute(
+            "SELECT key, value FROM index_metadata"
+        ).fetchall()
+        return {row["key"]: row["value"] for row in rows}
+
+    def set_index_metadata(self, metadata: dict[str, str]) -> None:
+        """Persist index-configuration metadata."""
+        for key, value in metadata.items():
+            self._conn.execute(
+                """INSERT INTO index_metadata (key, value, updated_at)
+                   VALUES (?, ?, datetime('now'))
+                   ON CONFLICT(key) DO UPDATE SET
+                       value = excluded.value,
+                       updated_at = datetime('now')""",
+                (key, value),
+            )
+        self._commit()
+
+    def reset_index_contents_for_rebuild(self) -> None:
+        """Clear derived index contents while preserving source rows.
+
+        Used when the embedder/chunker configuration changes. A following full
+        `seeklink index` pass can rebuild every file because sources are marked
+        unprocessed and their content hashes are cleared.
+        """
+        with self.transaction():
+            self._conn.execute("DELETE FROM vec_chunks")
+            self._conn.execute("DELETE FROM chunks")
+            self._conn.execute("DELETE FROM wiki_links")
+            self._conn.execute("DELETE FROM source_tags")
+            self._conn.execute(
+                """UPDATE sources
+                   SET status = 'unprocessed',
+                       content_hash = NULL,
+                       indexed_at = NULL,
+                       indegree = 0,
+                       updated_at = datetime('now')"""
+            )
 
     # ── Source CRUD ───────────────────────────────────────────────
 

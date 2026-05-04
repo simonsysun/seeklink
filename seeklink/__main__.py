@@ -29,13 +29,18 @@ import sys
 import time
 from pathlib import Path
 
+from seeklink.index_config import (
+    compatibility_state,
+    ensure_index_compatible_for_search,
+    expected_index_metadata,
+    resolve_embedder_model,
+)
+
 logger = logging.getLogger(__name__)
 
 
-# Model defaults — must stay in sync with seeklink/embedder.py::Embedder.MODEL_NAME
-# and seeklink/reranker.py::_DEFAULT_MODEL. Duplicated here to avoid importing
-# those modules (which pull in fastembed / mlx-lm) during cold CLI startup.
-_DEFAULT_EMBEDDER_MODEL = "jinaai/jina-embeddings-v2-base-zh"
+# Reranker default is duplicated here to avoid importing seeklink.reranker,
+# which pulls in mlx-lm during cold CLI startup.
 _DEFAULT_RERANKER_MODEL = "mlx-community/Qwen3-Reranker-0.6B-mxfp8"
 
 
@@ -81,7 +86,7 @@ def _resolve_expected_models() -> tuple[str, str]:
     importing those modules. Reranker reports literal ``"disabled"``
     when `SEEKLINK_RERANKER_MODEL` is empty, so we translate that here.
     """
-    embedder = os.environ.get("SEEKLINK_EMBEDDER_MODEL", _DEFAULT_EMBEDDER_MODEL)
+    embedder = resolve_embedder_model()
     reranker_env = os.environ.get("SEEKLINK_RERANKER_MODEL")
     if reranker_env is None:
         reranker = _DEFAULT_RERANKER_MODEL
@@ -362,6 +367,8 @@ def _status_json_payload(
     reranker: str,
     db_schema_version: int,
     freshness_count: int,
+    index_metadata: dict[str, str],
+    index_compatibility: dict,
 ) -> dict:
     return {
         "ok": True,
@@ -370,6 +377,10 @@ def _status_json_payload(
         "database": {
             "schema_version": db_schema_version,
             "wal_bytes": stats["wal_bytes"],
+        },
+        "index": {
+            "metadata": index_metadata,
+            "compatibility": index_compatibility,
         },
         "stats": {
             "notes_total": stats["notes_total"],
@@ -448,6 +459,7 @@ def _cmd_search(args: argparse.Namespace) -> None:
     reranker = None if args.no_rerank else Reranker()
 
     try:
+        ensure_index_compatible_for_search(db, embedder_model=embedder.MODEL_NAME)
         check_freshness(db, vault_root)
         search_kwargs = {
             "top_k": args.top_k,
@@ -481,6 +493,9 @@ def _cmd_search(args: argparse.Namespace) -> None:
             )
         else:
             _print_search_results(results)
+    except Exception as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
     finally:
         db.close()
 
@@ -549,6 +564,9 @@ def _cmd_index(args: argparse.Namespace) -> None:
                 f"{stats['skipped']} skipped, "
                 f"{stats['errors']} errors"
             )
+    except Exception as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
     finally:
         db.close()
 
@@ -687,6 +705,13 @@ def _cmd_status(args: argparse.Namespace) -> None:
         # not load state — we don't import/instantiate the reranker here
         # to keep `status` off the mlx-lm import path.
         expected_embedder, expected_reranker = _resolve_expected_models()
+        expected_metadata = expected_index_metadata(expected_embedder)
+        index_metadata = db.get_index_metadata()
+        index_compatibility = compatibility_state(
+            stored=index_metadata,
+            expected=expected_metadata,
+            chunks_total=stats["chunks_total"],
+        )
         if getattr(args, "json", False):
             _emit_json(
                 _status_json_payload(
@@ -696,6 +721,8 @@ def _cmd_status(args: argparse.Namespace) -> None:
                     reranker=expected_reranker,
                     db_schema_version=db.SCHEMA_VERSION,
                     freshness_count=freshness_count,
+                    index_metadata=index_metadata,
+                    index_compatibility=index_compatibility,
                 )
             )
         else:
@@ -706,6 +733,13 @@ def _cmd_status(args: argparse.Namespace) -> None:
             print(f"Suggestions: {stats['suggestions_pending']} pending")
             print(f"Embedder:    {expected_embedder}")
             print(f"Reranker:    {expected_reranker}")
+            print(f"Index:       {index_compatibility['state']}")
+            if not index_compatibility["compatible"]:
+                print(
+                    "Warning: index config mismatch; run `seeklink index` "
+                    "to rebuild derived vectors.",
+                    file=sys.stderr,
+                )
     finally:
         db.close()
 

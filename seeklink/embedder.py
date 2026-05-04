@@ -8,6 +8,8 @@ from pathlib import Path
 
 import numpy as np
 
+from seeklink.index_config import resolve_embedder_model
+
 
 def _default_cache_dir() -> Path:
     # On macOS the system default $TMPDIR is under /var/folders/.../T/, which
@@ -31,9 +33,7 @@ class Embedder:
     Thread-safe: model loads once on first use via double-checked locking.
     """
 
-    MODEL_NAME = os.environ.get(
-        "SEEKLINK_EMBEDDER_MODEL", "jinaai/jina-embeddings-v2-base-zh"
-    )
+    MODEL_NAME = resolve_embedder_model()
 
     def __init__(self) -> None:
         self._model = None

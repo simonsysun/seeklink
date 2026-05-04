@@ -112,7 +112,7 @@ seeklink status --vault PATH
 seeklink status --vault PATH --json
 ```
 
-Status 显示索引数量、模型名称、SQLite WAL 状态以及文件新鲜度警告。
+Status 显示索引数量、模型名称、索引配置兼容性、SQLite WAL 状态以及文件新鲜度警告。
 它不会加载嵌入或重排序模型。
 
 ### 索引
@@ -122,7 +122,9 @@ seeklink index --vault PATH
 seeklink index path/to/file.md --vault PATH
 ```
 
-全库索引通过内容哈希跳过未修改的文件。单文件索引则更新指定的一个 Markdown 文件。
+全库索引通过内容哈希跳过未修改的文件；如果已有索引是用不同的 embedder 或 chunker
+配置生成的，SeekLink 会重建派生索引内容。单文件索引只会在现有索引配置兼容时更新指定的
+一个 Markdown 文件。
 
 ### 守护进程
 
@@ -139,13 +141,13 @@ SeekLink 用倒数排名融合（Reciprocal Rank Fusion）将四个通道合并�
 
 | 通道 | 用途 |
 |---|---|
-| BM25 / FTS5 | 精确词汇、代码术语、缩写、中日文词汇匹配 |
+| BM25 / FTS5 | 精确词汇、代码术语、缩写、中文/CJK 词汇匹配 |
 | 向量搜索 | 跨不同措辞的语义匹配 |
 | 标题 / 别名 / 章节标题 | 精确的笔记和章节查找 |
 | Wikilink 入度 | 基于已有 `[[链接]]` 的图谱质量信号 |
 
 默认嵌入模型是 `jinaai/jina-embeddings-v2-base-zh`，通过 `fastembed` 运行。
-中日文全文搜索使用 jieba 分词器注册为 FTS5 自定义分词器；如果本地 Python/SQLite
+CJK 全文搜索优先使用 jieba 分词器注册为 FTS5 自定义分词器；如果本地 Python/SQLite
 环境无法安全注册（例如静态编译的 SQLite），SeekLink 会自动降级为 SQLite 内置的
 trigram 分词器，而不是崩溃。
 
@@ -187,7 +189,7 @@ SeekLink 在笔记库内写入一个 SQLite 数据库：
 | Windows | 不作为一等路径支持 |
 | 文件格式 | Markdown `.md` |
 | 笔记库类型 | 普通文件夹或 Obsidian 兼容 vault |
-| 中日文 | 原生支持（jieba），静态 SQLite 环境下自动降级为 trigram |
+| 中文/CJK | jieba 路径，静态 SQLite 环境下自动降级为 trigram |
 | Reranker | Apple Silicon 上通过 MLX 可用；其他平台自动禁用 |
 | 守护进程 | 一台机器一个笔记库 |
 

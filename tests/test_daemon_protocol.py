@@ -65,7 +65,13 @@ def test_search_no_rerank_passes_none_to_search(monkeypatch):
         return []
 
     search_module = importlib.import_module("seeklink.search")
+    index_config_module = importlib.import_module("seeklink.index_config")
     monkeypatch.setattr(search_module, "search", fake_search)
+    monkeypatch.setattr(
+        index_config_module,
+        "ensure_index_compatible_for_search",
+        lambda db, *, embedder_model: None,
+    )
     fake_reranker = FakeReranker()
 
     try:
@@ -120,7 +126,13 @@ def test_search_auto_rerank_k_passes_through(monkeypatch):
         return []
 
     search_module = importlib.import_module("seeklink.search")
+    index_config_module = importlib.import_module("seeklink.index_config")
     monkeypatch.setattr(search_module, "search", fake_search)
+    monkeypatch.setattr(
+        index_config_module,
+        "ensure_index_compatible_for_search",
+        lambda db, *, embedder_model: None,
+    )
     fake_reranker = FakeReranker()
 
     try:
@@ -173,7 +185,13 @@ def test_search_defaults_to_auto_rerank_k(monkeypatch):
         return []
 
     search_module = importlib.import_module("seeklink.search")
+    index_config_module = importlib.import_module("seeklink.index_config")
     monkeypatch.setattr(search_module, "search", fake_search)
+    monkeypatch.setattr(
+        index_config_module,
+        "ensure_index_compatible_for_search",
+        lambda db, *, embedder_model: None,
+    )
 
     try:
         _send_request(

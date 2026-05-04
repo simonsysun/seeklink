@@ -119,8 +119,9 @@ seeklink status --vault PATH
 seeklink status --vault PATH --json
 ```
 
-Status reports index counts, model names, SQLite WAL status, and freshness
-warnings. It does not load the embedding or reranking models.
+Status reports index counts, model names, index-configuration compatibility,
+SQLite WAL status, and freshness warnings. It does not load the embedding or
+reranking models.
 
 ### Index
 
@@ -129,8 +130,10 @@ seeklink index --vault PATH
 seeklink index path/to/file.md --vault PATH
 ```
 
-Full-vault indexing skips unchanged files by content hash. Single-file indexing
-updates one Markdown file.
+Full-vault indexing skips unchanged files by content hash unless the stored
+index was built with a different embedder or chunker configuration, in which
+case SeekLink rebuilds the derived index contents. Single-file indexing updates
+one Markdown file only when the existing index configuration is compatible.
 
 ### Daemon
 

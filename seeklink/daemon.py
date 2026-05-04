@@ -178,6 +178,11 @@ def _handle_connection(
     request_shutdown: Callable[[], None] | None = None,
 ) -> None:
     """Handle a single client connection: read request, execute, send response."""
+    from seeklink.index_config import (
+        compatibility_state,
+        ensure_index_compatible_for_search,
+        expected_index_metadata,
+    )
     from seeklink.ingest import ingest_file, ingest_vault
     from seeklink.search import search as do_search
 
@@ -198,6 +203,10 @@ def _handle_connection(
     try:
         if cmd == "search":
             query = args["query"]
+            ensure_index_compatible_for_search(
+                db,
+                embedder_model=embedder.MODEL_NAME,
+            )
             results = do_search(
                 db,
                 embedder,
@@ -235,6 +244,13 @@ def _handle_connection(
 
         elif cmd == "status":
             stats = db.get_stats()
+            expected_metadata = expected_index_metadata(embedder.MODEL_NAME)
+            index_metadata = db.get_index_metadata()
+            index_compatibility = compatibility_state(
+                stored=index_metadata,
+                expected=expected_metadata,
+                chunks_total=stats["chunks_total"],
+            )
             response = {
                 "ok": True,
                 "result": {
@@ -244,6 +260,8 @@ def _handle_connection(
                         "disabled" if reranker.disabled else reranker.MODEL_NAME
                     ),
                     "embedder": embedder.MODEL_NAME,
+                    "index_metadata": index_metadata,
+                    "index_compatibility": index_compatibility,
                 },
             }
 

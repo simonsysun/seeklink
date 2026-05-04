@@ -14,8 +14,13 @@ from pathlib import Path
 from uuid import uuid4
 
 from seeklink.chunker import ChunkSpan, chunk_markdown
-from seeklink.db import Database
+from seeklink.db import CapabilityError, Database
 from seeklink.embedder import Embedder
+from seeklink.index_config import (
+    describe_mismatches,
+    expected_index_metadata,
+    metadata_mismatches,
+)
 from seeklink.link_parser import extract_wiki_links
 from seeklink.models import Source
 
@@ -74,6 +79,8 @@ def ingest_file(
     # Skip non-.md files
     if path.suffix.lower() != ".md":
         return None
+
+    _ensure_single_file_index_config(db, embedder)
 
     # Read file
     try:
@@ -201,6 +208,7 @@ def ingest_vault(
     """
     if embedder is None:
         embedder = Embedder()
+    _prepare_full_vault_index_config(db, embedder)
 
     stats = {"ingested": 0, "unchanged": 0, "skipped": 0, "errors": 0, "pruned": 0}
     seen_paths: set[str] = set()
@@ -321,6 +329,45 @@ def ingest_vault(
         progress("done", {"stats": stats})
 
     return stats
+
+
+def _embedder_model_name(embedder: Embedder) -> str:
+    return str(getattr(embedder, "MODEL_NAME", "unknown"))
+
+
+def _prepare_full_vault_index_config(db: Database, embedder: Embedder) -> None:
+    """Ensure full-vault indexing uses a single compatible index config."""
+    expected = expected_index_metadata(_embedder_model_name(embedder))
+    stored = db.get_index_metadata()
+    mismatches = metadata_mismatches(stored, expected)
+    if mismatches and db.get_stats()["chunks_total"] > 0:
+        logger.info(
+            "Index configuration changed; rebuilding derived index contents: %s",
+            describe_mismatches(mismatches),
+        )
+        db.reset_index_contents_for_rebuild()
+    if mismatches:
+        db.set_index_metadata(expected)
+
+
+def _ensure_single_file_index_config(db: Database, embedder: Embedder) -> None:
+    """Prevent single-file indexing from mixing incompatible vector spaces."""
+    expected = expected_index_metadata(_embedder_model_name(embedder))
+    stored = db.get_index_metadata()
+    mismatches = metadata_mismatches(stored, expected)
+    if not mismatches:
+        return
+
+    if db.get_stats()["chunks_total"] == 0:
+        db.set_index_metadata(expected)
+        return
+
+    raise CapabilityError(
+        "Index configuration does not match the active embedder/chunker "
+        f"settings ({describe_mismatches(mismatches)}). Run full "
+        "`seeklink index` for this vault to rebuild the index before "
+        "indexing individual files."
+    )
 
 
 def _prepare_file(

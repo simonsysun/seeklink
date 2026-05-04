@@ -10,8 +10,9 @@ from unittest.mock import patch
 
 import pytest
 
-from seeklink.db import Database
+from seeklink.db import CapabilityError, Database
 from seeklink.embedder import Embedder
+from seeklink.index_config import expected_index_metadata
 from seeklink.ingest import (
     _EMBED_BATCH_SIZE,
     _parse_frontmatter,
@@ -51,6 +52,8 @@ def _write_md(vault: Path, rel_path: str, content: str) -> Path:
 
 
 class FakeBatchEmbedder:
+    MODEL_NAME = "fake-batch-embedder"
+
     def __init__(self, *, fail_on: str | None = None):
         self.calls: list[list[str]] = []
         self.fail_on = fail_on
@@ -74,6 +77,21 @@ class TestIngestFile:
 
         chunks = db.get_chunks_by_source(result.id)
         assert len(chunks) >= 1
+        assert db.get_index_metadata() == expected_index_metadata(embedder.MODEL_NAME)
+
+    def test_single_file_rejects_mismatched_existing_index(
+        self, db: Database, embedder: Embedder, vault: Path
+    ):
+        path = _write_md(vault, "note.md", "# My Note\n\nSome content here.")
+        result = ingest_file(db, path, vault, embedder)
+        assert result is not None
+        db.set_index_metadata({
+            **expected_index_metadata(embedder.MODEL_NAME),
+            "embedder_model": "different-model",
+        })
+
+        with pytest.raises(CapabilityError, match="full `seeklink index`"):
+            ingest_file(db, path, vault, embedder)
 
     def test_unchanged_file_skipped(self, db: Database, embedder: Embedder, vault: Path):
         content = "# Test\n\nContent here."
@@ -370,6 +388,31 @@ class TestIngestVault:
         links = db.get_links_from(source.id)
         assert len(links) == 1
         assert links[0].target_note_id is not None
+
+    def test_full_vault_rebuilds_after_index_config_change(
+        self, db: Database, vault: Path
+    ):
+        fake = FakeBatchEmbedder()
+        _write_md(vault, "note.md", "# Note\n\nOriginal content.")
+        first = ingest_vault(db, vault, fake)  # type: ignore[arg-type]
+        assert first["ingested"] == 1
+
+        source = db.get_source_by_path("note.md")
+        assert source is not None
+        old_chunk_count = len(db.get_chunks_by_source(source.id))
+        db.set_index_metadata({
+            **expected_index_metadata(fake.MODEL_NAME),
+            "embedder_model": "old-model",
+        })
+
+        second = ingest_vault(db, vault, fake)  # type: ignore[arg-type]
+
+        assert second["ingested"] == 1
+        source = db.get_source_by_path("note.md")
+        assert source is not None
+        assert source.status == "indexed"
+        assert len(db.get_chunks_by_source(source.id)) == old_chunk_count
+        assert db.get_index_metadata() == expected_index_metadata(fake.MODEL_NAME)
 
     def test_batch_embedding_failure_isolated_to_bad_file(
         self, db: Database, vault: Path

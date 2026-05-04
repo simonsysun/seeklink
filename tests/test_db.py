@@ -47,7 +47,14 @@ class TestSchemaCreation:
                 "AND name NOT LIKE 'sqlite_%'"
             ).fetchall()
         }
-        expected = {"sources", "chunks", "wiki_links", "suggestions", "source_tags"}
+        expected = {
+            "sources",
+            "chunks",
+            "wiki_links",
+            "suggestions",
+            "source_tags",
+            "index_metadata",
+        }
         assert expected.issubset(tables)
 
     def test_virtual_tables_exist(self, db: Database):
@@ -767,8 +774,8 @@ class TestMigrationV1ToV2:
         db.close()
 
 
-class TestMigrationV2ToV3:
-    """Test that v2 databases migrate to v3 correctly."""
+class TestMigrationV2ToCurrent:
+    """Test that v2 databases migrate through headings to the current schema."""
 
     def test_migrate_adds_headings_and_rebuilds_source_fts(self):
         db = Database(":memory:")
@@ -811,7 +818,7 @@ class TestMigrationV2ToV3:
         db.init_schema()
 
         version = db._conn.execute("PRAGMA user_version").fetchone()[0]
-        assert version == 3
+        assert version == Database.SCHEMA_VERSION
 
         source = db.get_source_by_path("notes/workflow.md")
         assert source is not None
@@ -824,5 +831,84 @@ class TestMigrationV2ToV3:
         db.update_source(source.id, headings='["Capture inbox workflow"]')
         heading_hits = db.search_fts_sources("capture inbox", limit=10)
         assert source.id in [sid for sid, _ in heading_hits]
+        assert db.get_index_metadata() == {}
 
+        db.close()
+
+
+class TestIndexMetadata:
+    """Index configuration metadata and rebuild reset helpers."""
+
+    def test_set_and_get_index_metadata(self, db: Database):
+        db.set_index_metadata({
+            "embedder_model": "model-a",
+            "embedding_dim": "768",
+        })
+        db.set_index_metadata({"embedder_model": "model-b"})
+
+        metadata = db.get_index_metadata()
+
+        assert metadata["embedder_model"] == "model-b"
+        assert metadata["embedding_dim"] == "768"
+
+    def test_reset_index_contents_for_rebuild_preserves_sources(self, db: Database):
+        source = _make_source(db, path="notes/rebuild.md", title="Rebuild")
+        db.update_source(
+            source.id,
+            status="indexed",
+            content_hash="old-hash",
+            indexed_at="2026-01-01 00:00:00",
+        )
+        chunk = db.add_chunk(source.id, "old chunk", 0)
+        db.upsert_vec(chunk.id, _random_embedding())
+        db.add_tags(source.id, ["old-tag"])
+
+        db.reset_index_contents_for_rebuild()
+
+        source = db.get_source_by_path("notes/rebuild.md")
+        assert source is not None
+        assert source.status == "unprocessed"
+        assert source.content_hash is None
+        assert source.indexed_at is None
+        assert source.indegree == 0
+        assert db.get_chunks_by_source(source.id) == []
+        assert db.get_tags(source.id) == []
+
+
+class TestMigrationV3ToV4:
+    """v3 databases gain index_metadata without touching existing rows."""
+
+    def test_migrate_adds_index_metadata_table(self):
+        db = Database(":memory:")
+        db._conn.executescript("""
+            CREATE TABLE sources (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                uid TEXT NOT NULL UNIQUE,
+                path TEXT NOT NULL UNIQUE,
+                title TEXT,
+                content_hash TEXT,
+                status TEXT DEFAULT 'unprocessed',
+                indegree INTEGER DEFAULT 0,
+                aliases TEXT DEFAULT '[]',
+                headings TEXT DEFAULT '[]',
+                fs_modified_at TEXT,
+                indexed_at TEXT,
+                created_at TEXT DEFAULT (datetime('now')),
+                updated_at TEXT DEFAULT (datetime('now'))
+            );
+            PRAGMA user_version = 3;
+        """)
+
+        db.init_schema()
+
+        version = db._conn.execute("PRAGMA user_version").fetchone()[0]
+        assert version == Database.SCHEMA_VERSION
+        tables = {
+            row[0]
+            for row in db._conn.execute(
+                "SELECT name FROM sqlite_master WHERE type='table'"
+            ).fetchall()
+        }
+        assert "index_metadata" in tables
+        assert db.get_index_metadata() == {}
         db.close()

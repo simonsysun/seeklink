@@ -136,7 +136,15 @@ def test_status_json_subprocess(tmp_path: Path):
     assert payload["ok"] is True
     assert payload["json_schema_version"] == 1
     assert payload["vault"] == str(tmp_path)
-    assert payload["database"]["schema_version"] == 3
+    assert payload["database"]["schema_version"] == 4
+    assert payload["index"] == {
+        "metadata": {},
+        "compatibility": {
+            "compatible": True,
+            "state": "empty",
+            "mismatches": {},
+        },
+    }
     assert payload["stats"] == {
         "notes_total": 0,
         "notes_unprocessed": 0,
