@@ -62,6 +62,9 @@ class QuerySpec:
     relevance: dict[str, float]
     tags: list[str]
     expansion: list[str] | None
+    folder: str | None = None
+    filter_tags: list[str] = field(default_factory=list)
+    answer_contains: dict[str, list[str]] = field(default_factory=dict)
 
 
 def _parse_relevance(raw: object, expected_paths: list[str]) -> dict[str, float]:
@@ -123,9 +126,11 @@ class ResultRow:
     hits: list[str]
     titles: list[str | None]
     snippets: list[str]
+    line_spans: list[dict[str, int]]
     scores: list[float]
     expected_paths: list[str]
     relevance: dict[str, float]
+    filters: dict[str, object]
     latency_ms: float
     reranker_active: bool
     recall_at_10: float
@@ -133,6 +138,8 @@ class ResultRow:
     precision_at_5: float
     average_precision_at_10: float
     ndcg_at_10: float
+    answerable_at_10: float | None
+    answerable_mrr: float | None
     last_expected_rank: int | None
     rerank_k: int | str = 0
     resolved_rerank_k: int | None = None
@@ -152,6 +159,21 @@ def load_queries(path: Path) -> list[QuerySpec]:
                 f"queries.yaml entry {i}: missing required field "
                 f"('query' and 'expected_paths' are mandatory)"
             )
+        filters = r.get("filters") or {}
+        if not isinstance(filters, dict):
+            raise ValueError(f"queries.yaml entry {i}: filters must be a mapping")
+        filter_tags = filters.get("tags") or []
+        if not isinstance(filter_tags, list):
+            raise ValueError(f"queries.yaml entry {i}: filters.tags must be a list")
+        folder = filters.get("folder")
+        if folder is not None and not isinstance(folder, str):
+            raise ValueError(
+                f"queries.yaml entry {i}: filters.folder must be a string"
+            )
+        answer_contains = _parse_answer_contains(
+            r.get("answer_contains"),
+            entry_index=i,
+        )
         expected_paths = list(r["expected_paths"])
         specs.append(
             QuerySpec(
@@ -161,18 +183,56 @@ def load_queries(path: Path) -> list[QuerySpec]:
                 relevance=_parse_relevance(r.get("relevance"), expected_paths),
                 tags=list(r.get("tags", [])),
                 expansion=list(r["expansion"]) if r.get("expansion") else None,
+                folder=folder,
+                filter_tags=[str(tag) for tag in filter_tags],
+                answer_contains=answer_contains,
             )
         )
     return specs
 
 
+def _parse_answer_contains(
+    raw: object,
+    *,
+    entry_index: int,
+) -> dict[str, list[str]]:
+    if raw is None:
+        return {}
+    if not isinstance(raw, dict):
+        raise ValueError(
+            f"queries.yaml entry {entry_index}: answer_contains must be a mapping"
+        )
+    parsed: dict[str, list[str]] = {}
+    for path, needles in raw.items():
+        if not isinstance(path, str) or not path:
+            raise ValueError(
+                f"queries.yaml entry {entry_index}: answer_contains path must be a non-empty string"
+            )
+        if isinstance(needles, str):
+            parsed[path] = [needles]
+        elif isinstance(needles, list):
+            parsed[path] = [str(needle) for needle in needles]
+        else:
+            raise ValueError(
+                f"queries.yaml entry {entry_index}: answer_contains[{path!r}] must be a string or list"
+            )
+    return parsed
+
+
 def _extract(results: list[SearchResult]) -> tuple[
-    list[str], list[str | None], list[str], list[float]
+    list[str], list[str | None], list[str], list[dict[str, int]], list[float]
 ]:
     return (
         [r.path for r in results],
         [r.title for r in results],
         [(r.content or "")[:200] for r in results],
+        [
+            {
+                "line_start": r.line_start,
+                "line_end": r.line_end,
+            }
+            for r in results
+        ],
         [r.score for r in results],
     )
 
@@ -241,6 +301,15 @@ def _first_stage_payload(
             "metadata": len(diagnostics.metadata_ranks),
             "indegree": len(diagnostics.indegree_ranks),
         },
+        "filtered_vector": {
+            "enabled": diagnostics.filtered_vector,
+            "allowed_source_count": diagnostics.allowed_source_count,
+            "vector_k_requested": diagnostics.vector_k_requested,
+            "vector_k_cap_hit": diagnostics.vector_k_cap_hit,
+            "vector_candidates_after_filter": (
+                diagnostics.vector_candidates_after_filter
+            ),
+        },
         "expected_path_ranks": expected_path_ranks,
         "hit_channel_ranks": [
             {
@@ -298,6 +367,12 @@ def classify_failure_bucket(
         return "expected_source_missing"
 
     if not any(payload.get("rrf") is not None for payload in payloads):
+        filtered_vector = first_stage.get("filtered_vector")
+        if (
+            isinstance(filtered_vector, dict)
+            and filtered_vector.get("enabled") is True
+        ):
+            return "filtered_vector_miss"
         return "candidate_generation_miss"
 
     if reranker_active:
@@ -315,6 +390,7 @@ def _result_row(
     hits: list[str],
     titles: list[str | None],
     snippets: list[str],
+    line_spans: list[dict[str, int]],
     scores: list[float],
     latency_ms: float,
     reranker_active: bool,
@@ -325,6 +401,12 @@ def _result_row(
     expansions_used: list[str] | None = None,
 ) -> ResultRow:
     """Build a ResultRow and compute all per-query metrics in one place."""
+    filters: dict[str, object] = {}
+    if spec.folder:
+        filters["folder"] = spec.folder
+    if spec.filter_tags:
+        filters["tags"] = list(spec.filter_tags)
+
     recall = recall_at_k(hits, spec.expected_paths)
     mrr = reciprocal_rank(hits, spec.expected_paths)
     precision_5 = precision_at_k(hits, spec.expected_paths, k=5)
@@ -334,6 +416,11 @@ def _result_row(
     ndcg_10 = ndcg_at_k(
         hits, spec.expected_paths, k=10, relevance=spec.relevance
     )
+    answerable_at_10, answerable_mrr = _answerability_metrics(
+        spec=spec,
+        hits=hits,
+        snippets=snippets,
+    )
     return ResultRow(
         query=spec.query,
         config=config,
@@ -341,9 +428,11 @@ def _result_row(
         hits=hits,
         titles=titles,
         snippets=snippets,
+        line_spans=line_spans,
         scores=scores,
         expected_paths=list(spec.expected_paths),
         relevance=dict(spec.relevance),
+        filters=filters,
         latency_ms=latency_ms,
         reranker_active=reranker_active,
         rerank_k=rerank_k if reranker_active else 0,
@@ -353,6 +442,8 @@ def _result_row(
         precision_at_5=precision_5,
         average_precision_at_10=average_precision_10,
         ndcg_at_10=ndcg_10,
+        answerable_at_10=answerable_at_10,
+        answerable_mrr=answerable_mrr,
         last_expected_rank=last_expected_rank(hits, spec.expected_paths, k=10),
         resolved_rerank_k=resolved_rerank_k if reranker_active else 0,
         rerank_k_reason=rerank_k_reason if reranker_active else None,
@@ -365,6 +456,35 @@ def _result_row(
             first_stage=first_stage or {},
         ),
     )
+
+
+def _answerability_metrics(
+    *,
+    spec: QuerySpec,
+    hits: list[str],
+    snippets: list[str],
+) -> tuple[float | None, float | None]:
+    """Return whether a labeled query surfaces answer text in top 10.
+
+    This is intentionally simple: labels name short phrases that should appear
+    in the returned chunk for a path. It measures agent usefulness better than a
+    path-only hit without turning the blind runner into a human-judgment tool.
+    """
+    if not spec.answer_contains:
+        return None, None
+
+    folded_labels = {
+        path: [needle.casefold() for needle in needles if needle]
+        for path, needles in spec.answer_contains.items()
+    }
+    for rank, (path, snippet) in enumerate(zip(hits[:10], snippets[:10]), start=1):
+        needles = folded_labels.get(path)
+        if not needles:
+            continue
+        folded_snippet = snippet.casefold()
+        if all(needle in folded_snippet for needle in needles):
+            return 1.0, 1.0 / rank
+    return 0.0, 0.0
 
 
 def _rrf_fuse_paths(
@@ -477,15 +597,20 @@ def _search_with_state(
     state: RunnerState,
     query: str,
     diagnostics: SearchDiagnostics | None = None,
+    *,
+    spec: QuerySpec | None = None,
 ) -> list[SearchResult]:
     return search(
         state.db,  # type: ignore[arg-type]
         state.embedder,  # type: ignore[arg-type]
         query,
         top_k=10,
+        tags=spec.filter_tags if spec is not None else None,
+        folder=spec.folder if spec is not None else None,
         reranker=state.reranker,
         rerank_k=state.rerank_k,
         metadata_expansion=state.metadata_expansion,
+        vault_root=state.vault,
         diagnostics=diagnostics,
     )
 
@@ -494,15 +619,21 @@ def run_config_a(spec: QuerySpec, state: RunnerState) -> ResultRow:
     """Baseline: product behavior = search + reranker (matches daemon path)."""
     diagnostics = SearchDiagnostics()
     t0 = time.perf_counter()
-    results = _search_with_state(state, spec.query, diagnostics=diagnostics)
+    results = _search_with_state(
+        state,
+        spec.query,
+        diagnostics=diagnostics,
+        spec=spec,
+    )
     latency_ms = (time.perf_counter() - t0) * 1000.0
-    hits, titles, snippets, scores = _extract(results)
+    hits, titles, snippets, line_spans, scores = _extract(results)
     return _result_row(
         spec=spec,
         config="A",
         hits=hits,
         titles=titles,
         snippets=snippets,
+        line_spans=line_spans,
         scores=scores,
         latency_ms=latency_ms,
         reranker_active=state.reranker_active,
@@ -550,16 +681,17 @@ def run_config_c(spec: QuerySpec, state: RunnerState) -> ResultRow:
         )
     all_queries = [spec.query, *spec.expansion]
     t0 = time.perf_counter()
-    per_q = [_search_with_state(state, q) for q in all_queries]
+    per_q = [_search_with_state(state, q, spec=spec) for q in all_queries]
     fused = _rrf_fuse_paths(per_q)
     latency_ms = (time.perf_counter() - t0) * 1000.0
-    hits, titles, snippets, scores = _extract(fused)
+    hits, titles, snippets, line_spans, scores = _extract(fused)
     return _result_row(
         spec=spec,
         config="C",
         hits=hits,
         titles=titles,
         snippets=snippets,
+        line_spans=line_spans,
         scores=scores,
         latency_ms=latency_ms,
         reranker_active=state.reranker_active,
@@ -605,6 +737,21 @@ def aggregate_rows(rows: list[ResultRow]) -> dict[str, float | int]:
     latencies = [row.latency_ms for row in rows]
     aggregate["p50_latency_ms"] = _percentile(latencies, 0.50)
     aggregate["p95_latency_ms"] = _percentile(latencies, 0.95)
+
+    answerable_rows = [row for row in rows if row.answerable_at_10 is not None]
+    aggregate["answerability_labeled_queries"] = len(answerable_rows)
+    aggregate["mean_answerable_at_10"] = (
+        sum(float(row.answerable_at_10) for row in answerable_rows)
+        / len(answerable_rows)
+        if answerable_rows
+        else 0.0
+    )
+    aggregate["mean_answerable_mrr"] = (
+        sum(float(row.answerable_mrr) for row in answerable_rows)
+        / len(answerable_rows)
+        if answerable_rows
+        else 0.0
+    )
     return aggregate
 
 

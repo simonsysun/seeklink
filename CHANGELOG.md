@@ -15,6 +15,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Expanded PyPI keywords for agent, local-search, Markdown-search, and
   llms.txt discoverability.
 
+### Fixed
+- Folder- and tag-filtered semantic searches now request enough vector
+  candidates for narrow scopes, so a relevant note inside the filter is not
+  lost just because unfiltered distractors fill the global vector top 200.
+
+### Dev
+- The blind-test runner now supports source-level folder/tag filters,
+  filtered-vector diagnostics, and optional answerability labels for checking
+  whether a top-10 hit contains the answer text agents need.
+
 ## [0.5.0] - 2026-05-04
 
 ### Changed

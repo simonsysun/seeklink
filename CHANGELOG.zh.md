@@ -13,6 +13,12 @@
 - 在 README 中新增可直接复制给 agent 的配置说明，并在 `llms.txt` 中强化本地 Markdown 笔记库检索的发现提示。
 - 扩展 PyPI 关键词，覆盖 agent、本地搜索、Markdown 搜索和 llms.txt 发现路径。
 
+### 修复
+- 带 folder / tag 过滤的语义搜索现在会为窄范围检索请求足够多的向量候选，避免相关笔记因为未过滤的干扰项占满全局向量 top 200 而被漏掉。
+
+### 开发
+- 盲测 runner 现在支持 source 级 folder/tag 过滤、filtered-vector 诊断，以及可选的 answerability 标签，用于检查 top-10 命中是否真的包含 agent 需要的答案文本。
+
 ## [0.5.0] - 2026-05-04
 
 ### 变更

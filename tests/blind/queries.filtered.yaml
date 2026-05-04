@@ -1,0 +1,85 @@
+# Filtered search queries for tests/corpus/.
+#
+# This fixture checks that folder and source-tag filters act as retrieval scopes,
+# not just presentation filters. It is intentionally small and public-safe; larger
+# scale/filter stress runs belong in .scratch/.
+
+- query: "why keyword search still helps embeddings"
+  intent: "retrieve the BM25 note inside the retrieval tag scope"
+  expected_paths:
+    - "notes/bm25-intuition.md"
+  answer_contains:
+    "notes/bm25-intuition.md": "Vector embedders are strong"
+  tags: [filtered, tag-filter, english, retrieval]
+  filters:
+    tags: [bm25]
+
+- query: "how agents remember between sessions"
+  intent: "retrieve the agent memory note inside the agents+memory tag scope"
+  expected_paths:
+    - "notes/agent-memory-patterns.md"
+  answer_contains:
+    "notes/agent-memory-patterns.md": "LLMs are stateless"
+  tags: [filtered, tag-filter, english, agents]
+  filters:
+    tags: [agents, memory]
+
+- query: "记忆为什么在睡眠中稳定下来"
+  intent: "retrieve memory consolidation through Chinese semantic phrasing"
+  expected_paths:
+    - "notes/memory-consolidation.md"
+  answer_contains:
+    "notes/memory-consolidation.md": "睡眠剥夺直接降低"
+  tags: [filtered, tag-filter, cjk, memory]
+  filters:
+    tags: [memory, sleep]
+
+- query: "turn durable notes into review cards"
+  intent: "retrieve the note-to-card workflow inside notes/"
+  expected_paths:
+    - "notes/note-to-card-workflow.md"
+  answer_contains:
+    "notes/note-to-card-workflow.md": "review-worthy claims"
+  tags: [filtered, folder-filter, english, workflow]
+  filters:
+    folder: "notes"
+
+- query: "scaled dot product formula"
+  intent: "retrieve an answer card inside cards/"
+  expected_paths:
+    - "cards/card-attention-formula.md"
+  answer_contains:
+    "cards/card-attention-formula.md": "scaled dot-product attention formula"
+  tags: [filtered, folder-filter, english, card]
+  filters:
+    folder: "cards"
+
+- query: "wild yeast starter timing"
+  intent: "retrieve recipe content inside recipes/"
+  expected_paths:
+    - "recipes/sourdough-starter.md"
+  answer_contains:
+    "recipes/sourdough-starter.md": "7-10 days"
+  tags: [filtered, folder-filter, english, recipe]
+  filters:
+    folder: "recipes"
+
+- query: "本地 agent retrieval 设计要求"
+  intent: "retrieve the weekly log scoped to logs/"
+  expected_paths:
+    - "logs/2026-W15.md"
+  answer_contains:
+    "logs/2026-W15.md": "BM25 + vector + graph + title"
+  tags: [filtered, folder-filter, cjk, logs]
+  filters:
+    folder: "logs"
+
+- query: "CJK first vault embedding advantage"
+  intent: "retrieve the RAG pipeline weekly log scoped to logs/"
+  expected_paths:
+    - "logs/2026-W18.md"
+  answer_contains:
+    "logs/2026-W18.md": "CJK-first vault"
+  tags: [filtered, folder-filter, mixed, logs]
+  filters:
+    folder: "logs"

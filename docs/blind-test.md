@@ -10,6 +10,7 @@ The bundled fixture lives in:
 ```text
 tests/corpus/              # small bilingual Markdown vault
 tests/blind/queries.yaml   # labeled queries
+tests/blind/queries.filtered.yaml
 tests/blind/run.py         # runner
 tests/blind/results/       # release-quality reference outputs only
 ```
@@ -44,6 +45,11 @@ Each query has hard expected paths and optional graded relevance:
     "notes/spaced-repetition.md": 3
     "logs/2026-W15.md": 2
   tags: [cjk, common]
+  filters:
+    folder: "notes"
+    tags: [memory]
+  answer_contains:
+    "notes/spaced-repetition.md": "spacing effect"
   expansion:
     - "间隔重复 遗忘曲线 FSRS"
     - "how to retain memory long term"
@@ -58,6 +64,11 @@ Rules:
   `0` irrelevant.
 - Tags should identify slices such as `cjk`, `english`, `mixed`, `short`,
   `long`, `technical`, `alias`, `filtered`, or `logs`.
+- `filters.folder` and `filters.tags` are source filters passed to product
+  search. Use them for filtered retrieval checks, not for query slicing.
+- `answer_contains` is optional. It labels short phrases that should appear in
+  the returned chunk for a path, giving a lightweight answerability signal for
+  agent workflows.
 
 ## Metrics
 
@@ -69,6 +80,7 @@ The runner records per-query:
 - `precision_at_5`
 - `average_precision_at_10`
 - `ndcg_at_10`
+- `answerable_at_10` and `answerable_mrr` when `answer_contains` labels exist
 - `last_expected_rank`
 - `latency_ms`
 - reranker budget metadata
@@ -77,15 +89,17 @@ The runner records per-query:
   top-10 ordering gap, candidate-generation miss, rerank-budget miss,
   reranker-ordering miss, missing expected source, or not diagnosed
 
-The aggregate output includes mean Recall@10, MRR, nDCG@10, latency, and p95
-latency. It also includes `diagnostics.failure_buckets`, a compact count of the
-per-query labels.
+The aggregate output includes mean Recall@10, MRR, nDCG@10, latency, p95
+latency, and answerability metrics when labels exist. It also includes
+`diagnostics.failure_buckets`, a compact count of the per-query labels.
 
 Use `failure_bucket` first, then inspect `first_stage` when a bucket needs
 detail:
 
 - Candidate-generation miss: the expected note never appears in first-stage
   candidates.
+- Filtered-vector miss: the query used folder/tag filters and the expected note
+  did not enter the filtered candidate pool.
 - Rerank-budget miss: the expected note appears in first-stage results but not
   inside the reranker candidate budget.
 - Reranker-ordering miss: the expected note reaches the reranker candidate pool
@@ -120,6 +134,17 @@ uv run python tests/blind/run.py \
   --queries tests/blind/queries.yaml \
   --vault tests/corpus \
   --out .scratch/blind/A_no_rerank.json
+```
+
+Run the filtered-search fixture:
+
+```bash
+uv run python tests/blind/run.py \
+  --config A \
+  --no-rerank \
+  --queries tests/blind/queries.filtered.yaml \
+  --vault tests/corpus \
+  --out .scratch/blind/A_filtered.json
 ```
 
 Run a reranker-budget sweep:

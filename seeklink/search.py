@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import logging
 import math
+import os
 import re
 import sqlite3
 import unicodedata
@@ -26,6 +27,8 @@ logger = logging.getLogger(__name__)
 RerankK = int | Literal["auto"]
 AUTO_RERANK_FAST_K = 5
 AUTO_RERANK_DEEP_K = 20
+FILTERED_VEC_K_CAP_DEFAULT = 5000
+FILTERED_VEC_K_CAP_ENV = "SEEKLINK_FILTERED_VEC_K_CAP"
 _CJK_QUESTION_BM25_WEIGHT = 0.5
 _CJK_TECHNICAL_RERANK_TERMS = (
     "向量",
@@ -171,6 +174,56 @@ class SearchDiagnostics:
     rerank_candidate_source_ids: list[int] = field(default_factory=list)
     effective_bm25_weight: float = 1.0
     cjk_question_terms_stripped: bool = False
+    filtered_vector: bool = False
+    allowed_source_count: int | None = None
+    vector_k_requested: int | None = None
+    vector_k_cap_hit: bool = False
+    vector_candidates_after_filter: int | None = None
+
+
+def _filtered_vec_k_cap() -> int:
+    raw = os.environ.get(FILTERED_VEC_K_CAP_ENV)
+    if raw is None:
+        return FILTERED_VEC_K_CAP_DEFAULT
+    try:
+        return max(200, int(raw))
+    except ValueError:
+        logger.warning(
+            "Ignoring invalid %s=%r; using %s",
+            FILTERED_VEC_K_CAP_ENV,
+            raw,
+            FILTERED_VEC_K_CAP_DEFAULT,
+        )
+        return FILTERED_VEC_K_CAP_DEFAULT
+
+
+def _resolve_vector_limit(
+    *,
+    top_k: int,
+    expand: bool,
+    has_filter: bool,
+    allowed_source_count: int | None,
+    total_source_count: int,
+    total_chunk_count: int,
+) -> tuple[int, bool]:
+    base_limit = 200 if (expand or has_filter) else 50
+    if (
+        not has_filter
+        or allowed_source_count is None
+        or allowed_source_count <= 0
+        or total_source_count <= 0
+        or total_chunk_count <= 0
+    ):
+        return base_limit, False
+
+    desired_allowed = max(40, 4 * top_k, 2 * AUTO_RERANK_DEEP_K)
+    selectivity = allowed_source_count / total_source_count
+    effective_selectivity = max(selectivity, 0.02)
+    wanted = math.ceil(desired_allowed / effective_selectivity)
+    cap = _filtered_vec_k_cap()
+    limit = min(total_chunk_count, max(base_limit, wanted), cap)
+    cap_hit = wanted > limit and limit == cap and total_chunk_count > cap
+    return limit, cap_hit
 
 
 def _contains_cjk(text: str) -> bool:
@@ -327,8 +380,26 @@ def search(
     bm25_ranked = sorted(bm25_best.keys(), key=lambda sid: bm25_best[sid][1])
     bm25_ranks = {sid: i + 1 for i, sid in enumerate(bm25_ranked)}
 
-    # Channel 2: Vector (use larger k when expansion or filtering requested)
-    vec_limit = 200 if (expand or has_filter) else 50
+    # Channel 2: Vector. Filtered searches need an adaptive global K because
+    # sqlite-vec currently retrieves nearest chunks before source filters are
+    # applied. A narrow folder/tag can otherwise lose a semantically relevant
+    # hit that sits just beyond the global top 200.
+    total_sources = 0
+    total_chunks = 0
+    if has_filter:
+        stats = db.get_stats()
+        total_sources = int(stats["notes_total"])
+        total_chunks = int(stats["chunks_total"])
+    vec_limit, filtered_vec_cap_hit = _resolve_vector_limit(
+        top_k=top_k,
+        expand=expand,
+        has_filter=has_filter,
+        allowed_source_count=(
+            len(allowed_source_ids) if allowed_source_ids is not None else None
+        ),
+        total_source_count=total_sources,
+        total_chunk_count=total_chunks,
+    )
     query_emb = _safe_embed(embedder, query)
     if query_emb is not None:
         vec_results = db.search_vec(query_emb, k=vec_limit)
@@ -347,6 +418,11 @@ def search(
     vec_best = _best_chunk_per_source(vec_chunks_with_dist)
     vec_ranked = sorted(vec_best.keys(), key=lambda sid: vec_best[sid][1])
     vec_ranks = {sid: i + 1 for i, sid in enumerate(vec_ranked)}
+    vec_candidates_after_filter = (
+        sum(1 for sid in vec_ranks if sid in allowed_source_ids)
+        if allowed_source_ids is not None
+        else None
+    )
 
     # Channel 4: Title/alias/heading metadata (source-level FTS5)
     title_results = db.search_fts_sources(
@@ -483,6 +559,13 @@ def search(
         diagnostics.cjk_question_terms_stripped = (
             fts_query.stripped_cjk_question_terms
         )
+        diagnostics.filtered_vector = has_filter
+        diagnostics.allowed_source_count = (
+            len(allowed_source_ids) if allowed_source_ids is not None else None
+        )
+        diagnostics.vector_k_requested = vec_limit
+        diagnostics.vector_k_cap_hit = filtered_vec_cap_hit
+        diagnostics.vector_candidates_after_filter = vec_candidates_after_filter
 
     # Pick best chunk for each source (prefer BM25 chunk, fall back to vec)
     best_chunks: dict[int, Chunk] = {}

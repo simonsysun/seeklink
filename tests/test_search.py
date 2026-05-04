@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from types import MethodType
 from unittest.mock import patch
 
 import pytest
@@ -52,6 +53,11 @@ class FtsOnlyEmbedder:
 
     def embed_query(self, text: str) -> bytes:
         raise RuntimeError("vector disabled for FTS-only regression test")
+
+
+class VectorOnlyEmbedder:
+    def embed_query(self, text: str) -> bytes:
+        return b"\0" * (768 * 4)
 
 
 class TestAutoRerankK:
@@ -145,6 +151,21 @@ def _write_md(vault: Path, rel_path: str, content: str) -> Path:
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(content, encoding="utf-8")
     return p
+
+
+def _install_fake_vector_order(
+    db: Database,
+    ranked_chunk_ids: list[int],
+    requested_k: list[int],
+) -> None:
+    def fake_search_vec(self: Database, embedding: bytes, k: int = 20):
+        requested_k.append(k)
+        return [
+            (chunk_id, float(rank))
+            for rank, chunk_id in enumerate(ranked_chunk_ids[:k], start=1)
+        ]
+
+    db.search_vec = MethodType(fake_search_vec, db)  # type: ignore[method-assign]
 
 
 def _ingest_corpus(db: Database, embedder: Embedder, vault: Path) -> None:
@@ -575,6 +596,52 @@ class TestTagFiltering:
         assert target is not None
         assert diagnostics.bm25_ranks[target.id] == 1
 
+    def test_tag_filter_expands_vector_candidates_beyond_global_limit(
+        self, db: Database
+    ):
+        embedder = VectorOnlyEmbedder()
+        ranked_chunk_ids: list[int] = []
+        for i in range(250):
+            source = db.add_source(
+                f"noise-{i}",
+                f"noise/noise-{i:03}.md",
+                title=f"Noise {i}",
+                status="indexed",
+            )
+            chunk = db.add_chunk(source.id, f"Semantic distractor {i}", 0)
+            ranked_chunk_ids.append(chunk.id)
+
+        target = db.add_source(
+            "target",
+            "target.md",
+            title="Target",
+            status="indexed",
+        )
+        target_chunk = db.add_chunk(
+            target.id,
+            "Delayed settlement exposure is controlled by reserve accounting.",
+            0,
+        )
+        db.add_tags(target.id, ["scoped"])
+        ranked_chunk_ids.append(target_chunk.id)
+
+        requested_k: list[int] = []
+        _install_fake_vector_order(db, ranked_chunk_ids, requested_k)
+        diagnostics = SearchDiagnostics()
+        results = search(
+            db,
+            embedder,  # type: ignore[arg-type]
+            "semantic risk query",
+            tags=["scoped"],
+            diagnostics=diagnostics,
+        )
+
+        assert [r.path for r in results] == ["target.md"]
+        assert requested_k[0] > 200
+        assert diagnostics.vector_k_requested == requested_k[0]
+        assert diagnostics.vector_candidates_after_filter == 1
+        assert diagnostics.vector_ranks[target.id] == 251
+
 
 class TestFolderFiltering:
     """Test folder-based filtering in search."""
@@ -622,6 +689,51 @@ class TestFolderFiltering:
         target = db.get_source_by_path("notes/target.md")
         assert target is not None
         assert diagnostics.bm25_ranks[target.id] == 1
+
+    def test_folder_filter_expands_vector_candidates_beyond_global_limit(
+        self, db: Database
+    ):
+        embedder = VectorOnlyEmbedder()
+        ranked_chunk_ids: list[int] = []
+        for i in range(250):
+            source = db.add_source(
+                f"noise-{i}",
+                f"archive/noise-{i:03}.md",
+                title=f"Noise {i}",
+                status="indexed",
+            )
+            chunk = db.add_chunk(source.id, f"Semantic distractor {i}", 0)
+            ranked_chunk_ids.append(chunk.id)
+
+        target = db.add_source(
+            "target",
+            "notes/target.md",
+            title="Target",
+            status="indexed",
+        )
+        target_chunk = db.add_chunk(
+            target.id,
+            "Delayed settlement exposure is controlled by reserve accounting.",
+            0,
+        )
+        ranked_chunk_ids.append(target_chunk.id)
+
+        requested_k: list[int] = []
+        _install_fake_vector_order(db, ranked_chunk_ids, requested_k)
+        diagnostics = SearchDiagnostics()
+        results = search(
+            db,
+            embedder,  # type: ignore[arg-type]
+            "semantic risk query",
+            folder="notes",
+            diagnostics=diagnostics,
+        )
+
+        assert [r.path for r in results] == ["notes/target.md"]
+        assert requested_k[0] > 200
+        assert diagnostics.vector_k_requested == requested_k[0]
+        assert diagnostics.vector_candidates_after_filter == 1
+        assert diagnostics.vector_ranks[target.id] == 251
 
 
 class TestTitleChannel:

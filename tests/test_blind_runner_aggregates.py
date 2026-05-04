@@ -63,6 +63,26 @@ class TestLoadQueries:
             "notes/rrf.md": 1.0,
         }
 
+    def test_load_queries_accepts_source_filters(self, tmp_path: Path):
+        path = tmp_path / "queries.yaml"
+        path.write_text(
+            """
+- query: scoped retrieval
+  expected_paths:
+    - notes/answer.md
+  tags: [filtered]
+  filters:
+    folder: notes
+    tags: [retrieval, pkm]
+""",
+            encoding="utf-8",
+        )
+
+        specs = blind_run.load_queries(path)
+
+        assert specs[0].folder == "notes"
+        assert specs[0].filter_tags == ["retrieval", "pkm"]
+
     def test_result_row_uses_graded_relevance_for_ndcg(self):
         spec = blind_run.QuerySpec(
             query="transformer retrieval",
@@ -82,6 +102,7 @@ class TestLoadQueries:
             hits=["notes/support.md", "notes/answer.md"],
             titles=[None, None],
             snippets=["", ""],
+            line_spans=[{"line_start": 1, "line_end": 1}],
             scores=[1.0, 0.5],
             latency_ms=10.0,
             reranker_active=True,
@@ -90,6 +111,36 @@ class TestLoadQueries:
 
         assert row.mrr == pytest.approx(0.5)
         assert row.ndcg_at_10 > row.mrr
+
+    def test_result_row_computes_answerability_when_labels_exist(self):
+        spec = blind_run.QuerySpec(
+            query="formula",
+            intent=None,
+            expected_paths=["cards/card.md"],
+            relevance={"cards/card.md": 3.0},
+            tags=["card"],
+            expansion=None,
+            answer_contains={"cards/card.md": ["softmax"]},
+        )
+
+        row = blind_run._result_row(
+            spec=spec,
+            config="A",
+            hits=["wrong.md", "cards/card.md"],
+            titles=[None, None],
+            snippets=["irrelevant", "Attention = softmax(QK)"],
+            line_spans=[
+                {"line_start": 1, "line_end": 2},
+                {"line_start": 8, "line_end": 10},
+            ],
+            scores=[1.0, 0.5],
+            latency_ms=10.0,
+            reranker_active=False,
+            rerank_k=0,
+        )
+
+        assert row.answerable_at_10 == 1.0
+        assert row.answerable_mrr == pytest.approx(0.5)
 
 
 class TestFirstStagePayload:
@@ -217,6 +268,30 @@ class TestFailureBuckets:
 
         assert bucket == "candidate_generation_miss"
 
+    def test_filtered_vector_miss_bucket(self):
+        bucket = blind_run.classify_failure_bucket(
+            hits=["wrong.md"],
+            expected_paths=["answer.md"],
+            recall_at_10=0.0,
+            reranker_active=False,
+            first_stage={
+                "filtered_vector": {"enabled": True},
+                "expected_path_ranks": {
+                    "answer.md": {
+                        "bm25": None,
+                        "vector": None,
+                        "title": None,
+                        "metadata": None,
+                        "indegree": None,
+                        "rrf": None,
+                        "rerank_candidate": None,
+                    }
+                },
+            },
+        )
+
+        assert bucket == "filtered_vector_miss"
+
     def test_rerank_budget_and_ordering_buckets(self):
         base_payload = {
             "bm25": None,
@@ -318,6 +393,8 @@ def _row(
         scores=[],
         expected_paths=[],
         relevance={},
+        filters={},
+        line_spans=[],
         latency_ms=latency,
         reranker_active=True,
         recall_at_10=recall,
@@ -325,6 +402,8 @@ def _row(
         precision_at_5=p5,
         average_precision_at_10=ap,
         ndcg_at_10=ndcg,
+        answerable_at_10=None,
+        answerable_mrr=None,
         last_expected_rank=None,
     )
 
@@ -342,6 +421,9 @@ class TestAggregateRows:
         assert aggregate["mean_latency_ms"] == 0.0
         assert aggregate["p50_latency_ms"] == 0.0
         assert aggregate["p95_latency_ms"] == 0.0
+        assert aggregate["answerability_labeled_queries"] == 0
+        assert aggregate["mean_answerable_at_10"] == 0.0
+        assert aggregate["mean_answerable_mrr"] == 0.0
 
     def test_mean_metrics_and_latency_percentiles(self):
         rows = [
