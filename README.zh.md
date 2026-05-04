@@ -61,7 +61,8 @@ seeklink get notes/agent-memory-patterns.md:1 -C 20
 和可选的 reranker 保持在内存里，避免每次调用都重新加载。全库 `seeklink index`
 会在 CLI 进程内运行，这样进度可以稳定输出到 stderr，最终 `Done:` 摘要保留在 stdout。
 `seeklink status` 和 `seeklink get` 始终走冷启动路径：status 只读 SQLite 元数据，
-get 直接从磁盘读文件。
+get 直接从磁盘读文件。如果脚本需要在设置了 `SEEKLINK_VAULT` 的情况下仍然走冷启动，
+可以使用 `--no-daemon` 或 `SEEKLINK_NO_DAEMON=1`。
 
 ## 输出格式
 
@@ -82,6 +83,7 @@ get 直接从磁盘读文件。
 ```bash
 seeklink search "agent 记忆系统" --vault PATH --json
 seeklink status --vault PATH --json
+seeklink doctor --vault PATH --json
 ```
 
 ## 常用命令
@@ -101,6 +103,7 @@ seeklink search "查询内容" --vault PATH [选项]
 --folder PREFIX    按笔记库相对路径的文件夹前缀筛选
 --rerank-k N|auto  Reranker 候选预算，默认 auto
 --no-rerank        本次查询跳过交叉编码器重排序
+--no-daemon        强制本进程搜索，不使用守护进程
 --title-weight F   覆盖标题/别名/标题通道的权重，默认 1.5
 ```
 
@@ -128,6 +131,16 @@ seeklink status --vault PATH --json
 Status 显示索引数量、模型名称、索引配置兼容性、SQLite WAL 状态以及文件新鲜度警告。
 它不会加载嵌入或重排序模型。
 
+### Doctor
+
+```bash
+seeklink doctor --vault PATH
+seeklink doctor --vault PATH --json
+```
+
+Doctor 检查 Python、SQLite、本地数据库、索引兼容性和可选 MLX 可用性。
+它不会下载或加载模型。
+
 ### 索引
 
 ```bash
@@ -148,6 +161,8 @@ seeklink daemon --vault PATH
 通常不需要手动运行。`search` 和单文件 `index` 在合适的时候会自动启动和重启守护进程。
 全库 `index` 仍然在 CLI 进程内运行，以便输出进度。给 `search` 或单文件 `index`
 传 `--vault` 会强制走一次性冷启动路径，因为守护进程在启动时就绑定到了一个笔记库。
+如果脚本需要在设置了 `SEEKLINK_VAULT` 的情况下仍然绕过守护进程，可以使用
+`--no-daemon` 或 `SEEKLINK_NO_DAEMON=1`。
 
 ## 搜索原理
 

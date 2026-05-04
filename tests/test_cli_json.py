@@ -97,6 +97,45 @@ def test_search_parser_defaults_to_auto_rerank_k(monkeypatch):
     assert captured == {"rerank_k": "auto"}
 
 
+def test_search_parser_accepts_no_daemon(monkeypatch):
+    captured: dict = {}
+
+    def fake_cmd_search(args):
+        captured["no_daemon"] = args.no_daemon
+
+    monkeypatch.setattr(sys, "argv", ["seeklink", "search", "memory", "--no-daemon"])
+    monkeypatch.setattr(cli, "_cmd_search", fake_cmd_search)
+    cli.main()
+
+    assert captured == {"no_daemon": True}
+
+
+def test_index_parser_accepts_no_daemon(monkeypatch):
+    captured: dict = {}
+
+    def fake_cmd_index(args):
+        captured["no_daemon"] = args.no_daemon
+
+    monkeypatch.setattr(sys, "argv", ["seeklink", "index", "note.md", "--no-daemon"])
+    monkeypatch.setattr(cli, "_cmd_index", fake_cmd_index)
+    cli.main()
+
+    assert captured == {"no_daemon": True}
+
+
+def test_should_use_daemon_honors_flag_and_env(monkeypatch):
+    assert cli._should_use_daemon(argparse.Namespace(vault=None, no_daemon=False))
+
+    assert not cli._should_use_daemon(argparse.Namespace(vault=Path(".")))
+    assert not cli._should_use_daemon(argparse.Namespace(vault=None, no_daemon=True))
+
+    monkeypatch.setenv("SEEKLINK_NO_DAEMON", "1")
+    assert not cli._should_use_daemon(argparse.Namespace(vault=None))
+
+    monkeypatch.setenv("SEEKLINK_NO_DAEMON", "false")
+    assert cli._should_use_daemon(argparse.Namespace(vault=None))
+
+
 def test_search_result_to_json_truncates_preview():
     result = SearchResult(
         source_id=1,
@@ -160,6 +199,31 @@ def test_status_json_subprocess(tmp_path: Path):
     }
     assert payload["models"]["embedder"] == "jinaai/jina-embeddings-v2-base-zh"
     assert payload["models"]["reranker"] == "mlx-community/Qwen3-Reranker-0.6B-mxfp8"
+
+
+def test_doctor_json_subprocess(tmp_path: Path):
+    cmd = [
+        sys.executable,
+        "-m",
+        "seeklink",
+        "doctor",
+        "--vault",
+        str(tmp_path),
+        "--json",
+    ]
+    result = subprocess.run(cmd, capture_output=True, text=True)
+
+    assert result.returncode == 0, result.stderr
+    payload = json.loads(result.stdout)
+    assert payload["ok"] is True
+    assert payload["json_schema_version"] == 1
+    assert payload["vault"] == str(tmp_path)
+    checks = {check["name"]: check for check in payload["checks"]}
+    assert checks["python"]["ok"] is True
+    assert checks["sqlite"]["ok"] is True
+    assert checks["database"]["ok"] is True
+    assert checks["index_compatibility"]["ok"] is True
+    assert checks["mlx_lm"]["required"] is False
 
 
 def test_search_json_no_rerank_sends_daemon_flag(capsys, monkeypatch):

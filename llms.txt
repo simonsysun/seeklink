@@ -50,11 +50,12 @@ seeklink index  --vault PATH           # if needed (first run or after edits)
 seeklink search "QUERY" --vault PATH   # retrieval
 seeklink search "QUERY" --vault PATH --json  # machine-readable retrieval output
 seeklink status --vault PATH --json          # machine-readable index/model status
+seeklink doctor --vault PATH --json          # machine-readable environment checks
 seeklink get    PATH:LINE -l N         # read window around a hit
 seeklink get    PATH:LINE -C N         # read N lines before/after a hit
 ```
 
-Set `SEEKLINK_VAULT=<path>` once to omit `--vault` on repeated calls. `search` and single-file `index path/to/file.md` use the resident daemon; full-vault `index` runs in the CLI process so progress stays on stderr. First-ever model downloads can take much longer than normal daemon startup. Warm search latency depends on whether the optional MLX reranker is installed and active; `search --json` reports whether reranking was active for that query. If vault/model config changes, `search` and single-file `index` auto-restart a stale daemon instead of silently serving the old vault.
+Set `SEEKLINK_VAULT=<path>` once to omit `--vault` on repeated calls. `search` and single-file `index path/to/file.md` use the resident daemon; full-vault `index` runs in the CLI process so progress stays on stderr. Use `--no-daemon` or `SEEKLINK_NO_DAEMON=1` when an agent or CI script needs the cold-start path even with `SEEKLINK_VAULT` set. First-ever model downloads can take much longer than normal daemon startup. Warm search latency depends on whether the optional MLX reranker is installed and active; `search --json` reports whether reranking was active for that query. If vault/model config changes, `search` and single-file `index` auto-restart a stale daemon instead of silently serving the old vault.
 
 ### Output contract
 
@@ -70,7 +71,7 @@ Set `SEEKLINK_VAULT=<path>` once to omit `--vault` on repeated calls. `search` a
 - `SCORE` is blended (reranker on) or raw RRF (reranker disabled). Don't compare scores across configurations.
 - Preview is truncated at 120 chars, newlines flattened to spaces.
 
-For structured output, prefer CLI JSON unless you need the fastest hot loop. `seeklink search "QUERY" --json` emits one JSON object with `ok`, `json_schema_version`, `query`, `vault`, `top_k`, `reranking`, `filters`, `models`, and `results`. `seeklink status --json` emits one JSON object with `ok`, `json_schema_version`, `vault`, `database`, `index`, `stats`, `freshness`, and `models`.
+For structured output, prefer CLI JSON unless you need the fastest hot loop. `seeklink search "QUERY" --json` emits one JSON object with `ok`, `json_schema_version`, `query`, `vault`, `top_k`, `reranking`, `filters`, `models`, and `results`. `seeklink status --json` emits one JSON object with `ok`, `json_schema_version`, `vault`, `database`, `index`, `stats`, `freshness`, and `models`. `seeklink doctor --json` emits `ok`, `json_schema_version`, `vault`, `checks`, `stats`, and `index` without downloading or loading models.
 
 Daemon protocol: Unix socket at `~/.rhizome/seeklink.sock`; 4-byte big-endian length prefix followed by a UTF-8 JSON body. Request body: `{"cmd":"search","args":{"query":"...","top_k":10}}`. Response body on success: `{"ok":true,"result":[...]}` where each item has `source_id`, `path`, `title`, `content_preview`, `score`, `indegree`, `line_start`, `line_end`.
 
@@ -94,5 +95,6 @@ No other codes.
 - Empty results on a fresh vault → index not built yet. Run `seeklink index --vault PATH`.
 - Reranker unavailable → install `seeklink[mlx]` on Apple Silicon or accept first-stage hybrid RRF ranking. Use `--no-rerank` when a deterministic no-rerank path is preferred.
 - SQLite capability error → use a Python build whose `sqlite3` module links against SQLite >= 3.45 with FTS5.
-- Daemon won't auto-spawn → `--vault` was passed, which intentionally forces cold-start. Without `--vault`, `search` and single-file `index` should auto-spawn and auto-restart stale daemons when `vault` / `embedder` / `reranker` no longer match.
+- Install or environment uncertainty → run `seeklink doctor --json` and inspect required checks whose `ok` field is false.
+- Daemon won't auto-spawn → `--vault`, `--no-daemon`, or `SEEKLINK_NO_DAEMON=1` was used, which intentionally forces cold-start. Without those, `search` and single-file `index` should auto-spawn and auto-restart stale daemons when `vault` / `embedder` / `reranker` no longer match.
 - Line numbers look wrong → file was edited after indexing. Re-index. `status` prints a freshness warning on cold-start; agents should run `status --json` after long editing sessions.

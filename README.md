@@ -67,7 +67,8 @@ daemon keeps the embedder and optional reranker in memory. Full-vault
 `seeklink index` runs in-process so progress stays on stderr and the final
 `Done:` summary stays on stdout. `seeklink status` and `seeklink get` always
 stay cold-start: status only reads SQLite metadata, and get reads the file
-directly from disk.
+directly from disk. Use `--no-daemon` or `SEEKLINK_NO_DAEMON=1` when a script
+needs the cold-start path even with `SEEKLINK_VAULT` set.
 
 ## Output
 
@@ -90,6 +91,7 @@ Use JSON when an agent needs structured output:
 ```bash
 seeklink search "agent memory systems" --vault PATH --json
 seeklink status --vault PATH --json
+seeklink doctor --vault PATH --json
 ```
 
 ## Common Commands
@@ -109,6 +111,7 @@ Options:
 --folder PREFIX    Filter by vault-relative folder prefix.
 --rerank-k N|auto  Rerank candidate budget. Default: auto.
 --no-rerank        Skip cross-encoder reranking for this query.
+--no-daemon        Force an in-process search instead of using the daemon.
 --title-weight F   Override title/alias/heading channel weight. Default: 1.5.
 ```
 
@@ -137,6 +140,16 @@ Status reports index counts, model names, index-configuration compatibility,
 SQLite WAL status, and freshness warnings. It does not load the embedding or
 reranking models.
 
+### Doctor
+
+```bash
+seeklink doctor --vault PATH
+seeklink doctor --vault PATH --json
+```
+
+Doctor checks Python, SQLite, the local database, index compatibility, and
+optional MLX availability. It does not download or load models.
+
 ### Index
 
 ```bash
@@ -160,7 +173,8 @@ You normally do not run this directly. `search` and single-file `index`
 auto-spawn and auto-restart the daemon when appropriate. Full-vault `index`
 still runs in-process for progress output. Passing `--vault` to `search` or
 single-file `index` forces a one-shot cold-start path because the daemon is
-bound to one vault at startup.
+bound to one vault at startup. `--no-daemon` and `SEEKLINK_NO_DAEMON=1` also
+force the same cold-start path.
 
 ## How Search Works
 

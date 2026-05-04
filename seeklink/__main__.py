@@ -5,6 +5,7 @@ Subcommands:
   search   — search the vault (daemon-first; cold-start fallback)
   index    — index notes (full-vault in-process; single-file daemon-first)
   status   — show vault / index stats (always cold-start; no model load)
+  doctor   — diagnose runtime environment and index compatibility
   get      — print a line range of a vault file (direct filesystem read)
 
 Dispatch: when `--vault` is not passed to `search` / single-file `index`,
@@ -22,9 +23,11 @@ output.
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import logging
 import os
+import sqlite3
 import sys
 import time
 from pathlib import Path
@@ -43,6 +46,7 @@ logger = logging.getLogger(__name__)
 # Reranker default is duplicated here to avoid importing seeklink.reranker,
 # which pulls in mlx-lm during cold CLI startup.
 _DEFAULT_RERANKER_MODEL = "mlx-community/Qwen3-Reranker-0.6B-mxfp8"
+_NO_DAEMON_ENV = "SEEKLINK_NO_DAEMON"
 
 
 def _parse_rerank_k(raw: str) -> int | str:
@@ -68,6 +72,13 @@ def _validate_rerank_k(value: int | str) -> None:
             file=sys.stderr,
         )
         sys.exit(1)
+
+
+def _env_flag(name: str) -> bool:
+    raw = os.environ.get(name)
+    if raw is None:
+        return False
+    return raw.strip().casefold() not in {"", "0", "false", "no", "off"}
 
 
 def _resolve_default_vault() -> Path:
@@ -148,16 +159,35 @@ def main() -> None:
         action="store_true",
         help="Emit a machine-readable JSON object instead of text output",
     )
+    search_p.add_argument(
+        "--no-daemon",
+        action="store_true",
+        help="Force an in-process search instead of using the daemon",
+    )
 
     # index
     index_p = sub.add_parser("index", help="Index notes")
     index_p.add_argument("path", nargs="?", help="File to index (omit for full vault)")
     index_p.add_argument("--vault", type=Path, help="Vault path (default: cwd)")
+    index_p.add_argument(
+        "--no-daemon",
+        action="store_true",
+        help="Force in-process indexing instead of using the daemon",
+    )
 
     # status
     status_p = sub.add_parser("status", help="Show index status")
     status_p.add_argument("--vault", type=Path, help="Vault path (default: cwd)")
     status_p.add_argument(
+        "--json",
+        action="store_true",
+        help="Emit a machine-readable JSON object instead of text output",
+    )
+
+    # doctor
+    doctor_p = sub.add_parser("doctor", help="Diagnose environment and index health")
+    doctor_p.add_argument("--vault", type=Path, help="Vault path (default: cwd)")
+    doctor_p.add_argument(
         "--json",
         action="store_true",
         help="Emit a machine-readable JSON object instead of text output",
@@ -208,6 +238,8 @@ def main() -> None:
         _cmd_index(args)
     elif args.command == "status":
         _cmd_status(args)
+    elif args.command == "doctor":
+        _cmd_doctor(args)
     elif args.command == "get":
         _cmd_get(args)
     else:
@@ -230,6 +262,8 @@ def _should_use_daemon(args: argparse.Namespace) -> bool:
     single vault (selected at daemon-start time) and cannot safely serve a
     different one. Multi-vault daemon support is tracked in TODOS.md.
     """
+    if getattr(args, "no_daemon", False) or _env_flag(_NO_DAEMON_ENV):
+        return False
     return getattr(args, "vault", None) is None
 
 
@@ -400,6 +434,115 @@ def _status_json_payload(
             "reranker": reranker,
         },
     }
+
+
+def _add_doctor_check(
+    checks: list[dict],
+    *,
+    name: str,
+    ok: bool,
+    detail: str,
+    required: bool = True,
+) -> None:
+    checks.append(
+        {
+            "name": name,
+            "ok": ok,
+            "required": required,
+            "detail": detail,
+        }
+    )
+
+
+def _cmd_doctor(args: argparse.Namespace) -> None:
+    """Lightweight diagnostics. Does not download or load ML models."""
+    _setup_logging()
+
+    checks: list[dict] = []
+    _add_doctor_check(
+        checks,
+        name="python",
+        ok=sys.version_info >= (3, 11),
+        detail=sys.version.split()[0],
+    )
+    _add_doctor_check(
+        checks,
+        name="sqlite",
+        ok=sqlite3.sqlite_version_info >= (3, 45),
+        detail=sqlite3.sqlite_version,
+    )
+    mlx_installed = importlib.util.find_spec("mlx_lm") is not None
+    _add_doctor_check(
+        checks,
+        name="mlx_lm",
+        ok=mlx_installed,
+        detail="installed" if mlx_installed else "not installed",
+        required=False,
+    )
+
+    stats: dict | None = None
+    index_compatibility: dict | None = None
+    vault_root = _resolve_default_vault() if args.vault is None else args.vault.resolve()
+    db = None
+    try:
+        from seeklink.app import init_app
+
+        db, embedder, vault_root = init_app(args.vault)
+        stats = db.get_stats()
+        expected_metadata = expected_index_metadata(
+            embedder.MODEL_NAME,
+            embedding_dimension_for_embedder(embedder),
+        )
+        index_compatibility = compatibility_state(
+            stored=db.get_index_metadata(),
+            expected=expected_metadata,
+            chunks_total=stats["chunks_total"],
+            vector_dimension=db.get_vector_dimension(),
+        )
+        _add_doctor_check(
+            checks,
+            name="database",
+            ok=True,
+            detail=str(vault_root / ".seeklink" / "seeklink.db"),
+        )
+        _add_doctor_check(
+            checks,
+            name="index_compatibility",
+            ok=bool(index_compatibility["compatible"]),
+            detail=str(index_compatibility["state"]),
+        )
+    except Exception as e:
+        _add_doctor_check(
+            checks,
+            name="database",
+            ok=False,
+            detail=str(e),
+        )
+    finally:
+        if db is not None:
+            db.close()
+
+    ok = all(check["ok"] for check in checks if check["required"])
+    if getattr(args, "json", False):
+        _emit_json(
+            {
+                "ok": ok,
+                "json_schema_version": 1,
+                "vault": str(vault_root),
+                "checks": checks,
+                "stats": stats or {},
+                "index": {
+                    "compatibility": index_compatibility or {},
+                },
+            }
+        )
+    else:
+        for check in checks:
+            label = "OK" if check["ok"] else ("WARN" if not check["required"] else "FAIL")
+            print(f"{label}: {check['name']} — {check['detail']}")
+
+    if not ok:
+        sys.exit(1)
 
 
 def _cmd_search(args: argparse.Namespace) -> None:

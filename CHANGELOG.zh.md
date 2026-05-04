@@ -12,6 +12,10 @@
 ### 变更
 - 在 README 中新增可直接复制给 agent 的配置说明，并在 `llms.txt` 中强化本地 Markdown 笔记库检索的发现提示。
 - 扩展 PyPI 关键词，覆盖 agent、本地搜索、Markdown 搜索和 llms.txt 发现路径。
+- `seeklink search` 和单文件 `seeklink index` 现在支持 `--no-daemon`；
+  脚本也可以用 `SEEKLINK_NO_DAEMON=1` 禁用守护进程，获得确定的冷启动行为。
+- 新增 `seeklink doctor` / `seeklink doctor --json`，用于轻量检查运行环境
+  和索引兼容性，不会下载或加载模型。
 
 ### 修复
 - 带 folder / tag 过滤的语义搜索现在会为窄范围检索请求足够多的向量候选，避免相关笔记因为未过滤的干扰项占满全局向量 top 200 而被漏掉。

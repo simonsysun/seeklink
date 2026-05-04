@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   discovery cues for local Markdown vault retrieval.
 - Expanded PyPI keywords for agent, local-search, Markdown-search, and
   llms.txt discoverability.
+- `seeklink search` and single-file `seeklink index` now accept
+  `--no-daemon`, and `SEEKLINK_NO_DAEMON=1` disables daemon use for scripts
+  that need deterministic cold-start behavior.
+- Added `seeklink doctor` / `seeklink doctor --json` for lightweight
+  environment and index-compatibility diagnostics without model downloads.
 
 ### Fixed
 - Folder- and tag-filtered semantic searches now request enough vector
