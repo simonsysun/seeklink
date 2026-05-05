@@ -81,8 +81,9 @@ Text search output is stable:
 
 - `PATH` is relative to the vault root.
 - `LINE` is 1-indexed and points to the best matching chunk in the current file.
-- Exit code is `0` for success, including no results, and `1` for vault/config
-  errors or missing files.
+- Exit code is `0` for success, including no results; `1` for runtime
+  vault/config/file errors detected by SeekLink; and `2` for command-line usage
+  errors from argument parsing.
 - Scores are useful for sorting within one query. Do not compare scores across
   reranker-enabled and reranker-disabled runs.
 
@@ -148,7 +149,8 @@ seeklink doctor --vault PATH --json
 ```
 
 Doctor checks Python, SQLite, the local database, index compatibility, and
-optional MLX availability. It does not download or load models.
+optional MLX availability. It does not download or load models, but may
+initialize the local SeekLink database/schema if missing.
 
 ### Index
 

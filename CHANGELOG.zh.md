@@ -9,21 +9,22 @@
 
 ## [Unreleased]
 
-## [0.6.0] - 2026-05-04
+## [0.6.0] - 2026-05-05
 
 ### 变更
 - `seeklink search --rerank-k auto` 现在会对一般中文技术查询使用中等
   reranker 预算，只把最深预算保留给过滤搜索和 chunk / 向量索引类中文查询，
   从而在保持捆绑盲测质量门槛的同时降低可选 MLX reranker 延迟。
-- 可选的 MLX Qwen3 reranker 现在会在模型支持 tied embeddings 时通过
-  两个 token 的分类头计算 `yes` / `no` 分数，避免生成完整词表 logits；
-  如有需要仍可通过 `SEEKLINK_RERANK_SCORING=legacy` 回退到旧路径。
+- 可选的 MLX Qwen3 reranker 现在会在可用时尝试使用两个 token 的
+  embedding-head 评分路径，在支持的 MLX 模型对象上避免生成完整词表
+  logits；如有需要仍可通过 `SEEKLINK_RERANK_SCORING=legacy` 回退到旧路径。
 - 在 README 中新增可直接复制给 agent 的配置说明，并在 `llms.txt` 中强化本地 Markdown 笔记库检索的发现提示。
 - 扩展 PyPI 关键词，覆盖 agent、本地搜索、Markdown 搜索和 llms.txt 发现路径。
 - `seeklink search` 和单文件 `seeklink index` 现在支持 `--no-daemon`；
   脚本也可以用 `SEEKLINK_NO_DAEMON=1` 禁用守护进程，获得确定的冷启动行为。
 - 新增 `seeklink doctor` / `seeklink doctor --json`，用于轻量检查运行环境
-  和索引兼容性，不会下载或加载模型。
+  和索引兼容性，不会下载或加载模型；如果本地 SeekLink 数据库/表结构不存在，
+  可能会初始化它们。
 
 ### 修复
 - 带 folder / tag 过滤的语义搜索现在会为窄范围检索请求足够多的向量候选，避免相关笔记因为未过滤的干扰项占满全局向量 top 200 而被漏掉。

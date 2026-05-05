@@ -9,16 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.6.0] - 2026-05-04
+## [0.6.0] - 2026-05-05
 
 ### Changed
 - `seeklink search --rerank-k auto` now uses a middle reranker budget for
   general CJK technical queries and reserves the deepest budget for filtered
   searches and chunk/vector-index style CJK queries, reducing optional MLX
   reranker latency while preserving the bundled blind-fixture quality gates.
-- The optional MLX Qwen3 reranker now scores `yes`/`no` through a two-token
-  classifier head when the model supports tied embeddings, avoiding full
-  vocabulary logits while keeping a legacy fallback via
+- The optional MLX Qwen3 reranker now attempts a two-token embedding-head
+  scoring path when available, avoiding full-vocabulary logits on supported
+  MLX model objects while keeping a legacy fallback via
   `SEEKLINK_RERANK_SCORING=legacy`.
 - Added copy-paste agent setup guidance to README and clarified `llms.txt`
   discovery cues for local Markdown vault retrieval.
@@ -28,7 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `--no-daemon`, and `SEEKLINK_NO_DAEMON=1` disables daemon use for scripts
   that need deterministic cold-start behavior.
 - Added `seeklink doctor` / `seeklink doctor --json` for lightweight
-  environment and index-compatibility diagnostics without model downloads.
+  environment and index-compatibility diagnostics without model downloads or
+  model loads; it may initialize the local SeekLink database/schema if missing.
 
 ### Fixed
 - Folder- and tag-filtered semantic searches now request enough vector
