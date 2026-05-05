@@ -9,6 +9,20 @@
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-05-05
+
+### 新增
+- 新增公开的 daemon 生命周期命令：`seeklink daemon status`、
+  `seeklink daemon stop`、`seeklink daemon restart` 和 `seeklink daemon pid`。
+- 新增 `SEEKLINK_DAEMON_IDLE_TIMEOUT`；热启动 daemon 现在默认在空闲 15 分钟后
+  自动退出。设置为 `0`、`off`、`false` 或 `no` 可以让它一直保持热启动直到手动停止。
+- `seeklink doctor --json` 现在会显示 daemon 状态，包括热启动 daemon 是否运行、
+  socket、笔记库、PID、模型、空闲超时，以及尽力获取的常驻内存。
+
+### 修复
+- 文档现在明确说明搜索后可能看到的后台 `Python` 进程是 SeekLink 的本地热启动
+  daemon，并说明如何查看、停止，或用一次性冷启动命令绕过它。
+
 ## [0.6.0] - 2026-05-05
 
 ### 变更
@@ -184,7 +198,8 @@
 - 原生 CJK 分词，通过 jieba 注册为自定义 FTS5 分词器。
 - MCP 服务器传输（`seeklink serve`）—— 于 v0.2.0 移除。
 
-[Unreleased]: https://github.com/simonsysun/seeklink/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/simonsysun/seeklink/compare/v0.6.1...HEAD
+[0.6.1]: https://github.com/simonsysun/seeklink/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/simonsysun/seeklink/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/simonsysun/seeklink/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/simonsysun/seeklink/compare/v0.3.2...v0.4.0

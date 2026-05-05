@@ -56,13 +56,15 @@ seeklink search "agent 记忆系统"
 seeklink get notes/agent-memory-patterns.md:1 -C 20
 ```
 
-当设置了 `SEEKLINK_VAULT` 且不传 `--vault` 时，`seeklink search` 和单文件
-`seeklink index path/to/file.md` 会自动使用一个常驻守护进程（daemon），它把嵌入模型
-和可选的 reranker 保持在内存里，避免每次调用都重新加载。全库 `seeklink index`
-会在 CLI 进程内运行，这样进度可以稳定输出到 stderr，最终 `Done:` 摘要保留在 stdout。
-`seeklink status` 和 `seeklink get` 始终走冷启动路径：status 只读 SQLite 元数据，
-get 直接从磁盘读文件。如果脚本需要在设置了 `SEEKLINK_VAULT` 的情况下仍然走冷启动，
-可以使用 `--no-daemon` 或 `SEEKLINK_NO_DAEMON=1`。
+不传 `--vault` 时，`seeklink search` 和单文件
+`seeklink index path/to/file.md` 会使用一个常驻守护进程（daemon），它把嵌入模型和
+可选的 reranker 保持在内存里；在 macOS 活动监视器中，这通常会显示为一个本地
+`Python` 进程。它只使用本机 Unix socket，不打开网络端口，也不会调用云服务。默认
+空闲 15 分钟后会自动退出。全库 `seeklink index` 会在 CLI 进程内运行，这样进度可以
+稳定输出到 stderr，最终 `Done:` 摘要保留在 stdout。`seeklink status` 和
+`seeklink get` 始终走冷启动路径：status 只读 SQLite 元数据，get 直接从磁盘读文件。
+如果脚本需要一次性冷启动路径，可以使用 `--no-daemon`、`SEEKLINK_NO_DAEMON=1`，或
+显式传入 `--vault PATH`。
 
 ## 输出格式
 
@@ -85,6 +87,7 @@ get 直接从磁盘读文件。如果脚本需要在设置了 `SEEKLINK_VAULT` �
 seeklink search "agent 记忆系统" --vault PATH --json
 seeklink status --vault PATH --json
 seeklink doctor --vault PATH --json
+seeklink daemon status --json
 ```
 
 ## 常用命令
@@ -139,7 +142,7 @@ seeklink doctor --vault PATH
 seeklink doctor --vault PATH --json
 ```
 
-Doctor 检查 Python、SQLite、本地数据库、索引兼容性和可选 MLX 可用性。
+Doctor 检查 Python、SQLite、本地数据库、索引兼容性、daemon 状态和可选 MLX 可用性。
 它不会下载或加载模型，但如果本地 SeekLink 数据库/表结构不存在，可能会初始化它们。
 
 ### 索引
@@ -156,14 +159,23 @@ chunker 配置生成的，SeekLink 会重建派生索引内容。单文件索引
 ### 守护进程
 
 ```bash
-seeklink daemon --vault PATH
+seeklink daemon status
+seeklink daemon stop
+seeklink daemon restart
+seeklink daemon pid
+seeklink daemon run --vault PATH
 ```
 
-通常不需要手动运行。`search` 和单文件 `index` 在合适的时候会自动启动和重启守护进程。
+通常不需要手动启动守护进程。`search` 和单文件 `index` 会在合适的时候自动启动和重启
+它；空闲超过 `SEEKLINK_DAEMON_IDLE_TIMEOUT` 秒后它会自动退出。默认值是 900 秒
+（15 分钟）；如果设置为 `0`、`off`、`false` 或 `no`，守护进程会一直保持热启动直到
+被手动停止。
+
 全库 `index` 仍然在 CLI 进程内运行，以便输出进度。给 `search` 或单文件 `index`
 传 `--vault` 会强制走一次性冷启动路径，因为守护进程在启动时就绑定到了一个笔记库。
-如果脚本需要在设置了 `SEEKLINK_VAULT` 的情况下仍然绕过守护进程，可以使用
-`--no-daemon` 或 `SEEKLINK_NO_DAEMON=1`。
+`--no-daemon` 和 `SEEKLINK_NO_DAEMON=1` 也会强制走同样的冷启动路径。用
+`seeklink daemon status` 可以查看热启动进程，用 `seeklink daemon stop` 可以立即释放
+它占用的内存。
 
 ## 搜索原理
 

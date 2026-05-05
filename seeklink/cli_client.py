@@ -184,6 +184,52 @@ def _shutdown_daemon() -> dict[str, Any]:
         return {"ok": False, "error": str(e)}
 
 
+def probe_status() -> dict[str, Any]:
+    """Return daemon status without auto-spawning a daemon."""
+    try:
+        return _connect_and_send("status", {})
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
+def stop_daemon(timeout: float = SHUTDOWN_WAIT_SECONDS) -> dict[str, Any]:
+    """Gracefully stop the daemon if it is running.
+
+    This is idempotent for CLI/script use: a missing or stale socket reports
+    success with ``status=not_running``.
+    """
+    if not SOCKET_PATH.exists():
+        return {"ok": True, "result": {"status": "not_running"}}
+
+    shutdown = _shutdown_daemon()
+    if not shutdown.get("ok"):
+        if _wait_for_socket_shutdown(0.1):
+            return {"ok": True, "result": {"status": "not_running"}}
+        return shutdown
+
+    if not _wait_for_socket_shutdown(timeout):
+        return {
+            "ok": False,
+            "error": f"daemon did not stop within {timeout}s",
+        }
+    return {"ok": True, "result": {"status": "stopped"}}
+
+
+def start_daemon(
+    *,
+    vault: Path | None = None,
+    timeout: float = SPAWN_WAIT_SECONDS,
+) -> dict[str, Any]:
+    """Spawn a detached daemon and wait until status is available."""
+    _spawn_daemon(vault=vault)
+    if not _wait_for_socket(timeout):
+        return {
+            "ok": False,
+            "error": f"daemon failed to start within {timeout}s",
+        }
+    return probe_status()
+
+
 def _call_once_with_spawn(cmd: str, args: dict[str, Any]) -> dict[str, Any]:
     """Try the daemon, spawn + retry once if unreachable."""
     try:
@@ -239,16 +285,19 @@ def _connect_and_send(cmd: str, args: dict[str, Any]) -> dict[str, Any]:
             pass
 
 
-def _spawn_daemon() -> None:
+def _spawn_daemon(*, vault: Path | None = None) -> None:
     """Fork a detached daemon subprocess.
 
     The subprocess inherits the current environment (including
     SEEKLINK_VAULT / SEEKLINK_EMBEDDER_MODEL / SEEKLINK_RERANKER_MODEL)
     so that configuration is consistent with the invoking CLI.
     """
+    cmd = [sys.executable, "-m", "seeklink", "daemon"]
+    if vault is not None:
+        cmd.extend(["--vault", str(vault)])
     try:
         subprocess.Popen(
-            [sys.executable, "-m", "seeklink", "daemon"],
+            cmd,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
             stdin=subprocess.DEVNULL,

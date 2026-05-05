@@ -123,6 +123,34 @@ def test_index_parser_accepts_no_daemon(monkeypatch):
     assert captured == {"no_daemon": True}
 
 
+def test_daemon_parser_accepts_status_json(monkeypatch):
+    captured: dict = {}
+
+    def fake_cmd_daemon(args):
+        captured["daemon_action"] = args.daemon_action
+        captured["json"] = args.json
+
+    monkeypatch.setattr(sys, "argv", ["seeklink", "daemon", "status", "--json"])
+    monkeypatch.setattr(cli, "_cmd_daemon", fake_cmd_daemon)
+    cli.main()
+
+    assert captured == {"daemon_action": "status", "json": True}
+
+
+def test_daemon_parser_defaults_to_run(monkeypatch):
+    captured: dict = {}
+
+    def fake_cmd_daemon(args):
+        captured["daemon_action"] = args.daemon_action
+        captured["vault"] = args.vault
+
+    monkeypatch.setattr(sys, "argv", ["seeklink", "daemon", "--vault", "/tmp/vault"])
+    monkeypatch.setattr(cli, "_cmd_daemon", fake_cmd_daemon)
+    cli.main()
+
+    assert captured == {"daemon_action": "run", "vault": Path("/tmp/vault")}
+
+
 def test_should_use_daemon_honors_flag_and_env(monkeypatch):
     assert cli._should_use_daemon(argparse.Namespace(vault=None, no_daemon=False))
 
@@ -224,6 +252,113 @@ def test_doctor_json_subprocess(tmp_path: Path):
     assert checks["database"]["ok"] is True
     assert checks["index_compatibility"]["ok"] is True
     assert checks["mlx_lm"]["required"] is False
+    assert isinstance(payload["daemon"]["running"], bool)
+    assert payload["daemon"]["socket"].endswith("seeklink.sock")
+
+
+def test_daemon_status_json_not_running(capsys, monkeypatch):
+    from seeklink import cli_client
+
+    monkeypatch.setattr(
+        cli_client,
+        "probe_status",
+        lambda: {"ok": False, "error": "socket missing"},
+    )
+    monkeypatch.setattr(cli_client, "SOCKET_PATH", Path("/tmp/seeklink.sock"))
+
+    cli._cmd_daemon_status(argparse.Namespace(json=True))
+
+    payload = json.loads(capsys.readouterr().out)
+    assert payload == {
+        "ok": True,
+        "json_schema_version": 1,
+        "daemon": {
+            "running": False,
+            "socket": "/tmp/seeklink.sock",
+        },
+    }
+
+
+def test_daemon_status_json_running(capsys, monkeypatch):
+    from seeklink import cli_client
+
+    monkeypatch.setattr(
+        cli_client,
+        "probe_status",
+        lambda: {
+            "ok": True,
+            "result": {
+                "pid": 123,
+                "socket": "/tmp/seeklink.sock",
+                "vault": "/tmp/vault",
+                "embedder": "embedder-a",
+                "reranker": "disabled",
+                "started_at": 1778000000.0,
+                "uptime_s": 12.5,
+                "idle_s": 2.0,
+                "idle_timeout_s": 900,
+                "requests_served": 4,
+                "rss_bytes": 123456,
+            },
+        },
+    )
+
+    cli._cmd_daemon_status(argparse.Namespace(json=True))
+
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["ok"] is True
+    assert payload["daemon"] == {
+        "running": True,
+        "pid": 123,
+        "socket": "/tmp/seeklink.sock",
+        "vault": "/tmp/vault",
+        "embedder": "embedder-a",
+        "reranker": "disabled",
+        "started_at": 1778000000.0,
+        "uptime_s": 12.5,
+        "idle_s": 2.0,
+        "idle_timeout_s": 900,
+        "requests_served": 4,
+        "rss_bytes": 123456,
+    }
+
+
+def test_daemon_stop_json_not_running(capsys, monkeypatch):
+    from seeklink import cli_client
+
+    monkeypatch.setattr(
+        cli_client,
+        "stop_daemon",
+        lambda: {"ok": True, "result": {"status": "not_running"}},
+    )
+    monkeypatch.setattr(cli_client, "SOCKET_PATH", Path("/tmp/seeklink.sock"))
+
+    cli._cmd_daemon_stop(argparse.Namespace(json=True))
+
+    payload = json.loads(capsys.readouterr().out)
+    assert payload == {
+        "ok": True,
+        "json_schema_version": 1,
+        "daemon": {
+            "running": False,
+            "socket": "/tmp/seeklink.sock",
+            "status": "not_running",
+        },
+    }
+
+
+def test_daemon_pid_outputs_pid(capsys, monkeypatch):
+    from seeklink import cli_client
+
+    monkeypatch.setattr(
+        cli_client,
+        "probe_status",
+        lambda: {"ok": True, "result": {"pid": 123, "socket": "/tmp/sock"}},
+    )
+
+    cli._cmd_daemon_pid(argparse.Namespace(json=False))
+
+    assert capsys.readouterr().out == "123\n"
 
 
 def test_search_json_no_rerank_sends_daemon_flag(capsys, monkeypatch):

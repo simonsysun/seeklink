@@ -3,7 +3,7 @@
 This is the "resident" mode for seeklink. The first CLI invocation on a
 cold machine spawns this process; it loads the embedder and reranker,
 binds a Unix socket at ~/.rhizome/seeklink.sock, and serves requests
-forever until SIGTERM / SIGINT.
+until SIGTERM / SIGINT, protocol shutdown, or idle timeout.
 
 Protocol: length-prefixed JSON over the socket. Each request is one
 connection; the daemon reads a 4-byte big-endian length, then that
@@ -25,7 +25,9 @@ import logging
 import os
 import signal
 import socket
+import subprocess
 import sys
+import time
 from pathlib import Path
 from typing import Any, Callable
 
@@ -33,6 +35,96 @@ logger = logging.getLogger(__name__)
 
 SOCKET_PATH = Path.home() / ".rhizome" / "seeklink.sock"
 MAX_MESSAGE_BYTES = 10_000_000  # 10MB — generous for any realistic payload
+DEFAULT_IDLE_TIMEOUT_SECONDS = 900
+_IDLE_TIMEOUT_ENV = "SEEKLINK_DAEMON_IDLE_TIMEOUT"
+
+
+def _parse_idle_timeout(raw: str | None = None) -> int | None:
+    """Parse the daemon idle timeout env value.
+
+    Returns seconds, or None for "never auto-exit". Invalid values fall back
+    to the default so one bad env var does not disable daemon startup.
+    """
+    if raw is None:
+        raw = os.environ.get(_IDLE_TIMEOUT_ENV)
+    if raw is None:
+        return DEFAULT_IDLE_TIMEOUT_SECONDS
+
+    value = raw.strip().casefold()
+    if value in {"", "0", "off", "false", "no", "never"}:
+        return None
+    try:
+        seconds = int(value)
+    except ValueError:
+        logger.warning(
+            "Invalid %s=%r; using default %ds",
+            _IDLE_TIMEOUT_ENV,
+            raw,
+            DEFAULT_IDLE_TIMEOUT_SECONDS,
+        )
+        return DEFAULT_IDLE_TIMEOUT_SECONDS
+    if seconds < 1:
+        logger.warning(
+            "Invalid %s=%r; using default %ds",
+            _IDLE_TIMEOUT_ENV,
+            raw,
+            DEFAULT_IDLE_TIMEOUT_SECONDS,
+        )
+        return DEFAULT_IDLE_TIMEOUT_SECONDS
+    return seconds
+
+
+def _rss_bytes(pid: int | None = None) -> int | None:
+    """Best-effort resident memory for daemon diagnostics."""
+    pid = os.getpid() if pid is None else pid
+    try:
+        out = subprocess.check_output(
+            ["ps", "-o", "rss=", "-p", str(pid)],
+            text=True,
+            stderr=subprocess.DEVNULL,
+        )
+    except Exception:
+        return None
+    try:
+        return int(out.strip()) * 1024
+    except (TypeError, ValueError):
+        return None
+
+
+def _daemon_metadata(state: dict[str, Any] | None) -> dict[str, Any]:
+    """Return daemon lifecycle metadata for status/doctor consumers."""
+    now = time.monotonic()
+    if state is None:
+        started_at = time.time()
+        started_monotonic = now
+        last_activity = now
+        idle_timeout = _parse_idle_timeout()
+        requests_served = 0
+    else:
+        started_at = state["started_at"]
+        started_monotonic = state["started_monotonic"]
+        last_activity = state["last_activity"]
+        idle_timeout = state["idle_timeout_s"]
+        requests_served = state["requests_served"]
+
+    return {
+        "pid": os.getpid(),
+        "socket": str(SOCKET_PATH),
+        "started_at": started_at,
+        "uptime_s": max(0.0, now - started_monotonic),
+        "idle_s": max(0.0, now - last_activity),
+        "idle_timeout_s": idle_timeout,
+        "requests_served": requests_served,
+        "rss_bytes": _rss_bytes(),
+    }
+
+
+def _idle_timed_out(state: dict[str, Any], now: float | None = None) -> bool:
+    timeout = state["idle_timeout_s"]
+    if timeout is None:
+        return False
+    now = time.monotonic() if now is None else now
+    return now - state["last_activity"] >= timeout
 
 
 def run_daemon(vault_path: Path | None = None) -> int:
@@ -107,10 +199,20 @@ def run_daemon(vault_path: Path | None = None) -> int:
         "disabled" if reranker.disabled else reranker.MODEL_NAME,
     )
 
+    idle_timeout = _parse_idle_timeout()
+    state: dict[str, Any] = {
+        "started_at": time.time(),
+        "started_monotonic": time.monotonic(),
+        "last_activity": time.monotonic(),
+        "idle_timeout_s": idle_timeout,
+        "requests_served": 0,
+    }
+
     # Bind Unix socket
     server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     server.bind(str(SOCKET_PATH))
     server.listen(8)
+    server.settimeout(1.0)
 
     shutdown_requested = {"flag": False}
 
@@ -130,6 +232,14 @@ def run_daemon(vault_path: Path | None = None) -> int:
         while not shutdown_requested["flag"]:
             try:
                 conn, _ = server.accept()
+            except socket.timeout:
+                if _idle_timed_out(state):
+                    logger.info(
+                        "Daemon idle timeout reached (%ss); shutting down",
+                        idle_timeout,
+                    )
+                    shutdown_requested["flag"] = True
+                continue
             except OSError:
                 break  # socket closed during shutdown
             try:
@@ -139,10 +249,13 @@ def run_daemon(vault_path: Path | None = None) -> int:
                     embedder,
                     reranker,
                     vault_root,
+                    daemon_state=state,
                     request_shutdown=lambda: shutdown_requested.__setitem__(
                         "flag", True
                     ),
                 )
+                state["requests_served"] += 1
+                state["last_activity"] = time.monotonic()
             except Exception:
                 logger.exception("Error handling connection")
             finally:
@@ -175,6 +288,7 @@ def _handle_connection(
     embedder: Any,
     reranker: Any,
     vault_root: Path,
+    daemon_state: dict[str, Any] | None = None,
     request_shutdown: Callable[[], None] | None = None,
 ) -> None:
     """Handle a single client connection: read request, execute, send response."""
@@ -265,6 +379,7 @@ def _handle_connection(
                     "embedder": embedder.MODEL_NAME,
                     "index_metadata": index_metadata,
                     "index_compatibility": index_compatibility,
+                    **_daemon_metadata(daemon_state),
                 },
             }
 

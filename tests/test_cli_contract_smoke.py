@@ -69,6 +69,13 @@ def test_documented_non_daemon_cli_workflow(tmp_path: Path):
     assert status_payload["stats"]["notes_total"] > 0
     assert status_payload["stats"]["chunks_total"] > 0
 
+    daemon_status_json = _run_seeklink(vault, "daemon", "status", "--json")
+    assert daemon_status_json.returncode == 0, daemon_status_json.stderr
+    daemon_payload = json.loads(daemon_status_json.stdout)
+    assert daemon_payload["ok"] is True
+    assert isinstance(daemon_payload["daemon"]["running"], bool)
+    assert daemon_payload["daemon"]["socket"].endswith("seeklink.sock")
+
     search = _run_seeklink(vault, "search", "agent memory systems", "--top-k", "3")
     assert search.returncode == 0, search.stderr
     assert re.search(r"^\s*[0-9.]+\s+\S+\.md:\d+\s+", search.stdout, re.MULTILINE)

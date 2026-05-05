@@ -1,7 +1,7 @@
 """Entry point for `python -m seeklink` and `seeklink` CLI.
 
 Subcommands:
-  daemon   — run the Unix-socket daemon (eager-loaded models, never exits)
+  daemon   — run/manage the Unix-socket daemon (eager-loaded models)
   search   — search the vault (daemon-first; cold-start fallback)
   index    — index notes (full-vault in-process; single-file daemon-first)
   status   — show vault / index stats (always cold-start; no model load)
@@ -31,6 +31,7 @@ import sqlite3
 import sys
 import time
 from pathlib import Path
+from typing import Any
 
 from seeklink.index_config import (
     compatibility_state,
@@ -119,9 +120,24 @@ def main() -> None:
     # daemon — Unix socket resident server
     daemon_p = sub.add_parser(
         "daemon",
-        help="Run the seeklink daemon (Unix socket, eager-loaded models)",
+        help="Manage the seeklink daemon (Unix socket, eager-loaded models)",
+    )
+    daemon_p.add_argument(
+        "daemon_action",
+        nargs="?",
+        choices=["run", "status", "stop", "restart", "pid"],
+        default="run",
+        help=(
+            "Daemon action. Default: run. Use status/stop/restart/pid for "
+            "lifecycle controls."
+        ),
     )
     daemon_p.add_argument("--vault", type=Path, help="Vault path (default: cwd)")
+    daemon_p.add_argument(
+        "--json",
+        action="store_true",
+        help="Emit machine-readable JSON for daemon lifecycle commands",
+    )
 
     # search
     search_p = sub.add_parser("search", help="Search the vault")
@@ -248,11 +264,211 @@ def main() -> None:
 
 
 def _cmd_daemon(args: argparse.Namespace) -> None:
-    from seeklink.daemon import run_daemon
-
     _setup_logging()
-    logging.getLogger().setLevel(logging.INFO)
-    sys.exit(run_daemon(args.vault))
+
+    action = getattr(args, "daemon_action", "run")
+    if action == "run":
+        from seeklink.daemon import run_daemon
+
+        logging.getLogger().setLevel(logging.INFO)
+        sys.exit(run_daemon(args.vault))
+    if action == "status":
+        _cmd_daemon_status(args)
+        return
+    if action == "stop":
+        _cmd_daemon_stop(args)
+        return
+    if action == "restart":
+        _cmd_daemon_restart(args)
+        return
+    if action == "pid":
+        _cmd_daemon_pid(args)
+        return
+
+    print(f"Error: unknown daemon action: {action}", file=sys.stderr)
+    sys.exit(1)
+
+
+def _daemon_not_running_payload() -> dict[str, Any]:
+    from seeklink import cli_client
+
+    return {
+        "ok": True,
+        "json_schema_version": 1,
+        "daemon": {
+            "running": False,
+            "socket": str(cli_client.SOCKET_PATH),
+        },
+    }
+
+
+def _daemon_running_payload(status_response: dict[str, Any]) -> dict[str, Any]:
+    from seeklink import cli_client
+
+    result = status_response.get("result") or {}
+    return {
+        "ok": True,
+        "json_schema_version": 1,
+        "daemon": {
+            "running": True,
+            "pid": result.get("pid"),
+            "socket": result.get("socket") or str(cli_client.SOCKET_PATH),
+            "vault": result.get("vault"),
+            "embedder": result.get("embedder"),
+            "reranker": result.get("reranker"),
+            "started_at": result.get("started_at"),
+            "uptime_s": result.get("uptime_s"),
+            "idle_s": result.get("idle_s"),
+            "idle_timeout_s": result.get("idle_timeout_s"),
+            "requests_served": result.get("requests_served"),
+            "rss_bytes": result.get("rss_bytes"),
+        },
+    }
+
+
+def _format_bytes(value: int | None) -> str:
+    if value is None:
+        return "unknown"
+    units = ["B", "KB", "MB", "GB"]
+    amount = float(value)
+    for unit in units:
+        if amount < 1024 or unit == units[-1]:
+            return f"{amount:.0f} {unit}" if unit == "B" else f"{amount:.1f} {unit}"
+        amount /= 1024
+    return f"{amount:.1f} GB"
+
+
+def _format_seconds(value: float | int | None) -> str:
+    if value is None:
+        return "never"
+    if value < 60:
+        return f"{value:.0f}s"
+    if value < 3600:
+        return f"{value / 60:.1f}m"
+    return f"{value / 3600:.1f}h"
+
+
+def _cmd_daemon_status(args: argparse.Namespace) -> None:
+    from seeklink import cli_client
+
+    status = cli_client.probe_status()
+    if not status.get("ok"):
+        payload = _daemon_not_running_payload()
+        if getattr(args, "json", False):
+            _emit_json(payload)
+        else:
+            print("Daemon: not running")
+            print(f"Socket: {payload['daemon']['socket']}")
+        return
+
+    payload = _daemon_running_payload(status)
+    if getattr(args, "json", False):
+        _emit_json(payload)
+        return
+
+    daemon = payload["daemon"]
+    print("Daemon: running")
+    print(f"PID:    {daemon.get('pid') or 'unknown'}")
+    print(f"Socket: {daemon.get('socket')}")
+    print(f"Vault:  {daemon.get('vault')}")
+    print(f"Embedder: {daemon.get('embedder')}")
+    print(f"Reranker: {daemon.get('reranker')}")
+    print(f"Uptime: {_format_seconds(daemon.get('uptime_s'))}")
+    print(f"Idle:   {_format_seconds(daemon.get('idle_s'))}")
+    print(f"Idle timeout: {_format_seconds(daemon.get('idle_timeout_s'))}")
+    print(f"Memory: {_format_bytes(daemon.get('rss_bytes'))}")
+
+
+def _cmd_daemon_stop(args: argparse.Namespace) -> None:
+    from seeklink import cli_client
+
+    result = cli_client.stop_daemon()
+    ok = bool(result.get("ok"))
+    status = (result.get("result") or {}).get("status")
+    if getattr(args, "json", False):
+        _emit_json(
+            {
+                "ok": ok,
+                "json_schema_version": 1,
+                "daemon": {
+                    "running": False if ok else None,
+                    "socket": str(cli_client.SOCKET_PATH),
+                    "status": status,
+                },
+                **({} if ok else {"error": result.get("error", "unknown error")}),
+            }
+        )
+    else:
+        if ok:
+            if status == "not_running":
+                print("Daemon: not running")
+            else:
+                print("Daemon: stopped")
+        else:
+            print(f"Error: {result.get('error', 'unknown error')}", file=sys.stderr)
+
+    if not ok:
+        sys.exit(1)
+
+
+def _cmd_daemon_restart(args: argparse.Namespace) -> None:
+    from seeklink import cli_client
+
+    stopped = cli_client.stop_daemon()
+    if not stopped.get("ok"):
+        if getattr(args, "json", False):
+            _emit_json(
+                {
+                    "ok": False,
+                    "json_schema_version": 1,
+                    "error": stopped.get("error", "unknown error"),
+                }
+            )
+        else:
+            print(f"Error: {stopped.get('error', 'unknown error')}", file=sys.stderr)
+        sys.exit(1)
+
+    started = cli_client.start_daemon(vault=args.vault)
+    if not started.get("ok"):
+        if getattr(args, "json", False):
+            _emit_json(
+                {
+                    "ok": False,
+                    "json_schema_version": 1,
+                    "error": started.get("error", "unknown error"),
+                }
+            )
+        else:
+            print(f"Error: {started.get('error', 'unknown error')}", file=sys.stderr)
+        sys.exit(1)
+
+    payload = _daemon_running_payload(started)
+    if getattr(args, "json", False):
+        _emit_json(payload)
+    else:
+        print(f"Daemon: restarted pid={payload['daemon'].get('pid')}")
+
+
+def _cmd_daemon_pid(args: argparse.Namespace) -> None:
+    from seeklink import cli_client
+
+    status = cli_client.probe_status()
+    if not status.get("ok"):
+        if getattr(args, "json", False):
+            _emit_json(_daemon_not_running_payload())
+        else:
+            print("Error: daemon not running", file=sys.stderr)
+        sys.exit(1)
+
+    payload = _daemon_running_payload(status)
+    if getattr(args, "json", False):
+        _emit_json(payload)
+        return
+    pid = payload["daemon"].get("pid")
+    if pid is None:
+        print("Error: daemon status did not report a pid", file=sys.stderr)
+        sys.exit(1)
+    print(pid)
 
 
 def _should_use_daemon(args: argparse.Namespace) -> bool:
@@ -480,6 +696,27 @@ def _cmd_doctor(args: argparse.Namespace) -> None:
         required=False,
     )
 
+    from seeklink import cli_client
+
+    daemon_status = cli_client.probe_status()
+    if daemon_status.get("ok"):
+        daemon_payload = _daemon_running_payload(daemon_status)["daemon"]
+        daemon_detail = (
+            f"running pid={daemon_payload.get('pid') or 'unknown'}, "
+            f"vault={daemon_payload.get('vault')}, "
+            f"memory={_format_bytes(daemon_payload.get('rss_bytes'))}"
+        )
+    else:
+        daemon_payload = _daemon_not_running_payload()["daemon"]
+        daemon_detail = "not running"
+    _add_doctor_check(
+        checks,
+        name="daemon",
+        ok=True,
+        detail=daemon_detail,
+        required=False,
+    )
+
     stats: dict | None = None
     index_compatibility: dict | None = None
     vault_root = _resolve_default_vault() if args.vault is None else args.vault.resolve()
@@ -534,6 +771,7 @@ def _cmd_doctor(args: argparse.Namespace) -> None:
                 "index": {
                     "compatibility": index_compatibility or {},
                 },
+                "daemon": daemon_payload,
             }
         )
     else:

@@ -9,6 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-05-05
+
+### Added
+- Added public daemon lifecycle controls: `seeklink daemon status`,
+  `seeklink daemon stop`, `seeklink daemon restart`, and `seeklink daemon pid`.
+- Added `SEEKLINK_DAEMON_IDLE_TIMEOUT`; the warm daemon now exits after 15
+  minutes of inactivity by default, while `0`, `off`, `false`, or `no` keep it
+  warm until stopped.
+- Added daemon visibility to `seeklink doctor --json`, including whether the
+  warm daemon is running, its socket, vault, PID, models, idle timeout, and
+  best-effort resident memory.
+
+### Fixed
+- Clarified that the background `Python` process users may see after search is
+  SeekLink's local warm daemon, and documented how to inspect, stop, or bypass
+  it with one-shot cold-start commands.
+
 ## [0.6.0] - 2026-05-05
 
 ### Changed
@@ -230,7 +247,8 @@ surface so the repo reads as a shipped tool rather than a work log.
 - Native CJK tokenization via jieba registered as a custom FTS5 tokenizer.
 - MCP server transport (`seeklink serve`) — removed in v0.2.0.
 
-[Unreleased]: https://github.com/simonsysun/seeklink/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/simonsysun/seeklink/compare/v0.6.1...HEAD
+[0.6.1]: https://github.com/simonsysun/seeklink/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/simonsysun/seeklink/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/simonsysun/seeklink/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/simonsysun/seeklink/compare/v0.3.2...v0.4.0

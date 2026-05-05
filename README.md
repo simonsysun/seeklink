@@ -61,14 +61,16 @@ seeklink search "agent memory systems"
 seeklink get notes/agent-memory-patterns.md:1 -C 20
 ```
 
-`seeklink search` and single-file `seeklink index path/to/file.md` auto-use a
-resident daemon when `SEEKLINK_VAULT` is set and `--vault` is not passed. The
-daemon keeps the embedder and optional reranker in memory. Full-vault
-`seeklink index` runs in-process so progress stays on stderr and the final
-`Done:` summary stays on stdout. `seeklink status` and `seeklink get` always
-stay cold-start: status only reads SQLite metadata, and get reads the file
-directly from disk. Use `--no-daemon` or `SEEKLINK_NO_DAEMON=1` when a script
-needs the cold-start path even with `SEEKLINK_VAULT` set.
+`seeklink search` and single-file `seeklink index path/to/file.md` use a
+resident daemon when `--vault` is not passed. The daemon keeps the embedder and
+optional reranker warm in memory; on macOS this appears as a local `Python`
+process. It is local-only, uses a Unix socket, and does not open a network port
+or call a cloud service. By default it exits after 15 minutes of inactivity.
+Full-vault `seeklink index` runs in-process so progress stays on stderr and the
+final `Done:` summary stays on stdout. `seeklink status` and `seeklink get`
+always stay cold-start: status only reads SQLite metadata, and get reads the
+file directly from disk. Use `--no-daemon`, `SEEKLINK_NO_DAEMON=1`, or an
+explicit `--vault PATH` when a script needs a one-shot cold-start path.
 
 ## Output
 
@@ -93,6 +95,7 @@ Use JSON when an agent needs structured output:
 seeklink search "agent memory systems" --vault PATH --json
 seeklink status --vault PATH --json
 seeklink doctor --vault PATH --json
+seeklink daemon status --json
 ```
 
 ## Common Commands
@@ -148,9 +151,9 @@ seeklink doctor --vault PATH
 seeklink doctor --vault PATH --json
 ```
 
-Doctor checks Python, SQLite, the local database, index compatibility, and
-optional MLX availability. It does not download or load models, but may
-initialize the local SeekLink database/schema if missing.
+Doctor checks Python, SQLite, the local database, index compatibility, daemon
+state, and optional MLX availability. It does not download or load models, but
+may initialize the local SeekLink database/schema if missing.
 
 ### Index
 
@@ -168,15 +171,25 @@ configuration is compatible.
 ### Daemon
 
 ```bash
-seeklink daemon --vault PATH
+seeklink daemon status
+seeklink daemon stop
+seeklink daemon restart
+seeklink daemon pid
+seeklink daemon run --vault PATH
 ```
 
-You normally do not run this directly. `search` and single-file `index`
-auto-spawn and auto-restart the daemon when appropriate. Full-vault `index`
-still runs in-process for progress output. Passing `--vault` to `search` or
-single-file `index` forces a one-shot cold-start path because the daemon is
-bound to one vault at startup. `--no-daemon` and `SEEKLINK_NO_DAEMON=1` also
-force the same cold-start path.
+You normally do not need to start the daemon manually. `search` and single-file
+`index` auto-spawn and auto-restart it when appropriate, then it exits after
+`SEEKLINK_DAEMON_IDLE_TIMEOUT` seconds of inactivity. The default is 900 seconds
+(15 minutes); set it to `0`, `off`, `false`, or `no` to keep the daemon warm
+until stopped.
+
+Full-vault `index` still runs in-process for progress output. Passing `--vault`
+to `search` or single-file `index` forces a one-shot cold-start path because the
+daemon is bound to one vault at startup. `--no-daemon` and
+`SEEKLINK_NO_DAEMON=1` also force the same cold-start path. Use
+`seeklink daemon status` to inspect the warm process and `seeklink daemon stop`
+to release its memory immediately.
 
 ## How Search Works
 
