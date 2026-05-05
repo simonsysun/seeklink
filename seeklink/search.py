@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 
 RerankK = int | Literal["auto"]
 AUTO_RERANK_FAST_K = 5
+AUTO_RERANK_MID_K = 10
 AUTO_RERANK_DEEP_K = 20
 FILTERED_VEC_K_CAP_DEFAULT = 5000
 FILTERED_VEC_K_CAP_ENV = "SEEKLINK_FILTERED_VEC_K_CAP"
@@ -50,6 +51,15 @@ _CJK_TECHNICAL_RERANK_TERMS = (
     "chunk",
     "embedding",
     "vector",
+)
+_CJK_DEEP_RERANK_TERMS = (
+    "切块",
+    "分块",
+    "向量库",
+    "嵌入",
+    "embedding",
+    "chunk",
+    "vector database",
 )
 _METADATA_COMPANION_STOPWORDS = frozenset({
     "and",
@@ -235,6 +245,11 @@ def _contains_technical_rerank_term(text: str) -> bool:
     return any(term in folded for term in _CJK_TECHNICAL_RERANK_TERMS)
 
 
+def _contains_deep_rerank_term(text: str) -> bool:
+    folded = text.casefold()
+    return any(term in folded for term in _CJK_DEEP_RERANK_TERMS)
+
+
 def _resolve_rerank_k_with_reason(
     query: str,
     rerank_k: RerankK,
@@ -244,10 +259,11 @@ def _resolve_rerank_k_with_reason(
 ) -> tuple[int, str]:
     """Resolve a numeric rerank budget for one query.
 
-    The default CLI path uses "auto", a conservative policy from the 22-query
-    pilot: English, source-metadata, and ordinary CJK lookups got most of
-    the reranker benefit by reranking only the top 5, while CJK / mixed
-    technical queries needed deeper candidates to recover recall.
+    The default CLI path uses "auto", a conservative policy from the bundled
+    blind fixture: English, source-metadata, and ordinary CJK lookups get most
+    of the reranker benefit from the top 5. CJK technical lookups use a mid
+    budget, and only chunk/vector-index style CJK queries use the deepest
+    budget because they may need candidates below the shallow first-stage head.
     """
     if isinstance(rerank_k, int):
         return rerank_k, "fixed"
@@ -259,8 +275,10 @@ def _resolve_rerank_k_with_reason(
         return AUTO_RERANK_DEEP_K, "filter"
     if title_ranks:
         return AUTO_RERANK_FAST_K, "title"
+    if _contains_cjk(query) and _contains_deep_rerank_term(query):
+        return AUTO_RERANK_DEEP_K, "cjk_deep"
     if _contains_cjk(query) and _contains_technical_rerank_term(query):
-        return AUTO_RERANK_DEEP_K, "cjk_technical"
+        return AUTO_RERANK_MID_K, "cjk_technical"
     return AUTO_RERANK_FAST_K, "default"
 
 

@@ -12,6 +12,7 @@ from seeklink.db import Database
 from seeklink.embedder import Embedder
 from seeklink.ingest import ingest_file
 from seeklink.search import (
+    AUTO_RERANK_MID_K,
     SearchDiagnostics,
     SearchResult,
     _best_chunk_per_source,
@@ -92,6 +93,14 @@ class TestAutoRerankK:
             has_filter=False,
             title_ranks={},
         ) == 20
+
+    def test_cjk_general_technical_query_uses_mid_budget(self):
+        assert _resolve_rerank_k(
+            "FSRS 算法原理",
+            "auto",
+            has_filter=False,
+            title_ranks={},
+        ) == AUTO_RERANK_MID_K
 
     def test_english_without_title_match_uses_fast_budget(self):
         assert _resolve_rerank_k(

@@ -24,11 +24,12 @@ private-vault measurements. Do not commit intermediate experiment output.
 |---|---|
 | `A` | Current product behavior: hybrid search plus the default reranker path when available |
 | `B` | Candidate query-expansion path, reserved for future experiments |
-| `C` | Hand-written expansion upper bound using the `expansion:` field in `queries.yaml` |
+| `C` | Hand-written expansion reference using the `expansion:` field in `queries.yaml` |
 
-Config `A` is the release baseline. Config `C` answers whether expansion has
-headroom. Config `B` should not ship unless it beats `A` on quality without
-breaking the latency budget.
+Config `A` is the release baseline. Config `C` is a reference check for whether
+hand-written expansion looks promising; it can underperform `A` when expansion
+drifts or adds latency. Config `B` should not ship unless it beats `A` on
+quality without breaking the latency budget.
 
 ## Query Format
 
@@ -158,14 +159,14 @@ uv run python tests/blind/run.py \
   --out .scratch/blind/A_rerank5.json
 ```
 
-Run the hand-written expansion upper bound:
+Run the hand-written expansion reference:
 
 ```bash
 uv run python tests/blind/run.py \
   --config C \
   --queries tests/blind/queries.yaml \
   --vault tests/corpus \
-  --out .scratch/blind/C_upper_bound.json
+  --out .scratch/blind/C_reference.json
 ```
 
 Only copy a result into `tests/blind/results/` when it is the final
@@ -197,8 +198,8 @@ candidate uses config `B`, require all of the following before shipping it:
 4. Human blind review prefers `B` by at least 0.5 points on a 1-5 scale.
 5. p95 latency is at most `min(3 * p95(A), 2500ms)`.
 
-If config `C` is also close to `A`, expansion probably is not the right lever;
-look at chunking, metadata, filters, or the embedder instead.
+If config `C` does not clearly beat `A`, expansion probably is not the right
+lever; look at chunking, metadata, filters, or the embedder instead.
 
 ## Public vs Private Results
 
@@ -207,7 +208,7 @@ Public repo:
 - fixture vault
 - labeled fixture queries
 - runner code
-- final baseline / shipping / upper-bound reference results
+- final baseline / shipping / expansion-reference results
 
 Private or local only:
 

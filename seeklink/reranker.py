@@ -34,6 +34,11 @@ _DEFAULT_INSTRUCTION = (
     "Given a web search query, retrieve relevant passages that answer the query."
 )
 _MAX_PASSAGE_TOKENS = 200
+_SCORING_MODE_ENV = "SEEKLINK_RERANK_SCORING"
+_SCORING_AUTO = "auto"
+_SCORING_CLS_HEAD = "cls_head"
+_SCORING_LEGACY = "legacy"
+_VALID_SCORING_MODES = {_SCORING_AUTO, _SCORING_CLS_HEAD, _SCORING_LEGACY}
 
 
 class Reranker:
@@ -51,8 +56,23 @@ class Reranker:
         self._tokenizer = None
         self._token_yes: int | None = None
         self._token_no: int | None = None
+        self._cls_weight = None
         self._lock = threading.Lock()
         self._disabled = self.MODEL_NAME == ""
+        self._scoring_mode = (
+            os.environ.get(_SCORING_MODE_ENV, _SCORING_AUTO)
+            .strip()
+            .casefold()
+            .replace("-", "_")
+        )
+        if self._scoring_mode not in _VALID_SCORING_MODES:
+            logger.warning(
+                "Unsupported %s=%r; using %s",
+                _SCORING_MODE_ENV,
+                self._scoring_mode,
+                _SCORING_AUTO,
+            )
+            self._scoring_mode = _SCORING_AUTO
 
     @property
     def disabled(self) -> bool:
@@ -70,6 +90,8 @@ class Reranker:
                 self._model, self._tokenizer = mlx_lm.load(self.MODEL_NAME)
                 self._token_yes = self._tokenizer.convert_tokens_to_ids("yes")
                 self._token_no = self._tokenizer.convert_tokens_to_ids("no")
+                if self._scoring_mode != _SCORING_LEGACY:
+                    self._prepare_cls_head()
             except Exception as e:
                 logger.warning(
                     "Reranker load failed (%s): %s — reranking disabled",
@@ -77,6 +99,33 @@ class Reranker:
                     e,
                 )
                 self._disabled = True
+
+    def _prepare_cls_head(self) -> None:
+        """Prepare a two-token classifier head when the MLX model supports it."""
+        try:
+            import mlx.core as mx
+
+            if self._model is None or self._token_yes is None or self._token_no is None:
+                return
+            body = getattr(self._model, "model", None)
+            embed_tokens = getattr(body, "embed_tokens", None)
+            if body is None or embed_tokens is None:
+                if self._scoring_mode == _SCORING_CLS_HEAD:
+                    logger.warning(
+                        "Reranker cls_head scoring unavailable; using legacy logits"
+                    )
+                return
+            yes_no = embed_tokens(mx.array([self._token_yes, self._token_no]))
+            self._cls_weight = yes_no[0] - yes_no[1]
+            mx.eval(self._cls_weight)
+        except Exception as e:
+            self._cls_weight = None
+            if self._scoring_mode == _SCORING_CLS_HEAD:
+                logger.warning(
+                    "Reranker cls_head scoring failed to initialize (%s); "
+                    "using legacy logits",
+                    e,
+                )
 
     def _token_list(self, text: str) -> list[int]:
         """Tokenize text into a flat Python list."""
@@ -106,10 +155,7 @@ class Reranker:
         # Conservative fallback for unusual tokenizers without decode().
         return passage[:1200]
 
-    def _score_one(self, query: str, passage: str) -> float:
-        """Score a single (query, passage) pair. Returns 0-1 probability."""
-        import mlx.core as mx
-
+    def _pair_tokens(self, query: str, passage: str) -> list[int]:
         passage = self._truncate_passage(passage)
         prompt = (
             f"Instruct: {_DEFAULT_INSTRUCTION}\n"
@@ -123,6 +169,30 @@ class Reranker:
         text += "<think>\n"
 
         tokens = self._token_list(text)
+        return tokens
+
+    def _score_one_cls_head(self, tokens: list[int]) -> float | None:
+        """Score via final hidden state dot (yes_embedding - no_embedding)."""
+        if self._cls_weight is None:
+            return None
+
+        import mlx.core as mx
+
+        input_ids = mx.array([tokens])
+        hidden = self._model.model(input_ids)
+        last_h = hidden[0, -1, :]
+        logit = mx.sum(last_h * self._cls_weight)
+        mx.eval(logit)
+        value = logit.item()
+        if value >= 0:
+            return 1.0 / (1.0 + math.exp(-value))
+        exp_value = math.exp(value)
+        return exp_value / (1.0 + exp_value)
+
+    def _score_one_legacy(self, tokens: list[int]) -> float:
+        """Score via full-vocabulary yes/no token logits."""
+        import mlx.core as mx
+
         input_ids = mx.array([tokens])
         logits = self._model(input_ids)
         last_logits = logits[0, -1, :]
@@ -134,6 +204,15 @@ class Reranker:
         yes_e = math.exp(yes_s - max_s)
         no_e = math.exp(no_s - max_s)
         return yes_e / (yes_e + no_e)
+
+    def _score_one(self, query: str, passage: str) -> float:
+        """Score a single (query, passage) pair. Returns 0-1 probability."""
+        tokens = self._pair_tokens(query, passage)
+        if self._scoring_mode != _SCORING_LEGACY:
+            score = self._score_one_cls_head(tokens)
+            if score is not None:
+                return score
+        return self._score_one_legacy(tokens)
 
     def rerank(
         self, query: str, passages: list[str]

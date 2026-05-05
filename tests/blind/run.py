@@ -7,7 +7,7 @@ Usage:
 Three configs:
     A: baseline = current seeklink daemon path (search + reranker)
     B: candidate query expansion path (raises until implemented)
-    C: hand-crafted expansion (RRF-fused; upper bound, not simple max)
+    C: hand-crafted expansion reference (RRF-fused; not simple max)
 
 See docs/blind-test.md for the framework spec and acceptance criteria.
 
@@ -663,12 +663,12 @@ def run_config_b(spec: QuerySpec, state: RunnerState) -> ResultRow:
     raise NotImplementedError(
         "Config B requires a query expansion implementation that is not yet "
         "shipped. Use config A for the product baseline and config C for the "
-        "hand-written expansion upper bound."
+        "hand-written expansion reference."
     )
 
 
 def run_config_c(spec: QuerySpec, state: RunnerState) -> ResultRow:
-    """Upper bound: run each hand-crafted expansion, fuse via RRF (rank-based).
+    """Run each hand-crafted expansion, then fuse via RRF (rank-based).
 
     Rank-fusion (not score-fusion) because scores across different query
     runs are not calibrated to each other. `_rrf_fuse_paths` implements a

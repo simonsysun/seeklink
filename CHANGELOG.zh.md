@@ -12,6 +12,12 @@
 ## [0.6.0] - 2026-05-04
 
 ### 变更
+- `seeklink search --rerank-k auto` 现在会对一般中文技术查询使用中等
+  reranker 预算，只把最深预算保留给过滤搜索和 chunk / 向量索引类中文查询，
+  从而在保持捆绑盲测质量门槛的同时降低可选 MLX reranker 延迟。
+- 可选的 MLX Qwen3 reranker 现在会在模型支持 tied embeddings 时通过
+  两个 token 的分类头计算 `yes` / `no` 分数，避免生成完整词表 logits；
+  如有需要仍可通过 `SEEKLINK_RERANK_SCORING=legacy` 回退到旧路径。
 - 在 README 中新增可直接复制给 agent 的配置说明，并在 `llms.txt` 中强化本地 Markdown 笔记库检索的发现提示。
 - 扩展 PyPI 关键词，覆盖 agent、本地搜索、Markdown 搜索和 llms.txt 发现路径。
 - `seeklink search` 和单文件 `seeklink index` 现在支持 `--no-daemon`；
@@ -24,8 +30,8 @@
 
 ### 开发
 - 盲测 runner 现在支持 source 级 folder/tag 过滤、filtered-vector 诊断，以及可选的 answerability 标签，用于检查 top-10 命中是否真的包含 agent 需要的答案文本。
-- 发布验证现在包含一个 8 条查询的过滤检索 fixture。在捆绑 fixture vault 上关闭 reranker 时，它的 Recall@10 为 1.000，Answerable@10 为 1.000；常规 22 条查询 fixture 在启用可选 MLX reranker 时仍为 Recall@10 0.985、MRR 0.977、nDCG@10 0.901。
-- 将 `tests/blind/results/` 刷新为 v0.6 发布质量快照：v0.5 baseline、v0.6 shipping run、v0.6 filtered fixture，以及 v0.6 expansion upper bound。
+- 发布验证现在包含一个 8 条查询的过滤检索 fixture。在捆绑 fixture vault 上关闭 reranker 时，它的 Recall@10 为 1.000，Answerable@10 为 1.000；常规 22 条查询 fixture 在启用可选 MLX reranker 时仍为 Recall@10 0.985、MRR 0.977、nDCG@10 0.902。
+- 将 `tests/blind/results/` 刷新为 v0.6 发布质量快照：v0.5 baseline、v0.6 shipping run、v0.6 filtered fixture，以及 v0.6 expansion reference。
 
 ## [0.5.0] - 2026-05-04
 
@@ -86,7 +92,7 @@
 
 ### 变更
 - 将 0.3.0 / 0.3.1 的内容合并为单一发布条目（即本条）。早前的条目用流程细节描述了同一份代码，这些细节不属于公开的发布说明。
-- 精简 `tests/blind/results/`，仅保留发布质量的 baseline、shipped 和 upper-bound 测量结果。移除了中间迭代结果。
+- 精简 `tests/blind/results/`，仅保留发布质量的 baseline、shipped 和 expansion-reference 测量结果。移除了中间迭代结果。
 - 收紧了内部代码注释和测试文档字符串，使其描述当前行为而非产生它的迭代历史。
 - README 中的度量数据声明显式标注为"pilot"并附样本量。
 

@@ -12,6 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.6.0] - 2026-05-04
 
 ### Changed
+- `seeklink search --rerank-k auto` now uses a middle reranker budget for
+  general CJK technical queries and reserves the deepest budget for filtered
+  searches and chunk/vector-index style CJK queries, reducing optional MLX
+  reranker latency while preserving the bundled blind-fixture quality gates.
+- The optional MLX Qwen3 reranker now scores `yes`/`no` through a two-token
+  classifier head when the model supports tied embeddings, avoiding full
+  vocabulary logits while keeping a legacy fallback via
+  `SEEKLINK_RERANK_SCORING=legacy`.
 - Added copy-paste agent setup guidance to README and clarified `llms.txt`
   discovery cues for local Markdown vault retrieval.
 - Expanded PyPI keywords for agent, local-search, Markdown-search, and
@@ -34,10 +42,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Release verification now includes an 8-query filtered fixture. On the bundled
   fixture vault with reranking disabled, it reports Recall@10 1.000 and
   Answerable@10 1.000; the regular 22-query fixture remains at Recall@10
-  0.985, MRR 0.977, and nDCG@10 0.901 with the optional MLX reranker active.
+  0.985, MRR 0.977, and nDCG@10 0.902 with the optional MLX reranker active.
 - Refreshed `tests/blind/results/` with v0.6 release-quality snapshots: the
   v0.5 baseline, v0.6 shipping run, v0.6 filtered fixture, and v0.6 expansion
-  upper bound.
+  reference.
 
 ## [0.5.0] - 2026-05-04
 
@@ -130,7 +138,7 @@ surface so the repo reads as a shipped tool rather than a work log.
 
 ### Changed
 - Consolidated the 0.3.0 / 0.3.1 narrative into a single release entry (this one). The earlier entries described the same code twice with process detail that did not belong in public release notes.
-- Trimmed `tests/blind/results/` to release-quality baseline, shipping, and upper-bound measurements. Intermediate iteration results removed.
+- Trimmed `tests/blind/results/` to release-quality baseline, shipping, and expansion-reference measurements. Intermediate iteration results removed.
 - Tightened internal code comments and test docstrings so they describe current behavior rather than the iteration history that produced it.
 - README metric claims explicitly labeled as "pilot" with sample size.
 
@@ -144,7 +152,7 @@ surface so the repo reads as a shipped tool rather than a work log.
 - **Line-range retrieval.** `SearchResult` now carries 1-indexed inclusive `line_start` / `line_end` fields mapped through the indexer's frontmatter strip back to on-disk line numbers. CLI `search` prints `SCORE  PATH:LINE  TITLE` so agents can pipe the hit into a precise window read. A new `seeklink get PATH[:LINE] [-l N]` command performs that window read directly from the filesystem — no DB round-trip, no daemon involvement, universal-newline translation, path-escape rejection.
 - **Cold-start `search` reranker parity.** `seeklink search --vault PATH` (the cold-start path) now constructs a reranker and passes it to the search pipeline, matching the daemon. Before this change, the same query returned different rankings depending on whether a daemon happened to be running.
 - **Agent-first documentation.** New "For agents" section in the README (minimum workflow, output contract, exit codes, query-shape hints, daemon JSON fallback). `llms.txt` rewritten as an explicit contract.
-- **Blind-test framework** at `tests/blind/`: 32-file bilingual (CJK + English) fixture corpus (`tests/corpus/`), 22 ground-truth queries (`tests/blind/queries.yaml`), runner that cold-starts once per invocation and measures `recall_at_10` / `mrr` / `latency_ms` / `p95`. Three configurations: `A` (current baseline), `B` (planned query expansion — not yet shipped), `C` (hand-crafted expansion, RRF-fused; upper bound). Used to gate this release.
+- **Blind-test framework** at `tests/blind/`: 32-file bilingual (CJK + English) fixture corpus (`tests/corpus/`), 22 ground-truth queries (`tests/blind/queries.yaml`), runner that cold-starts once per invocation and measures `recall_at_10` / `mrr` / `latency_ms` / `p95`. Three configurations: `A` (current baseline), `B` (planned query expansion — not yet shipped), `C` (hand-crafted expansion, RRF-fused reference). Used to gate this release.
 
 ### Fixed
 - **`seeklink get` trailing-newline accounting.** `get FILE:LINE` on a newline-terminated file no longer counts the trailing `\n` as an extra logical line. `get FILE:6` on a 5-line file correctly emits the beyond-EOF warning instead of returning a blank line.
