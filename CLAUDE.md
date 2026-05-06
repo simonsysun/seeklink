@@ -1,3 +1,5 @@
+@AGENTS.md
+
 ## Claude Code only
 
 - Use plan mode before non-trivial code changes.
