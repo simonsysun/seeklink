@@ -7,6 +7,7 @@ Subcommands:
   status   — show vault / index stats (always cold-start; no model load)
   doctor   — diagnose runtime environment and index compatibility
   get      — print a line range of a vault file (direct filesystem read)
+  mcp      — run the optional read-only MCP stdio adapter
 
 Dispatch: when `--vault` is not passed to `search` / single-file `index`,
 the CLI tries the daemon socket first (auto-spawning the daemon on first call)
@@ -15,14 +16,14 @@ Passing `--vault` always uses cold-start because the daemon is bound to
 a single vault (selected via SEEKLINK_VAULT or cwd at daemon-start time).
 Full-vault `index`, `status`, and `get` never route through the daemon.
 
-Agents integrating SeekLink should invoke the CLI via `subprocess` or
-connect to the daemon socket via `seeklink.cli_client` for structured
-output.
+Agents integrating SeekLink can use CLI JSON, the daemon socket, or the
+optional `seeklink[mcp]` stdio adapter for structured output.
 """
 
 from __future__ import annotations
 
 import argparse
+import contextlib
 import importlib.util
 import json
 import logging
@@ -241,6 +242,17 @@ def main() -> None:
     )
     get_p.add_argument("--vault", type=Path, help="Vault path (default: cwd)")
 
+    # mcp — read-only stdio adapter for MCP clients
+    mcp_p = sub.add_parser(
+        "mcp",
+        help="Run the optional read-only MCP stdio adapter",
+    )
+    mcp_p.add_argument(
+        "--vault",
+        type=Path,
+        help="Vault path. Defaults to SEEKLINK_VAULT; cwd is not used for MCP.",
+    )
+
     args = parser.parse_args()
 
     if args.command is None:
@@ -258,6 +270,8 @@ def main() -> None:
         _cmd_doctor(args)
     elif args.command == "get":
         _cmd_get(args)
+    elif args.command == "mcp":
+        _cmd_mcp(args)
     else:
         parser.print_help()
         sys.exit(1)
@@ -287,6 +301,29 @@ def _cmd_daemon(args: argparse.Namespace) -> None:
 
     print(f"Error: unknown daemon action: {action}", file=sys.stderr)
     sys.exit(1)
+
+
+def _cmd_mcp(args: argparse.Namespace) -> None:
+    """Run the optional read-only MCP stdio adapter."""
+    _setup_logging()
+    try:
+        with contextlib.redirect_stdout(sys.stderr):
+            from seeklink.mcp_server import run_mcp_server
+            from seeklink.mcp_services import ServiceError
+    except ModuleNotFoundError as e:
+        if e.name and e.name.startswith("mcp"):
+            print(
+                'Error: MCP support is not installed. Install with `pip install "seeklink[mcp]"`.',
+                file=sys.stderr,
+            )
+            sys.exit(1)
+        raise
+
+    try:
+        run_mcp_server(args.vault)
+    except ServiceError as e:
+        print(f"Error: {e.message}", file=sys.stderr)
+        sys.exit(1)
 
 
 def _daemon_not_running_payload() -> dict[str, Any]:

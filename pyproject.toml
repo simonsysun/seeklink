@@ -1,7 +1,7 @@
 [project]
 name = "seeklink"
-version = "0.6.1"
-description = "Local semantic search CLI for Markdown vaults. BM25 + vector + wikilink graph + source metadata, fused via RRF. Native CJK."
+version = "0.7.0"
+description = "Local semantic search CLI and optional MCP stdio server for Markdown vaults. BM25 + vector + wikilink graph + metadata via RRF. Native CJK."
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.11"
@@ -38,6 +38,12 @@ keywords = [
     "agent-tools",
     "llm-tools",
     "llms-txt",
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "claude-code",
+    "cursor",
+    "vscode",
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -68,6 +74,9 @@ dependencies = [
 mlx = [
     "mlx-lm>=0.31.2; platform_system == 'Darwin' and platform_machine == 'arm64'",
 ]
+mcp = [
+    "mcp>=1.27,<2",
+]
 
 [project.urls]
 Homepage = "https://github.com/simonsysun/seeklink"
@@ -88,6 +97,7 @@ include = ["seeklink*"]
 [dependency-groups]
 dev = [
     "anyio>=4.12.1",
+    "mcp>=1.27,<2",
     "mlx-lm>=0.31.2",
     "numpy>=2.4.2",
     "pytest>=9.0.2",

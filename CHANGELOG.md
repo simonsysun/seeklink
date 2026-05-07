@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-05-06
+
+### Added
+- Added an optional read-only Model Context Protocol (MCP) stdio adapter. Run
+  `seeklink mcp --vault PATH` after installing `seeklink[mcp]` to expose
+  `search`, `get`, `status`, and `doctor` to MCP clients such as Claude Code,
+  Cursor, and VS Code.
+
+### Changed
+- MCP `search` now keeps its text summary compact while leaving ranked
+  previews in structured content, reducing duplicate context for agents.
+
 ## [0.6.1] - 2026-05-05
 
 ### Added
@@ -247,7 +259,8 @@ surface so the repo reads as a shipped tool rather than a work log.
 - Native CJK tokenization via jieba registered as a custom FTS5 tokenizer.
 - MCP server transport (`seeklink serve`) — removed in v0.2.0.
 
-[Unreleased]: https://github.com/simonsysun/seeklink/compare/v0.6.1...HEAD
+[Unreleased]: https://github.com/simonsysun/seeklink/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/simonsysun/seeklink/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/simonsysun/seeklink/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/simonsysun/seeklink/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/simonsysun/seeklink/compare/v0.4.0...v0.5.0
