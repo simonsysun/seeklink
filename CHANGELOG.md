@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Added minimal Dockerfile and Glama metadata so SeekLink's read-only MCP
+  adapter can be started and claimed by MCP directory checks such as Glama.
+  The canonical install path remains `pip install "seeklink[mcp]"`.
+
 ## [0.7.0] - 2026-05-06
 
 ### Added

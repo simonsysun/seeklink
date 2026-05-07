@@ -9,6 +9,11 @@
 
 ## [Unreleased]
 
+### 新增
+- 新增最小 Dockerfile 和 Glama metadata，便于 Glama 等 MCP 目录启动、检查并
+  claim SeekLink 的只读 MCP 适配器。标准安装方式仍然是
+  `pip install "seeklink[mcp]"`。
+
 ## [0.7.0] - 2026-05-06
 
 ### 新增
