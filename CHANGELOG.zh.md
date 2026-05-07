@@ -9,6 +9,17 @@
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-05-06
+
+### 新增
+- 新增可选的只读 Model Context Protocol (MCP) stdio 适配器。安装
+  `seeklink[mcp]` 后运行 `seeklink mcp --vault PATH`，即可向 Claude Code、
+  Cursor、VS Code 等 MCP 客户端暴露 `search`、`get`、`status` 和 `doctor`。
+
+### 变更
+- MCP `search` 现在保持更紧凑的 text summary，并把排序结果预览保留在
+  structured content 中，减少 agent 看到的重复上下文。
+
 ## [0.6.1] - 2026-05-05
 
 ### 新增
@@ -198,7 +209,8 @@
 - 原生 CJK 分词，通过 jieba 注册为自定义 FTS5 分词器。
 - MCP 服务器传输（`seeklink serve`）—— 于 v0.2.0 移除。
 
-[Unreleased]: https://github.com/simonsysun/seeklink/compare/v0.6.1...HEAD
+[Unreleased]: https://github.com/simonsysun/seeklink/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/simonsysun/seeklink/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/simonsysun/seeklink/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/simonsysun/seeklink/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/simonsysun/seeklink/compare/v0.4.0...v0.5.0

@@ -1,5 +1,7 @@
 # SeekLink
 
+<!-- mcp-name: io.github.simonsysun/seeklink -->
+
 [English](README.md) · [中文](README.zh.md)
 
 [![PyPI](https://img.shields.io/pypi/v/seeklink)](https://pypi.org/project/seeklink/)
@@ -7,14 +9,16 @@
 [![Tests](https://github.com/simonsysun/seeklink/actions/workflows/test.yml/badge.svg)](https://github.com/simonsysun/seeklink/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-SeekLink is a local semantic search CLI for Markdown vaults. It indexes a folder
-of `.md` files, searches with hybrid keyword + vector retrieval, and returns
-line-anchored results that humans and agents can read with simple shell
-commands.
+SeekLink is a local semantic search CLI and optional read-only MCP stdio server
+for Markdown vaults. It indexes a folder of `.md` files, searches with hybrid
+keyword + vector retrieval, and returns line-anchored results that humans and
+agents can read with simple shell commands.
 
 It is built for personal knowledge bases, Obsidian-compatible vaults, bilingual
-English/Chinese notes, and local agent workflows. It is also a useful search
-layer for Markdown wiki patterns such as Andrej Karpathy's
+English/Chinese notes, and local agent workflows. MCP clients such as Claude
+Code, Cursor, and VS Code can call the same read-only search/get/status/doctor
+surface through `seeklink[mcp]`. It is also a useful search layer for Markdown
+wiki patterns such as Andrej Karpathy's
 [llm-wiki](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f):
 an agent can search existing pages, read precise line windows, then update the
 wiki without sending the vault to a hosted service.
@@ -36,6 +40,15 @@ For Apple Silicon reranking support, install the optional MLX extra:
 uv tool install "seeklink[mlx]"
 # or
 pip install "seeklink[mlx]"
+```
+
+For Model Context Protocol (MCP) clients such as Claude Code, Cursor, or VS
+Code, install the optional MCP extra:
+
+```bash
+uv tool install "seeklink[mcp]"
+# or
+pip install "seeklink[mcp]"
 ```
 
 SeekLink requires Python's `sqlite3` module to be linked against SQLite
@@ -71,6 +84,9 @@ final `Done:` summary stays on stdout. `seeklink status` and `seeklink get`
 always stay cold-start: status only reads SQLite metadata, and get reads the
 file directly from disk. Use `--no-daemon`, `SEEKLINK_NO_DAEMON=1`, or an
 explicit `--vault PATH` when a script needs a one-shot cold-start path.
+
+MCP users follow the same first step: build the index with
+`seeklink index --vault PATH` before registering the MCP server.
 
 ## Output
 
@@ -154,6 +170,63 @@ seeklink doctor --vault PATH --json
 Doctor checks Python, SQLite, the local database, index compatibility, daemon
 state, and optional MLX availability. It does not download or load models, but
 may initialize the local SeekLink database/schema if missing.
+
+### MCP
+
+The optional Model Context Protocol (MCP) adapter lets agent clients discover
+and call SeekLink's read-only tools directly. The CLI keeps working
+independently; MCP is another surface for the same retrieval path, not a
+replacement.
+
+```bash
+seeklink mcp --vault PATH
+```
+
+Install it with `seeklink[mcp]`. Build the index with the CLI first:
+`seeklink index --vault PATH`. The MCP adapter is read-only and exposes four
+tools: `search`, `get`, `status`, and `doctor`. It does not expose `index`,
+write notes, use HTTP/OAuth, or route through the Unix-socket daemon. Run one
+MCP server per vault. `search` keeps its text summary compact with paths and
+line anchors; result previews stay in structured content for agents that need
+them. `status` and `doctor` may initialize or migrate the local SeekLink schema
+when an existing `.seeklink/seeklink.db` needs it, but they do not index or
+modify Markdown notes. If your MCP client does not inherit your shell `PATH`,
+use the absolute path from `which seeklink` in the examples below.
+
+Claude Code:
+
+```bash
+claude mcp add --transport stdio --scope project seeklink \
+  -- seeklink mcp --vault /ABS/PATH/TO/VAULT
+```
+
+Cursor `.cursor/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "seeklink": {
+      "type": "stdio",
+      "command": "seeklink",
+      "args": ["mcp", "--vault", "/ABS/PATH/TO/VAULT"]
+    }
+  }
+}
+```
+
+VS Code `.vscode/mcp.json`:
+
+```json
+{
+  "servers": {
+    "seeklink": {
+      "type": "stdio",
+      "command": "seeklink",
+      "args": ["mcp", "--vault", "/ABS/PATH/TO/VAULT"]
+    }
+  }
+}
+```
 
 ### Index
 
@@ -256,6 +329,7 @@ and a wikilink graph. Delete `.seeklink/` and run `seeklink index` to rebuild.
 | CJK | Native path via jieba, with trigram fallback on static SQLite builds |
 | Reranker | Optional `seeklink[mlx]` extra on Apple Silicon; disabled elsewhere |
 | Daemon | Single vault per machine |
+| MCP | Optional `seeklink[mcp]` stdio adapter, one server per vault |
 
 ## Not For
 
@@ -276,6 +350,12 @@ seeklink search "query" --vault PATH --json
 seeklink get PATH:LINE -C 20 --vault PATH
 ```
 
+MCP clients can use the optional read-only adapter:
+
+```bash
+seeklink mcp --vault PATH
+```
+
 To make an agent choose SeekLink for a Markdown vault, add this to the
 project's `AGENTS.md`, `CLAUDE.md`, or editor rules:
 
@@ -287,6 +367,9 @@ semantic retrieval:
 2. If no index exists or files changed, run `seeklink index --vault PATH`.
 3. Run `seeklink search "QUERY" --vault PATH --json`.
 4. Read exact context with `seeklink get PATH:LINE -C 20 --vault PATH`.
+
+If SeekLink is registered as an MCP server in this client, prefer the
+`search`, `get`, `status`, and `doctor` MCP tools over shelling out to the CLI.
 
 Prefer SeekLink for conceptual, cross-language, tag/folder-filtered, or
 Obsidian-style note searches. Use rg for exact literal searches.

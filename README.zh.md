@@ -7,12 +7,14 @@
 [![Tests](https://github.com/simonsysun/seeklink/actions/workflows/test.yml/badge.svg)](https://github.com/simonsysun/seeklink/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-SeekLink 是一个本地运行的语义搜索命令行工具，专为 Markdown 笔记库设计。
-它索引一个文件夹里的 `.md` 文件，用关键词 + 向量混合检索找到相关内容，
+SeekLink 是一个本地运行的 Markdown 语义搜索命令行工具，并提供可选的只读 MCP
+stdio server。它索引一个文件夹里的 `.md` 文件，用关键词 + 向量混合检索找到相关内容，
 返回带行号的结果——无论人还是 AI agent，都能用一句简单的 shell 命令精确定位到原文。
 
 它的设计场景是：个人知识库、Obsidian 兼容的笔记 vault、中英文混合笔记、
-以及本地 agent 工作流。它也很适合配合 [Andrej Karpathy 的 llm-wiki](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f)
+以及本地 agent 工作流。Claude Code、Cursor、VS Code 等 MCP 客户端可以通过
+`seeklink[mcp]` 调用同一套只读的 search/get/status/doctor 能力。它也很适合配合
+[Andrej Karpathy 的 llm-wiki](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f)
 这类 Markdown wiki 模式使用：agent 可以先搜索已有页面，读取精确的行窗口，
 再更新 wiki——整个过程不需要把笔记库上传到任何云端服务。
 
@@ -32,6 +34,15 @@ pip install seeklink
 uv tool install "seeklink[mlx]"
 # 或者
 pip install "seeklink[mlx]"
+```
+
+如果要在 Claude Code、Cursor、VS Code 等 Model Context Protocol (MCP) 客户端里使用
+SeekLink，请安装可选 MCP extra：
+
+```bash
+uv tool install "seeklink[mcp]"
+# 或者
+pip install "seeklink[mcp]"
 ```
 
 SeekLink 需要 Python 的 `sqlite3` 模块链接到 SQLite 3.45 或更新版本，并启用 FTS5。
@@ -65,6 +76,9 @@ seeklink get notes/agent-memory-patterns.md:1 -C 20
 `seeklink get` 始终走冷启动路径：status 只读 SQLite 元数据，get 直接从磁盘读文件。
 如果脚本需要一次性冷启动路径，可以使用 `--no-daemon`、`SEEKLINK_NO_DAEMON=1`，或
 显式传入 `--vault PATH`。
+
+MCP 用户也遵循同一个第一步：先用 `seeklink index --vault PATH` 建好索引，
+再注册 MCP server。
 
 ## 输出格式
 
@@ -144,6 +158,60 @@ seeklink doctor --vault PATH --json
 
 Doctor 检查 Python、SQLite、本地数据库、索引兼容性、daemon 状态和可选 MLX 可用性。
 它不会下载或加载模型，但如果本地 SeekLink 数据库/表结构不存在，可能会初始化它们。
+
+### MCP
+
+可选 Model Context Protocol (MCP) 适配器让 agent 客户端可以直接发现和调用
+SeekLink 的只读工具。CLI 仍然可以独立使用；MCP 是同一套检索能力的另一种入口，
+不是替代品。
+
+```bash
+seeklink mcp --vault PATH
+```
+
+先安装 `seeklink[mcp]`，并用 CLI 建好索引：`seeklink index --vault PATH`。
+MCP 适配器是只读的，只暴露四个工具：`search`、`get`、`status` 和 `doctor`。
+它不暴露 `index`，不写笔记，不使用 HTTP/OAuth，也不经过 Unix-socket daemon。
+一份 vault 对应一个 MCP server。`search` 的 text summary 只保留路径和行号锚点，
+结果预览放在 structured content 里，方便 agent 需要时再读取。
+`status` 和 `doctor` 在已有 `.seeklink/seeklink.db` 需要时可能会初始化或迁移本地
+SeekLink schema，但不会索引或修改 Markdown 笔记。如果 MCP 客户端没有继承 shell 的
+`PATH`，请把下面示例里的 `seeklink` 替换成 `which seeklink` 返回的绝对路径。
+
+Claude Code：
+
+```bash
+claude mcp add --transport stdio --scope project seeklink \
+  -- seeklink mcp --vault /ABS/PATH/TO/VAULT
+```
+
+Cursor `.cursor/mcp.json`：
+
+```json
+{
+  "mcpServers": {
+    "seeklink": {
+      "type": "stdio",
+      "command": "seeklink",
+      "args": ["mcp", "--vault", "/ABS/PATH/TO/VAULT"]
+    }
+  }
+}
+```
+
+VS Code `.vscode/mcp.json`：
+
+```json
+{
+  "servers": {
+    "seeklink": {
+      "type": "stdio",
+      "command": "seeklink",
+      "args": ["mcp", "--vault", "/ABS/PATH/TO/VAULT"]
+    }
+  }
+}
+```
 
 ### 索引
 
@@ -239,6 +307,7 @@ SeekLink 在笔记库内写入一个 SQLite 数据库：
 | 中文/CJK | jieba 路径，静态 SQLite 环境下自动降级为 trigram |
 | Reranker | Apple Silicon 上通过可选 `seeklink[mlx]` extra 启用；其他平台自动禁用 |
 | 守护进程 | 一台机器一个笔记库 |
+| MCP | 可选 `seeklink[mcp]` stdio 适配器，一份 vault 一个 server |
 
 ## 不适用的场景
 
@@ -259,6 +328,12 @@ seeklink search "查询" --vault PATH --json
 seeklink get PATH:LINE -C 20 --vault PATH
 ```
 
+MCP 客户端可以使用可选的只读适配器：
+
+```bash
+seeklink mcp --vault PATH
+```
+
 如果希望 agent 在处理 Markdown 笔记库时主动选择 SeekLink，可以把下面这段加入项目的
 `AGENTS.md`、`CLAUDE.md` 或编辑器规则：
 
@@ -269,6 +344,9 @@ seeklink get PATH:LINE -C 20 --vault PATH
 2. 如果还没有索引，或文件已经变化，运行 `seeklink index --vault PATH`。
 3. 运行 `seeklink search "QUERY" --vault PATH --json`。
 4. 用 `seeklink get PATH:LINE -C 20 --vault PATH` 读取精确上下文。
+
+如果当前客户端已经把 SeekLink 注册为 MCP server，优先使用 `search`、`get`、
+`status` 和 `doctor` MCP 工具，而不是再 shell out 调 CLI。
 
 概念性查询、跨语言查询、标签/文件夹筛选、Obsidian 风格笔记搜索优先用 SeekLink。
 精确字面量搜索使用 rg。
