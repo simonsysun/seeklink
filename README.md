@@ -9,6 +9,11 @@
 [![Tests](https://github.com/simonsysun/seeklink/actions/workflows/test.yml/badge.svg)](https://github.com/simonsysun/seeklink/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
+> **Status: paused.** SeekLink is no longer actively maintained. For an
+> actively-developed local Markdown search engine in the same space — local
+> hybrid keyword + vector search, line-anchored results, CLI + MCP, multilingual —
+> we recommend [qmd](https://github.com/tobi/qmd).
+
 SeekLink is a local semantic search CLI and optional read-only MCP stdio server
 for Markdown vaults. It indexes a folder of `.md` files, searches with hybrid
 keyword + vector retrieval, and returns line-anchored results that humans and

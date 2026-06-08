@@ -7,6 +7,10 @@
 [![Tests](https://github.com/simonsysun/seeklink/actions/workflows/test.yml/badge.svg)](https://github.com/simonsysun/seeklink/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
+> **状态：已暂停。** SeekLink 不再积极维护。如果你想要一个仍在活跃开发、
+> 同类场景的本地 Markdown 搜索引擎（本地关键词 + 向量混合检索、带行号结果、
+> CLI + MCP、多语言），推荐使用 [qmd](https://github.com/tobi/qmd)。
+
 SeekLink 是一个本地运行的 Markdown 语义搜索命令行工具，并提供可选的只读 MCP
 stdio server。它索引一个文件夹里的 `.md` 文件，用关键词 + 向量混合检索找到相关内容，
 返回带行号的结果——无论人还是 AI agent，都能用一句简单的 shell 命令精确定位到原文。
