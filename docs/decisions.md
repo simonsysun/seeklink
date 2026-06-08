@@ -45,3 +45,34 @@ search for references with `git grep` and read any callers. Delete in narrow
 rounds, then verify immediately with the smallest relevant project checks. If a
 scratch artifact is almost useful as user documentation, rewrite it as product
 documentation instead of deleting; if in doubt, keep it local or ask Simon.
+
+## 2026-06-07: SeekLink paused — retrieval is a commodity; the principle for any revival
+
+SeekLink aimed to be the local semantic-retrieval organ for a personal bilingual
+Markdown knowledge base and for AI agents. A 2026-06 review concluded:
+
+- The niche is occupied. `qmd` (github.com/tobi/qmd; ~26k stars as of 2026-06,
+  actively developed, built by Shopify's CEO) appears to cover the same combination
+  SeekLink offers — local hybrid keyword+vector, line-anchored output, CLI + MCP,
+  multilingual — and a company clone (OceanBase `seekx`) adds jieba CJK.
+  Local-Markdown retrieval is now a commodity.
+- SeekLink has no external users and no real vault to serve. Its only eval is a
+  22-query / 32-note single-author fixture at a quality ceiling (Recall@10 ~0.985),
+  and its CJK rerank-budget router hardcodes that fixture's vocabulary
+  (search.py:34-63) so it does not generalize. No quality claim was ever validated.
+
+Decision: stop active development. Use `qmd` off-the-shelf as the retrieval organ;
+put effort into the separate AI memory system (the novel work).
+
+Guiding principle for ANY revival — **division of labor**: the retriever owns
+recall + cheap signals (provenance, recency, precise PATH:LINE locators); the
+CALLING AGENT owns task-conditioned precision. Do not push task/conversation
+awareness or learned global ranking weights into the retriever. Keep the non-learned
+RRF (static weights, no task-conditioned or trained ranking), a rebuildable index,
+and the blind-test gate.
+
+Revive only if real `qmd` usage over a real vault exposes a repeated, specific
+failure `qmd` cannot cheaply fix — candidates: strict read-only enforcement,
+calibrated abstention ("no strong match"), or memory-layer-aware retrieval. Then
+build it as a thin wrapper, not a full engine. See `TODOS.md` for the specific
+directions.
